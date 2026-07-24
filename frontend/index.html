@@ -4,45 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 한국사 심화 퀴즈</title>
+
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
+<div class="container">
+
     <h1>📚 AI 한국사 심화 퀴즈</h1>
 
-    <h2>한국사능력검정시험 심화</h2>
+    <div id="progress">문제 1 / 10</div>
 
-    <hr>
+    <h2 id="question">문제가 여기에 표시됩니다.</h2>
 
-    <h3>문제 1 / 10</h3>
+    <img id="questionImage"
+         src="../images/sample.jpg"
+         alt="문제 이미지">
 
-    <p>다음 문화재의 이름은?</p>
+    <div id="choices"></div>
 
-    <img src="../images/sample.jpg" width="300" alt="문화재 사진">
+    <div id="result"></div>
 
-    <br><br>
+    <button id="nextBtn" style="display:none;">
+        다음 문제 →
+    </button>
 
- <button onclick="checkAnswer(1)">
-① 석굴암
-</button>
+</div>
 
-<br><br>
+<script src="../questions/questions.js"></script>
+<script src="app.js"></script>
 
-<button onclick="checkAnswer(2)">
-② 고려청자
-</button>
-
-<br><br>
-
-<button onclick="checkAnswer(3)">
-③ 훈민정음
-</button>
-
-<br><br>
-
-<button onclick="checkAnswer(4)">
-④ 수원화성
-</button>
-<script src="../js/quiz.js"></script>
 </body>
 </html>
