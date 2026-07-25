@@ -818,3 +818,90 @@ auth.signInWithEmailAndPassword(
 
 
 };
+document.getElementById("myHistoryBtn")
+.onclick = function(){
+
+
+const user = auth.currentUser;
+
+
+if(!user){
+
+    alert(
+    "로그인이 필요합니다."
+    );
+
+    return;
+
+}
+
+
+
+db.collection("users")
+.doc(user.uid)
+.collection("quizHistory")
+.orderBy("date","desc")
+.get()
+
+.then(function(snapshot){
+
+
+let html =
+"<h2>나의 시험 기록</h2>";
+
+
+
+if(snapshot.empty){
+
+html +=
+"<p>시험 기록이 없습니다.</p>";
+
+}
+
+
+snapshot.forEach(function(doc){
+
+
+const data = doc.data();
+
+
+html += `
+
+<div>
+
+<p>
+날짜 : ${data.date}
+</p>
+
+
+<p>
+점수 :
+${data.score}/${data.total}
+</p>
+
+
+<p>
+오답 :
+${data.wrongCount}개
+</p>
+
+<hr>
+
+</div>
+
+`;
+
+
+});
+
+
+
+document.getElementById(
+"myHistory"
+).innerHTML = html;
+
+
+});
+
+
+};
