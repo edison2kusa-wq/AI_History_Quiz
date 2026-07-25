@@ -436,6 +436,10 @@ function showResult(){
     다시 시작
     </button>
 
+    <button onclick="shareQuiz()">
+카카오톡 공유
+</button>
+
     `;
 
 
@@ -624,3 +628,37 @@ document.querySelectorAll(".category")
 
 
 });
+
+function shareQuiz(){
+
+
+    if(navigator.share){
+
+
+        navigator.share({
+
+            title:
+            "AI 한국사 심화 퀴즈",
+
+            text:
+            "한국사 모의시험 결과 확인하기",
+
+            url:
+            location.href
+
+        });
+
+
+    }
+
+    else{
+
+
+        alert(
+        "공유 기능을 지원하지 않는 브라우저입니다."
+        );
+
+
+    }
+
+}
