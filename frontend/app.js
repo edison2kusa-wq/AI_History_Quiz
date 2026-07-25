@@ -4,6 +4,10 @@ let quizList = [];
 let currentQuestion = 0;
 let score = 0;
 let wrongAnswers = [];
+let timer;
+let timeLeft = 0;
+let examSeconds = 0;
+let answered = false;
 const mainMenu =
 document.getElementById("mainMenu");
 
@@ -90,6 +94,23 @@ document.getElementById("settingStartBtn")
         document.getElementById("countSelect").value
     );
 
+    if (count == 10) {
+
+    examSeconds = 10 * 60;
+
+} else if (count == 20) {
+
+    examSeconds = 20 * 60;
+
+} else {
+
+    examSeconds = 50 * 60;
+
+}
+
+timeLeft = examSeconds;
+
+startTimer();
 
 
     quizList = getAllQuestions().filter(function(q){
@@ -178,9 +199,9 @@ document.getElementById("settingStartBtn")
 
 
 // 문제 표시
-function showQuestion(){
+function {
 
-    const q = quizList[currentQuestion];
+    const q = quizList[currshowQuestion()entQuestion];
 
 
     document.getElementById("progress").innerText =
@@ -214,34 +235,26 @@ if (q.image && q.image.trim() !== "") {
 
 
 
-    q.choices.forEach(function(choice,index){
+    q.choices.forEach(function(choice, index) {
 
+    const button = document.createElement("button");
 
-        const button =
-        document.createElement("button");
+    button.innerText = `${index + 1}. ${choice}`;
 
+    // 버튼 번호 저장
+    button.dataset.index = index;
 
-        button.innerText =
-        `${index+1}. ${choice}`;
+    button.onclick = function () {
 
+        if (answered) return;
 
+        checkAnswer(index);
 
-        button.onclick = function () {
+    };
 
-    if (button.disabled) return;
+    choiceBox.appendChild(button);
 
-    document.querySelectorAll("#choices button")
-        .forEach(btn => btn.disabled = true);
-
-    checkAnswer(index);
-
-};
-
-
-        choiceBox.appendChild(button);
-
-
-    });
+});
 
 
 
@@ -258,14 +271,54 @@ if (q.image && q.image.trim() !== "") {
 
     document.getElementById("progressBar").style.width =
     percent + "%";
+    answered = false;
 
 }
 
+function startTimer() {
 
+    clearInterval(timer);
+
+    updateTimer();
+
+    timer = setInterval(function () {
+
+        timeLeft--;
+
+        updateTimer();
+
+        if (timeLeft <= 0) {
+
+            clearInterval(timer);
+
+            alert("시험 시간이 종료되었습니다.");
+
+            saveResult();
+
+            showResult();
+
+        }
+
+    }, 1000);
+
+}
+
+function updateTimer() {
+
+    const min = String(Math.floor(timeLeft / 60)).padStart(2, "0");
+    const sec = String(timeLeft % 60).padStart(2, "0");
+
+    document.getElementById("timer").innerText =
+        `⏰ 남은시간 : ${min}:${sec}`;
+
+}
 
 // 정답 확인
 function checkAnswer(selected){
 
+    if(answered) return;
+
+    answered = true;
 
     const q = quizList[currentQuestion];
 
@@ -322,7 +375,36 @@ function checkAnswer(selected){
 
     document.getElementById("nextBtn").style.display =
     "block";
+    const buttons =
+document.querySelectorAll("#choices button");
 
+buttons.forEach(function(btn){
+
+    const idx = Number(btn.dataset.index);
+
+    btn.disabled = true;
+
+    if(idx === q.answer){
+
+        btn.style.background = "#4CAF50";
+        btn.style.color = "#fff";
+
+    }
+
+    else if(idx === selected){
+
+        btn.style.background = "#E53935";
+        btn.style.color = "#fff";
+
+    }
+
+    else{
+
+        btn.style.opacity = "0.5";
+
+    }
+
+});
 }
 
 
@@ -491,7 +573,7 @@ if(user){
 // 결과 화면
 function showResult(){
 
-
+clearInterval(timer);
     const percent =
 
     Math.round(
@@ -500,7 +582,11 @@ function showResult(){
 
     );
 
+const usedTime = examSeconds - timeLeft;
 
+const min = Math.floor(usedTime / 60);
+
+const sec = usedTime % 60;
 
     let resultText =
     percent >= 80
@@ -531,7 +617,9 @@ function showResult(){
     <p>
     정답률 : ${percent}%
     </p>
-
+<p>
+시험시간 : ${min}분 ${sec}초
+</p>
 
     <button onclick="location.reload()">
     다시 시작
@@ -1074,3 +1162,4 @@ showQuestion();
 
 
 };
+
