@@ -399,7 +399,50 @@ db.collection("users")
     wrongCount:
     wrongAnswers.length
 
-})
+}
+
+// 오답 저장
+
+if(user && wrongAnswers.length > 0){
+
+
+wrongAnswers.forEach(function(q){
+
+
+db.collection("users")
+.doc(user.uid)
+.collection("wrongAnswers")
+.add({
+
+    question:
+    q.question,
+
+
+    choices:
+    q.choices,
+
+
+    answer:
+    q.answer,
+
+
+    explanation:
+    q.explanation,
+
+
+    date:
+    new Date().toLocaleString()
+
+
+});
+
+
+});
+
+
+}
+
+)
 .then(()=>{
 
 
@@ -899,6 +942,99 @@ ${data.wrongCount}개
 document.getElementById(
 "myHistory"
 ).innerHTML = html;
+
+
+});
+
+
+};
+
+document.getElementById("wrongNoteBtn")
+.onclick=function(){
+
+
+const user = auth.currentUser;
+
+
+if(!user){
+
+alert(
+"로그인이 필요합니다."
+);
+
+return;
+
+}
+
+
+
+db.collection("users")
+.doc(user.uid)
+.collection("wrongAnswers")
+.get()
+
+.then(function(snapshot){
+
+
+let html =
+"<h2>오답노트</h2>";
+
+
+
+if(snapshot.empty){
+
+html +=
+"<p>오답 기록이 없습니다.</p>";
+
+}
+
+
+
+snapshot.forEach(function(doc){
+
+
+const q =
+doc.data();
+
+
+
+html += `
+
+<div>
+
+<h3>
+${q.question}
+</h3>
+
+
+<p>
+정답 :
+${q.choices[q.answer]}
+</p>
+
+
+<p>
+해설 :
+${q.explanation}
+</p>
+
+
+<hr>
+
+</div>
+
+`;
+
+
+
+});
+
+
+
+document.getElementById(
+"wrongNote"
+).innerHTML = html;
+
 
 
 });
