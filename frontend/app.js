@@ -1,79 +1,626 @@
+let quizList = [];
 let currentQuestion = 0;
 let score = 0;
+let wrongAnswers = [];
 
-// 문제를 화면에 표시
-function showQuestion() {
+// 기본 문제 + 관리자 추가 문제 합치기
 
-    const q = questions[currentQuestion];
+function getAllQuestions(){
 
-    document.getElementById("progress").innerText =
-        `문제 ${currentQuestion + 1} / ${questions.length}`;
+    const savedQuestions =
+    JSON.parse(
+        localStorage.getItem("questions")
+    ) || [];
 
-    document.getElementById("question").innerText =
-        q.question;
-    document.getElementById("questionImage").src = q.image;
-    const choiceBox = document.getElementById("choices");
-    choiceBox.innerHTML = "";
 
-    q.choices.forEach((choice, index) => {
+    return [
+        ...questions,
+        ...savedQuestions
+    ];
 
-        const btn = document.createElement("button");
-
-        btn.innerText = `${index + 1}. ${choice}`;
-
-        btn.onclick = function () {
-            checkAnswer(index);
-        };
-
-        choiceBox.appendChild(btn);
-    });
-
-    document.getElementById("result").innerHTML = "";
-    document.getElementById("nextBtn").style.display = "none";
 }
 
+const MAX_QUESTIONS = 10;
+
+
+// 문제 섞기
+function shuffle(array) {
+
+    for (let i = array.length - 1; i > 0; i--) {
+
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [array[i], array[j]] =
+        [array[j], array[i]];
+
+    }
+
+}
+
+
+
+// 시험 시작
+document.getElementById("startBtn").onclick=function(){
+
+    document.getElementById("settingMenu")
+    .style.display="block";
+
+};
+
+
+
+
+
+document.getElementById("settingStartBtn")
+.onclick=function(){
+
+
+    document.getElementById("mainMenu")
+    .style.display="none";
+
+
+    document.getElementById("quizScreen")
+    .style.display="block";
+
+
+
+    let period =
+    document.getElementById("periodSelect").value;
+
+
+    let category =
+    document.getElementById("categorySelect").value;
+
+
+    let level =
+    document.getElementById("levelSelect").value;
+
+
+
+    let count =
+    Number(
+        document.getElementById("countSelect").value
+    );
+
+
+
+    quizList = getAllQuestions().filter(function(q){
+
+
+        let result=true;
+
+
+
+        if(period !== "전체"){
+
+            result =
+            result &&
+            q.year === period;
+
+        }
+
+
+
+        if(category !== "전체"){
+
+            result =
+            result &&
+            q.category === category;
+
+        }
+
+
+
+        if(level !== "전체"){
+
+            result =
+            result &&
+            q.level === level;
+
+        }
+
+
+
+        return result;
+
+
+    });
+
+
+
+    if(quizList.length===0){
+
+        alert(
+        "조건에 맞는 문제가 없습니다."
+        );
+
+        location.reload();
+
+        return;
+
+    }
+
+
+
+    shuffle(quizList);
+
+
+
+    quizList =
+    quizList.slice(
+        0,
+        Math.min(count, quizList.length)
+    );
+
+
+
+    currentQuestion=0;
+
+    score=0;
+
+    wrongAnswers=[];
+
+
+
+    showQuestion();
+
+
+};
+
+
+
+// 문제 표시
+function showQuestion(){
+
+    const q = quizList[currentQuestion];
+
+
+    document.getElementById("progress").innerText =
+    `문제 ${currentQuestion + 1} / ${quizList.length}`;
+
+
+    document.getElementById("question").innerText =
+    q.question;
+
+
+    document.getElementById("questionImage").src =
+    q.image;
+
+
+
+    const choiceBox =
+    document.getElementById("choices");
+
+
+    choiceBox.innerHTML="";
+
+
+
+    q.choices.forEach(function(choice,index){
+
+
+        const button =
+        document.createElement("button");
+
+
+        button.innerText =
+        `${index+1}. ${choice}`;
+
+
+
+        button.onclick=function(){
+
+            checkAnswer(index);
+
+        };
+
+
+        choiceBox.appendChild(button);
+
+
+    });
+
+
+
+    document.getElementById("result").innerHTML="";
+
+
+    document.getElementById("nextBtn").style.display="none";
+
+
+
+    let percent =
+    ((currentQuestion) / quizList.length) * 100;
+
+
+    document.getElementById("progressBar").style.width =
+    percent + "%";
+
+}
+
+
+
 // 정답 확인
-function checkAnswer(selected) {
+function checkAnswer(selected){
 
-    const q = questions[currentQuestion];
 
-    if (selected === q.answer) {
+    const q = quizList[currentQuestion];
+
+
+    if(selected === q.answer){
+
 
         score++;
 
-        document.getElementById("result").innerHTML =
-            `<p style="color:green;">⭕ 정답입니다!</p>
-             <p>${q.explanation}</p>`;
-
-    } else {
 
         document.getElementById("result").innerHTML =
-            `<p style="color:red;">❌ 오답입니다.</p>
-             <p><strong>정답:</strong> ${q.choices[q.answer]}</p>
-             <p>${q.explanation}</p>`;
+
+        `
+        <p style="color:green;">
+        ⭕ 정답입니다!
+        </p>
+
+        <p>
+        ${q.explanation}
+        </p>
+        `;
+
+
     }
 
-    document.getElementById("nextBtn").style.display = "inline-block";
+    else{
+
+
+        wrongAnswers.push(q);
+
+
+        document.getElementById("result").innerHTML =
+
+        `
+        <p style="color:red;">
+        ❌ 오답입니다.
+        </p>
+
+        <p>
+        정답 : ${q.choices[q.answer]}
+        </p>
+
+        <p>
+        ${q.explanation}
+        </p>
+        `;
+
+
+    }
+
+
+
+    document.getElementById("nextBtn").style.display =
+    "block";
+
 }
 
+
+
 // 다음 문제
-document.getElementById("nextBtn").onclick = function () {
+document.getElementById("nextBtn").onclick=function(){
+
 
     currentQuestion++;
 
-    if (currentQuestion < questions.length) {
+
+
+    if(currentQuestion < quizList.length){
+
 
         showQuestion();
 
-    } else {
 
-        document.querySelector(".container").innerHTML = `
-            <h1>시험 종료</h1>
-            <h2>${questions.length}문제 중 ${score}문제 정답</h2>
-            <button onclick="location.reload()">다시 시작</button>
-        `;
     }
+
+    else{
+
+
+        saveResult();
+
+        showResult();
+
+
+    }
+
+
 };
 
-// 첫 문제 표시
-showQuestion();
+
+
+// 결과 저장
+function saveResult(){
+
+
+    localStorage.setItem(
+
+        "wrongAnswers",
+
+        JSON.stringify(wrongAnswers)
+
+    );
+
+
+
+    const history =
+
+    JSON.parse(
+
+        localStorage.getItem("quizHistory")
+
+    ) || [];
+
+
+
+    history.push({
+
+        date:
+        new Date().toLocaleString(),
+
+        score:
+
+        score,
+
+        total:
+
+        quizList.length
+
+    });
+
+
+
+    localStorage.setItem(
+
+        "quizHistory",
+
+        JSON.stringify(history)
+
+    );
+
+
+}
+
+
+
+// 결과 화면
+function showResult(){
+
+
+    const percent =
+
+    Math.round(
+
+        score / quizList.length * 100
+
+    );
+
+
+
+    let resultText =
+    percent >= 80
+    ? "합격"
+    : "불합격";
+
+
+
+    document.querySelector(".container").innerHTML =
+
+    `
+
+    <h1>
+    시험 종료
+    </h1>
+
+
+    <h2>
+    ${score} / ${quizList.length}
+    </h2>
+
+
+    <h2>
+    ${resultText}
+    </h2>
+
+
+    <p>
+    정답률 : ${percent}%
+    </p>
+
+
+    <button onclick="location.reload()">
+    다시 시작
+    </button>
+
+    `;
+
+
+}
+
+
+
+// 오답노트
+document.getElementById("wrongBtn").onclick=function(){
+
+
+    const data =
+
+    JSON.parse(
+
+        localStorage.getItem("wrongAnswers")
+
+    ) || [];
+
+
+
+    if(data.length===0){
+
+        alert("오답 기록이 없습니다.");
+
+        return;
+
+    }
+
+
+
+    let text="오답 문제\n\n";
+
+
+    data.forEach(function(q,i){
+
+
+        text +=
+
+        `${i+1}. ${q.question}\n`;
+
+        text +=
+
+        `정답 : ${q.choices[q.answer]}\n\n`;
+
+
+    });
+
+
+
+    alert(text);
+
+
+};
+
+
+
+// 시험 기록
+document.getElementById("historyBtn").onclick=function(){
+
+
+    const history =
+
+    JSON.parse(
+
+        localStorage.getItem("quizHistory")
+
+    ) || [];
+
+
+
+    if(history.length===0){
+
+        alert("시험 기록이 없습니다.");
+
+        return;
+
+    }
+
+
+
+    let text="시험 기록\n\n";
+
+
+
+    history.forEach(function(item,index){
+
+
+        text +=
+
+        `${index+1}회 : ${item.score}/${item.total}\n`;
+
+        text +=
+
+        `${item.date}\n\n`;
+
+    });
+
+
+
+    alert(text);
+
+
+};
+
+
+
+// 분야별 문제(다음 버전)
+// 분야별 메뉴 열기
+
+document.getElementById("categoryBtn").onclick=function(){
+
+    document.getElementById("categoryMenu").style.display="block";
+
+};
+
+
+
+
+// 분야별 시험 시작
+
+document.querySelectorAll(".category")
+.forEach(function(button){
+
+
+    button.onclick=function(){
+
+
+        const category =
+        this.dataset.category;
+
+
+
+        document.getElementById("mainMenu").style.display="none";
+
+        document.getElementById("quizScreen").style.display="block";
+
+
+
+        quizList = getAllQuestions().filter(function(q){
+
+        return q.category === category;
+
+        });
+
+
+
+        shuffle(quizList);
+
+
+
+        quizList =
+        quizList.slice(
+            0,
+            Math.min(MAX_QUESTIONS, quizList.length)
+        );
+
+
+
+        currentQuestion=0;
+
+        score=0;
+
+        wrongAnswers=[];
+
+
+
+        if(quizList.length===0){
+
+            alert(
+            "해당 분야 문제가 없습니다."
+            );
+
+            location.reload();
+
+            return;
+
+        }
+
+
+
+        showQuestion();
+
+
+    };
+
+
+});

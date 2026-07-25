@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>
+문제 관리자
+</title>
+
+<link rel="stylesheet" href="admin.css">
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+<h1>
+한국사 문제 관리자
+</h1>
+
+
+<input id="question"
+placeholder="문제 입력">
+
+
+<input id="choice1"
+placeholder="보기 1">
+
+
+<input id="choice2"
+placeholder="보기 2">
+
+
+<input id="choice3"
+placeholder="보기 3">
+
+
+<input id="choice4"
+placeholder="보기 4">
+
+
+
+<select id="answer">
+
+<option value="0">
+1번 정답
+</option>
+
+<option value="1">
+2번 정답
+</option>
+
+<option value="2">
+3번 정답
+</option>
+
+<option value="3">
+4번 정답
+</option>
+
+</select>
+
+
+
+<select id="year">
+
+<option>
+고대
+</option>
+
+<option>
+고려
+</option>
+
+<option>
+조선
+</option>
+
+<option>
+근현대
+</option>
+
+</select>
+
+
+
+<select id="category">
+
+<option>
+정치
+</option>
+
+<option>
+경제
+</option>
+
+<option>
+사회
+</option>
+
+<option>
+문화
+</option>
+
+<option>
+독립운동
+</option>
+
+</select>
+
+
+
+<select id="level">
+
+<option>
+중
+</option>
+
+<option>
+상
+</option>
+
+<option>
+최상
+</option>
+
+</select>
+
+
+
+<textarea id="explanation"
+placeholder="해설"></textarea>
+
+
+<button id="saveBtn">
+문제 저장
+</button>
+
+<hr>
+
+<h3>
+CSV 문제 일괄 등록
+</h3>
+
+
+<input 
+type="file"
+id="csvFile"
+accept=".csv"
+>
+
+
+<button id="csvUploadBtn">
+CSV 업로드
+</button>
+
+<input type="hidden" id="editId">
+
+<button id="viewBtn">
+등록 문제 보기
+</button>
+
+
+<div id="list"></div>
+
+
+</div>
+
+
+<script src="admin.js"></script>
+
+</body>
+
+</html>
