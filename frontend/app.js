@@ -1041,3 +1041,104 @@ document.getElementById(
 
 
 };
+
+document.getElementById("wrongQuizBtn")
+.onclick = function(){
+
+
+const user = auth.currentUser;
+
+
+if(!user){
+
+alert(
+"로그인이 필요합니다."
+);
+
+return;
+
+}
+
+
+
+db.collection("users")
+.doc(user.uid)
+.collection("wrongAnswers")
+.get()
+
+.then(function(snapshot){
+
+
+let wrongList = [];
+
+
+
+snapshot.forEach(function(doc){
+
+
+const q = doc.data();
+
+
+wrongList.push({
+
+question:
+q.question,
+
+
+choices:
+q.choices,
+
+
+answer:
+q.answer,
+
+
+explanation:
+q.explanation
+
+
+});
+
+
+});
+
+
+
+if(wrongList.length === 0){
+
+alert(
+"오답 문제가 없습니다."
+);
+
+return;
+
+}
+
+
+
+// 기존 문제 목록 교체
+
+quizList = wrongList;
+
+
+currentQuestion = 0;
+
+score = 0;
+
+wrongAnswers = [];
+
+
+
+mainMenu.style.display="none";
+
+quizScreen.style.display="block";
+
+
+
+showQuestion();
+
+
+});
+
+
+};
