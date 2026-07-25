@@ -199,79 +199,68 @@ startTimer();
 
 
 // 문제 표시
-function {
+function showQuestion(){
 
-    const q = quizList[currshowQuestion()entQuestion];
-
+    const q = quizList[currentQuestion];
 
     document.getElementById("progress").innerText =
     `문제 ${currentQuestion + 1} / ${quizList.length}`;
 
-
     document.getElementById("question").innerText =
     q.question;
 
+    const img =
+    document.getElementById("questionImage");
 
-   const img = document.getElementById("questionImage");
+    if(q.image && q.image.trim() !== ""){
 
-if (q.image && q.image.trim() !== "") {
+        img.src = q.image;
+        img.style.display = "block";
 
-    img.src = q.image;
-    img.style.display = "block";
+    }else{
 
-} else {
+        img.style.display = "none";
 
-    img.style.display = "none";
-
-}
-
-
+    }
 
     const choiceBox =
     document.getElementById("choices");
 
-
     choiceBox.innerHTML="";
 
+    answered = false;
 
+    q.choices.forEach(function(choice,index){
 
-    q.choices.forEach(function(choice, index) {
+        const button =
+        document.createElement("button");
 
-    const button = document.createElement("button");
+        button.innerText =
+        `${index+1}. ${choice}`;
 
-    button.innerText = `${index + 1}. ${choice}`;
+        button.dataset.index = index;
 
-    // 버튼 번호 저장
-    button.dataset.index = index;
+        button.onclick=function(){
 
-    button.onclick = function () {
+            if(answered) return;
 
-        if (answered) return;
+            checkAnswer(index);
 
-        checkAnswer(index);
+        };
 
-    };
+        choiceBox.appendChild(button);
 
-    choiceBox.appendChild(button);
-
-});
-
-
+    });
 
     document.getElementById("result").innerHTML="";
 
-
     document.getElementById("nextBtn").style.display="none";
 
-
-
     let percent =
-    ((currentQuestion) / quizList.length) * 100;
-
+    (currentQuestion / quizList.length) * 100;
 
     document.getElementById("progressBar").style.width =
     percent + "%";
-    answered = false;
 
 }
 
