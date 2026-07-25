@@ -33,6 +33,42 @@ content="website">
     <!-- 메인 메뉴 -->
     <div id="mainMenu">
 
+        <div id="loginBox">
+
+<h3>
+로그인
+</h3>
+
+
+<input 
+id="email"
+placeholder="이메일"
+>
+
+
+<input 
+id="password"
+type="password"
+placeholder="비밀번호"
+>
+
+
+<button id="signupBtn">
+회원가입
+</button>
+
+
+<button id="loginBtn">
+로그인
+</button>
+
+
+<p id="loginResult"></p>
+
+
+</div>
+
+
         <h1>AI 한국사 심화 퀴즈</h1>
 
         <p>
@@ -237,6 +273,15 @@ content="website">
 
 
 <script src="questions/questions.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script src="frontend/firebase-config.js"></script>
+
 <script src="frontend/app.js"></script>
 
 

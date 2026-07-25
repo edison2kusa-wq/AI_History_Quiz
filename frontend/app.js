@@ -1,3 +1,5 @@
+console.log(db);
+
 let quizList = [];
 let currentQuestion = 0;
 let score = 0;
@@ -383,6 +385,41 @@ function saveResult(){
     );
 
 
+    // Firebase 시험 기록 저장
+
+db.collection("quizHistory")
+.add({
+
+    date:
+    new Date().toLocaleString(),
+
+    score:
+    score,
+
+    total:
+    quizList.length,
+
+    wrongCount:
+    wrongAnswers.length
+
+})
+.then(function(){
+
+    console.log(
+    "Firebase 저장 완료"
+    );
+
+})
+.catch(function(error){
+
+    console.log(
+    "저장 오류",
+    error
+    );
+
+});
+
+
 }
 
 
@@ -662,3 +699,85 @@ function shareQuiz(){
     }
 
 }
+
+// 회원가입
+
+document.getElementById("signupBtn")
+.onclick=function(){
+
+
+const email =
+document.getElementById("email").value;
+
+
+const password =
+document.getElementById("password").value;
+
+
+
+auth.createUserWithEmailAndPassword(
+    email,
+    password
+)
+
+.then(function(){
+
+    alert(
+    "회원가입 완료"
+    );
+
+})
+
+.catch(function(error){
+
+    alert(
+    error.message
+    );
+
+});
+
+
+};
+
+
+
+
+
+// 로그인
+
+document.getElementById("loginBtn")
+.onclick=function(){
+
+
+const email =
+document.getElementById("email").value;
+
+
+const password =
+document.getElementById("password").value;
+
+
+
+auth.signInWithEmailAndPassword(
+    email,
+    password
+)
+
+.then(function(){
+
+    alert(
+    "로그인 성공"
+    );
+
+})
+
+.catch(function(error){
+
+    alert(
+    error.message
+    );
+
+});
+
+
+};
