@@ -458,8 +458,6 @@ if(user){
 }
 
 
-}
-
     localStorage.setItem(
 
         "quizHistory",
@@ -467,41 +465,6 @@ if(user){
         JSON.stringify(history)
 
     );
-
-
-    // Firebase 시험 기록 저장
-
-db.collection("quizHistory")
-.add({
-
-    date:
-    new Date().toLocaleString(),
-
-    score:
-    score,
-
-    total:
-    quizList.length,
-
-    wrongCount:
-    wrongAnswers.length
-
-})
-.then(function(){
-
-    console.log(
-    "Firebase 저장 완료"
-    );
-
-})
-.catch(function(error){
-
-    console.log(
-    "저장 오류",
-    error
-    );
-
-});
 
 
 }
