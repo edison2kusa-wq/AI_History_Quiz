@@ -1,9 +1,15 @@
-console.log(db);
+// console.log(db);
 
 let quizList = [];
 let currentQuestion = 0;
 let score = 0;
 let wrongAnswers = [];
+const mainMenu =
+document.getElementById("mainMenu");
+
+const quizScreen =
+document.getElementById("quizScreen");
+
 
 // 기본 문제 + 관리자 추가 문제 합치기
 
@@ -382,76 +388,74 @@ const user = auth.currentUser;
 if(user){
 
 
-db.collection("users")
-.doc(user.uid)
-.collection("quizHistory")
-.add({
+    // 시험 기록 저장
 
-    date:
-    new Date().toLocaleString(),
+    db.collection("users")
+    .doc(user.uid)
+    .collection("quizHistory")
+    .add({
 
-    score:
-    score,
+        date:
+        new Date().toLocaleString(),
 
-    total:
-    MAX_QUESTIONS,
+        score:
+        score,
 
-    wrongCount:
-    wrongAnswers.length
+        total:
+        quizList.length,
+
+        wrongCount:
+        wrongAnswers.length
+
+    })
+    .then(()=>{
+
+        console.log(
+        "사용자 시험 기록 저장 완료"
+        );
+
+    });
+
+
+
+    // 오답 저장
+
+    if(wrongAnswers.length > 0){
+
+
+        wrongAnswers.forEach(function(q){
+
+
+            db.collection("users")
+            .doc(user.uid)
+            .collection("wrongAnswers")
+            .add({
+
+                question:
+                q.question,
+
+                choices:
+                q.choices,
+
+                answer:
+                q.answer,
+
+                explanation:
+                q.explanation,
+
+                date:
+                new Date().toLocaleString()
+
+            });
+
+
+        });
+
+
+    }
+
 
 }
-
-// 오답 저장
-
-if(user && wrongAnswers.length > 0){
-
-
-wrongAnswers.forEach(function(q){
-
-
-db.collection("users")
-.doc(user.uid)
-.collection("wrongAnswers")
-.add({
-
-    question:
-    q.question,
-
-
-    choices:
-    q.choices,
-
-
-    answer:
-    q.answer,
-
-
-    explanation:
-    q.explanation,
-
-
-    date:
-    new Date().toLocaleString()
-
-
-});
-
-
-});
-
-
-}
-
-)
-.then(()=>{
-
-
-console.log(
-"사용자 시험 기록 저장 완료"
-);
-
-
-});
 
 
 }
@@ -561,58 +565,6 @@ function showResult(){
 
 
 }
-
-
-
-// 오답노트
-document.getElementById("wrongBtn").onclick=function(){
-
-
-    const data =
-
-    JSON.parse(
-
-        localStorage.getItem("wrongAnswers")
-
-    ) || [];
-
-
-
-    if(data.length===0){
-
-        alert("오답 기록이 없습니다.");
-
-        return;
-
-    }
-
-
-
-    let text="오답 문제\n\n";
-
-
-    data.forEach(function(q,i){
-
-
-        text +=
-
-        `${i+1}. ${q.question}\n`;
-
-        text +=
-
-        `정답 : ${q.choices[q.answer]}\n\n`;
-
-
-    });
-
-
-
-    alert(text);
-
-
-};
-
-
 
 // 시험 기록
 document.getElementById("historyBtn").onclick=function(){
