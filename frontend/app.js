@@ -191,8 +191,18 @@ function showQuestion(){
     q.question;
 
 
-    document.getElementById("questionImage").src =
-    q.image;
+   const img = document.getElementById("questionImage");
+
+if (q.image && q.image.trim() !== "") {
+
+    img.src = q.image;
+    img.style.display = "block";
+
+} else {
+
+    img.style.display = "none";
+
+}
 
 
 
@@ -216,11 +226,16 @@ function showQuestion(){
 
 
 
-        button.onclick=function(){
+        button.onclick = function () {
 
-            checkAnswer(index);
+    if (button.disabled) return;
 
-        };
+    document.querySelectorAll("#choices button")
+        .forEach(btn => btn.disabled = true);
+
+    checkAnswer(index);
+
+};
 
 
         choiceBox.appendChild(button);
@@ -279,7 +294,9 @@ function checkAnswer(selected){
     else{
 
 
-        wrongAnswers.push(q);
+        if (!wrongAnswers.some(item => item.question === q.question)) {
+    wrongAnswers.push(q);
+}
 
 
         document.getElementById("result").innerHTML =
