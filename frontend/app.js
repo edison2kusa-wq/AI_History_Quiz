@@ -374,7 +374,44 @@ function saveResult(){
 
     });
 
+// 로그인 사용자 확인 후 저장
 
+const user = auth.currentUser;
+
+
+if(user){
+
+
+db.collection("users")
+.doc(user.uid)
+.collection("quizHistory")
+.add({
+
+    date:
+    new Date().toLocaleString(),
+
+    score:
+    score,
+
+    total:
+    MAX_QUESTIONS,
+
+    wrongCount:
+    wrongAnswers.length
+
+})
+.then(()=>{
+
+
+console.log(
+"사용자 시험 기록 저장 완료"
+);
+
+
+});
+
+
+}
 
     localStorage.setItem(
 
