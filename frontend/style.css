@@ -283,3 +283,49 @@ button:hover {
 
 
 }
+#questionNav{
+
+    margin:20px 0;
+
+}
+
+
+.navBtn{
+
+    width:40px;
+    height:40px;
+    margin:5px;
+
+    border:none;
+    border-radius:5px;
+
+    cursor:pointer;
+
+    font-weight:bold;
+
+}
+
+#questionNav{
+
+    text-align:center;
+    margin:15px 0;
+
+}
+
+
+.navBtn{
+
+    width:42px;
+    height:42px;
+
+    margin:3px;
+
+    border-radius:6px;
+
+    border:1px solid #ccc;
+
+    font-size:16px;
+
+    cursor:pointer;
+
+}

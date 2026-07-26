@@ -230,11 +230,22 @@ placeholder="비밀번호"
                 </button>
 
             </div>
+
+        <button id="aiRecommendBtn">
+
+AI 추천 시험
+
+</button>    
         <button id="historyBtn">
             📊 시험 기록
         </button>
 
-        
+       <button id="reportBtn">
+
+학습 리포트
+
+</button> 
+<div id="reportBox"></div>
 
 
     </div>
@@ -249,7 +260,7 @@ placeholder="비밀번호"
 </div>    
             문제 1 / 10
         </div>
-        
+        <div id="questionNav"></div>
 
         <!-- 진행률 -->
         <div class="progress-box">
@@ -279,11 +290,16 @@ placeholder="비밀번호"
         <div id="result"></div>
 
 
-        <!-- 다음 문제 -->
-        <button id="nextBtn" style="display:none;">
-            다음 문제
-        </button>
+     <button id="prevBtn" style="display:none;">
+    이전 문제
+</button>
 
+<button id="nextBtn" style="display:none;">
+    다음 문제
+</button>
+<button id="submitBtn" style="display:none;">
+시험 제출
+</button>
 
     </div>
 

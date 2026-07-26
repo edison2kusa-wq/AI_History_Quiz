@@ -36,7 +36,7 @@ const questions = [
 
 
     image:
-    "../images/jiphyeonjeon.jpg"
+    "frontend/images/jiphyeonjeon.jpg"
 
 },
 
@@ -78,7 +78,7 @@ const questions = [
 
 
     image:
-    "../images/palman.jpg"
+    "frontend/images/palman.jpg"
 
 },
 
@@ -120,7 +120,7 @@ const questions = [
 
 
     image:
-    "../images/1919.jpg"
+    "frontend/images/1919.jpg"
 
 }
 

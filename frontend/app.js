@@ -7,7 +7,9 @@ let wrongAnswers = [];
 let timer;
 let timeLeft = 0;
 let examSeconds = 0;
-let answered = false;
+
+let userAnswers = [];
+let questionNav;
 const mainMenu =
 document.getElementById("mainMenu");
 
@@ -189,20 +191,85 @@ startTimer();
 
     wrongAnswers=[];
 
-
+    userAnswers = new Array(quizList.length).fill(null);
 
     showQuestion();
 
 
 };
 
+function createQuestionNav(){
 
+    const nav =
+    document.getElementById("questionNav");
+
+
+    if(!nav) return;
+
+
+    nav.innerHTML="";
+
+
+    quizList.forEach(function(q,index){
+
+
+        const btn =
+        document.createElement("button");
+
+
+        btn.innerText =
+        index + 1;
+
+
+        btn.className="navBtn";
+
+
+        // 문제 이동
+        btn.onclick=function(){
+
+            currentQuestion = index;
+
+            showQuestion();
+
+        };
+
+
+        // 기본색
+        btn.style.background="#eeeeee";
+
+
+        // 푼 문제 표시
+        if(userAnswers[index] !== null){
+
+            btn.style.background="#4CAF50";
+            btn.style.color="white";
+
+        }
+
+
+        // 현재 문제 표시
+        if(index === currentQuestion){
+
+            btn.style.background="#2196F3";
+            btn.style.color="white";
+
+        }
+
+
+        nav.appendChild(btn);
+
+
+    });
+
+
+}
 
 // 문제 표시
 function showQuestion(){
-
+    createQuestionNav();
     const q = quizList[currentQuestion];
-
+    q.count =
+(q.count || 0) + 1;
     document.getElementById("progress").innerText =
     `문제 ${currentQuestion + 1} / ${quizList.length}`;
 
@@ -228,7 +295,17 @@ function showQuestion(){
 
     choiceBox.innerHTML="";
 
-    answered = false;
+
+// 첫 문제에서는 이전 버튼 숨김
+if (currentQuestion === 0) {
+
+    document.getElementById("prevBtn").style.display = "none";
+
+} else {
+
+    document.getElementById("prevBtn").style.display = "inline-block";
+
+}
 
     q.choices.forEach(function(choice,index){
 
@@ -239,14 +316,15 @@ function showQuestion(){
         `${index+1}. ${choice}`;
 
         button.dataset.index = index;
+        if (userAnswers[currentQuestion] === index) {
+    button.style.background = "#2196F3";
+    button.style.color = "#fff";
+}
+       button.onclick = function () {
 
-        button.onclick=function(){
+    checkAnswer(index);
 
-            if(answered) return;
-
-            checkAnswer(index);
-
-        };
+};
 
         choiceBox.appendChild(button);
 
@@ -255,12 +333,36 @@ function showQuestion(){
     document.getElementById("result").innerHTML="";
 
     document.getElementById("nextBtn").style.display="none";
-
+    document.getElementById("submitBtn").style.display ="none";
     let percent =
     (currentQuestion / quizList.length) * 100;
 
     document.getElementById("progressBar").style.width =
     percent + "%";
+    document.querySelectorAll(".navBtn")
+.forEach(function(btn,index){
+
+
+    btn.style.background="#eee";
+
+
+    if(userAnswers[index] !== null){
+
+        btn.style.background="#4CAF50";
+        btn.style.color="#fff";
+
+    }
+
+
+    if(index === currentQuestion){
+
+        btn.style.background="#2196F3";
+        btn.style.color="#fff";
+
+    }
+
+
+});
 
 }
 
@@ -305,17 +407,13 @@ function updateTimer() {
 // 정답 확인
 function checkAnswer(selected){
 
-    if(answered) return;
+    userAnswers[currentQuestion] = selected;
 
-    answered = true;
 
     const q = quizList[currentQuestion];
 
 
     if(selected === q.answer){
-
-
-        score++;
 
 
         document.getElementById("result").innerHTML =
@@ -337,8 +435,10 @@ function checkAnswer(selected){
 
 
         if (!wrongAnswers.some(item => item.question === q.question)) {
-    wrongAnswers.push(q);
-}
+
+            wrongAnswers.push(q);
+
+        }
 
 
         document.getElementById("result").innerHTML =
@@ -364,39 +464,45 @@ function checkAnswer(selected){
 
     document.getElementById("nextBtn").style.display =
     "block";
+
+
     const buttons =
-document.querySelectorAll("#choices button");
+    document.querySelectorAll("#choices button");
 
-buttons.forEach(function(btn){
 
-    const idx = Number(btn.dataset.index);
+    buttons.forEach(function(btn){
 
-    btn.disabled = true;
 
-    if(idx === q.answer){
+        const idx = Number(btn.dataset.index);
 
-        btn.style.background = "#4CAF50";
-        btn.style.color = "#fff";
 
-    }
+        if(idx === q.answer){
 
-    else if(idx === selected){
+            btn.style.background = "#4CAF50";
+            btn.style.color = "#fff";
 
-        btn.style.background = "#E53935";
-        btn.style.color = "#fff";
+        }
 
-    }
 
-    else{
+        else if(idx === selected){
 
-        btn.style.opacity = "0.5";
+            btn.style.background = "#E53935";
+            btn.style.color = "#fff";
 
-    }
+        }
 
-});
+
+        else{
+
+            btn.style.opacity = "0.5";
+
+        }
+
+
+    });
+createQuestionNav();
+
 }
-
-
 
 // 다음 문제
 document.getElementById("nextBtn").onclick=function(){
@@ -404,25 +510,18 @@ document.getElementById("nextBtn").onclick=function(){
 
     currentQuestion++;
 
+if(currentQuestion < quizList.length){
 
+    showQuestion();
 
-    if(currentQuestion < quizList.length){
-
-
-        showQuestion();
-
-
-    }
+}
 
     else{
 
+    document.getElementById("submitBtn").style.display =
+    "block";
 
-        saveResult();
-
-        showResult();
-
-
-    }
+}
 
 
 };
@@ -441,6 +540,44 @@ function saveResult(){
 
     );
 
+    // 취약 분야 분석 저장
+
+let weakCategory =
+JSON.parse(
+localStorage.getItem("weakCategory")
+)
+|| {};
+
+
+
+wrongAnswers.forEach(function(q){
+
+
+let c =
+q.category || "기타";
+
+
+if(!weakCategory[c]){
+
+weakCategory[c]=0;
+
+}
+
+
+weakCategory[c]++;
+
+
+});
+
+
+
+localStorage.setItem(
+
+"weakCategory",
+
+JSON.stringify(weakCategory)
+
+);
 
 
     const history =
@@ -455,18 +592,30 @@ function saveResult(){
 
     history.push({
 
-        date:
-        new Date().toLocaleString(),
+date:
+new Date().toLocaleString(),
 
-        score:
+score:
+score,
 
-        score,
+total:
+quizList.length,
 
-        total:
+percent:
+Math.round(
+score / quizList.length * 100
+),
 
-        quizList.length
 
-    });
+category:
+
+quizList.map(function(q){
+
+return q.category;
+
+})
+
+});
 
 // 로그인 사용자 확인 후 저장
 
@@ -562,20 +711,31 @@ if(user){
 // 결과 화면
 function showResult(){
 
-clearInterval(timer);
+    clearInterval(timer);
+
+
     const percent =
-
     Math.round(
-
         score / quizList.length * 100
-
     );
 
-const usedTime = examSeconds - timeLeft;
 
-const min = Math.floor(usedTime / 60);
+    const wrongCount =
+    quizList.length - score;
 
-const sec = usedTime % 60;
+
+    const usedTime =
+    examSeconds - timeLeft;
+
+
+    const min =
+    Math.floor(usedTime / 60);
+
+
+    const sec =
+    usedTime % 60;
+
+
 
     let resultText =
     percent >= 80
@@ -583,43 +743,114 @@ const sec = usedTime % 60;
     : "불합격";
 
 
+    let color =
+    percent >= 80
+    ? "#4CAF50"
+    : "#E53935";
+
+
 
     document.querySelector(".container").innerHTML =
 
-    `
 
-    <h1>
-    시험 종료
-    </h1>
-
-
-    <h2>
-    ${score} / ${quizList.length}
-    </h2>
+`
+<div style="
+text-align:center;
+padding:30px;
+">
 
 
-    <h2>
-    ${resultText}
-    </h2>
+<h1>
+시험 종료
+</h1>
 
 
-    <p>
-    정답률 : ${percent}%
-    </p>
+<h2 style="
+color:${color};
+font-size:40px;
+">
+
+${resultText}
+
+</h2>
+
+
+
+<div style="
+font-size:25px;
+margin:20px;
+">
+
+${score} / ${quizList.length}
+
+</div>
+
+
+
+<div style="
+background:#ddd;
+height:30px;
+border-radius:15px;
+overflow:hidden;
+margin:20px;
+">
+
+
+<div style="
+width:${percent}%;
+height:100%;
+background:${color};
+">
+
+</div>
+
+
+</div>
+
+
+
 <p>
-시험시간 : ${min}분 ${sec}초
+정답률 : ${percent}%
 </p>
 
-    <button onclick="location.reload()">
-    다시 시작
-    </button>
 
-    <button onclick="shareQuiz()">
-카카오톡 공유
+<p>
+⭕ 맞은 문제 : ${score}개
+</p>
+
+
+<p>
+❌ 틀린 문제 : ${wrongCount}개
+</p>
+
+
+<p>
+시험시간 :
+${min}분 ${sec}초
+</p>
+
+
+
+<button onclick="location.reload()">
+
+다시 시험
+
 </button>
 
-    `;
 
+
+<button onclick="
+document.getElementById('wrongNoteBtn').click();
+">
+
+오답노트 보기
+
+</button>
+
+
+</div>
+
+`;
 
 }
 
@@ -730,7 +961,7 @@ document.querySelectorAll(".category")
         score=0;
 
         wrongAnswers=[];
-
+        userAnswers = new Array(quizList.length).fill(null);
 
 
         if(quizList.length===0){
@@ -1151,4 +1382,421 @@ showQuestion();
 
 
 };
+document.getElementById("prevBtn").onclick = function () {
 
+    if (currentQuestion > 0) {
+
+        currentQuestion--;
+
+        showQuestion();
+
+    }
+
+};
+document.getElementById("submitBtn").onclick = function(){
+
+    let unanswered = [];
+
+    userAnswers.forEach(function(answer,index){
+
+        if(answer === null){
+
+            unanswered.push(index + 1);
+
+        }
+
+    });
+
+
+    if(unanswered.length > 0){
+
+        let check =
+        confirm(
+        "풀지 않은 문제가 있습니다.\n\n" +
+        "문제 번호 : " +
+        unanswered.join(", ") +
+        "\n\n제출하시겠습니까?"
+        );
+
+
+        if(!check){
+
+            return;
+
+        }
+
+    }
+
+
+    score = 0;
+
+    wrongAnswers = [];
+
+
+    quizList.forEach(function(q,index){
+
+
+        if(userAnswers[index] === q.answer){
+
+            score++;
+
+        }
+
+        else{
+
+            wrongAnswers.push(q);
+
+        }
+
+
+    });
+
+
+    saveResult();
+
+    showResult();
+
+
+};
+
+// AI 추천 시험
+
+document.getElementById("aiRecommendBtn")
+.onclick=function(){
+
+
+const user = auth.currentUser;
+
+
+if(!user){
+
+    alert("로그인이 필요합니다.");
+    return;
+
+}
+
+
+
+db.collection("users")
+.doc(user.uid)
+.collection("wrongAnswers")
+.get()
+
+.then(function(snapshot){
+
+
+let recommendList=[];
+
+
+
+snapshot.forEach(function(doc){
+
+
+const q=doc.data();
+
+
+recommendList.push({
+
+question:q.question,
+
+choices:q.choices,
+
+answer:q.answer,
+
+explanation:q.explanation
+
+});
+
+
+});
+
+
+
+if(recommendList.length===0){
+
+
+alert(
+"분석할 오답 데이터가 없습니다.\n먼저 시험을 응시해주세요."
+);
+
+
+return;
+
+}
+
+
+
+// 오답 기반 시험 생성
+
+
+shuffle(recommendList);
+
+
+quizList =
+recommendList.slice(0,10);
+
+
+
+currentQuestion=0;
+
+score=0;
+
+wrongAnswers=[];
+
+userAnswers =
+new Array(quizList.length).fill(null);
+
+
+
+mainMenu.style.display="none";
+
+quizScreen.style.display="block";
+
+
+showQuestion();
+
+
+
+});
+
+
+};
+
+// 학습 리포트
+
+document.getElementById("reportBtn")
+.onclick=function(){
+
+
+const history =
+
+JSON.parse(
+localStorage.getItem("quizHistory")
+)
+|| [];
+
+
+
+const weakCategory =
+
+JSON.parse(
+localStorage.getItem("weakCategory")
+)
+|| {};
+
+
+
+if(history.length === 0){
+
+alert(
+"아직 시험 기록이 없습니다."
+);
+
+return;
+
+}
+
+
+
+// 총 응시 횟수
+
+let totalExam =
+history.length;
+
+
+
+// 평균 점수
+
+let avg =
+0;
+
+
+history.forEach(function(item){
+
+avg += item.percent || 0;
+
+});
+
+
+avg =
+Math.round(avg / totalExam);
+
+
+
+// 최고 점수
+
+let maxScore =
+Math.max.apply(null,
+
+history.map(function(item){
+
+return item.percent || 0;
+
+})
+
+);
+
+
+
+// 합격 횟수
+
+let passCount =
+
+history.filter(function(item){
+
+return (item.percent || 0) >= 80;
+
+}).length;
+
+
+
+let passRate =
+
+Math.round(
+(passCount / totalExam) * 100
+);
+
+
+
+// 취약 분야 정렬
+
+
+let weakList =
+
+Object.keys(weakCategory);
+
+
+
+weakList.sort(function(a,b){
+
+return weakCategory[b]-weakCategory[a];
+
+});
+
+
+
+let weakText =
+
+weakList
+.slice(0,3)
+.map(function(item,index){
+
+return (
+
+(index+1)
++". "
++
+item
++
+" (오답 "
++
+weakCategory[item]
++
+"개)"
+
+);
+
+})
+.join("<br>");
+
+
+
+if(weakText===""){
+
+weakText="분석 데이터 없음";
+
+}
+
+
+
+// 결과 출력
+
+
+document.getElementById("reportBox")
+.innerHTML =
+
+
+`
+
+<div style="
+background:#f5f5f5;
+padding:20px;
+margin-top:20px;
+border-radius:10px;
+">
+
+
+<h2>
+📊 나의 학습 리포트
+</h2>
+
+
+<p>
+총 응시 횟수 :
+<b>${totalExam}회</b>
+</p>
+
+
+<p>
+평균 정답률 :
+<b>${avg}%</b>
+</p>
+
+
+<p>
+최고 기록 :
+<b>${maxScore}%</b>
+</p>
+
+
+<p>
+합격률 :
+<b>${passRate}%</b>
+</p>
+
+
+
+<hr>
+
+
+<h3>
+취약 분야 TOP 3
+</h3>
+
+
+<p>
+${weakText}
+</p>
+
+
+
+<hr>
+
+
+<h3>
+추천 학습 방향
+</h3>
+
+
+<p>
+
+${avg >= 80 ?
+
+"현재 수준이 안정적입니다. 고난도 문제 풀이를 추천합니다."
+
+:
+
+"취약 분야 반복 학습 후 모의시험을 다시 진행하세요."
+
+}
+
+</p>
+
+
+</div>
+
+`;
+
+
+
+};
