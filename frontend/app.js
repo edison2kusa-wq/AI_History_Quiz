@@ -791,23 +791,25 @@ if(user){
             .collection("wrongAnswers")
             .add({
 
-                questionId:
-                q.id,
-                q.question,
+    questionId:
+    q.id,
 
-                choices:
-                q.choices,
+    question:
+    q.question,
 
-                answer:
-                q.answer,
+    choices:
+    q.choices,
 
-                explanation:
-                q.explanation,
+    answer:
+    q.answer,
 
-                date:
-                new Date().toLocaleString()
+    explanation:
+    q.explanation,
 
-            });
+    date:
+    new Date().toLocaleString()
+
+});
 
 
         });
