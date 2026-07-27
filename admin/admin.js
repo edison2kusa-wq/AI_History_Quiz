@@ -143,7 +143,7 @@ function clearForm() {
 }
 
 async function saveQuestion() {
-
+    const imageUrl = await uploadImage();
     const data = {
 
         question: document.getElementById("question").value,
@@ -165,7 +165,7 @@ async function saveQuestion() {
 
         explanation: document.getElementById("explanation").value,
 
-        image: document.getElementById("image").value,
+        image: imageUrl,
 
         created: new Date()
 
@@ -500,6 +500,29 @@ async function loadDashboard() {
     document.getElementById("totalWrong").innerText =
         wrongCount;
 
+}
+
+async function uploadImage() {
+
+    const file =
+        document.getElementById("imageFile").files[0];
+
+    if (!file) {
+        return document.getElementById("image").value || "";
+    }
+
+    const fileName =
+        "history_images/" + Date.now() + "_" + file.name;
+
+    const storageRef = storage.ref(fileName);
+
+    await storageRef.put(file);
+
+    const url = await storageRef.getDownloadURL();
+
+    document.getElementById("image").value = url;
+
+    return url;
 }
 
 async function loadStatistics(){

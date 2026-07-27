@@ -46,6 +46,7 @@ async function getAllQuestions(){
 
 
             const q = doc.data();
+            q.id = doc.id;
 
 
             // 테스트 데이터 제외
@@ -310,6 +311,20 @@ function createQuestionNav(){
 function showQuestion(){
     createQuestionNav();
     const q = quizList[currentQuestion];
+    const img =
+document.getElementById("questionImage");
+
+if(q.image){
+
+    img.src = q.image;
+
+    img.style.display = "block";
+
+}else{
+
+    img.style.display = "none";
+
+}
     q.count =
 (q.count || 0) + 1;
     document.getElementById("progress").innerText =
@@ -1359,6 +1374,7 @@ snapshot.forEach(function(doc){
 
 
 const q = doc.data();
+q.id = doc.id;
 
 
 wrongList.push({
@@ -1478,20 +1494,31 @@ document.getElementById("submitBtn").onclick = function(){
     quizList.forEach(function(q,index){
 
 
-        if(userAnswers[index] === q.answer){
-
-            score++;
-
-        }
-
-        else{
-
-            wrongAnswers.push(q);
-
-        }
+    const userAnswer =
+    userAnswers[index];
 
 
-    });
+    if(userAnswer === q.answer){
+
+        score++;
+
+    }
+
+    else{
+
+        wrongAnswers.push(q);
+
+    }
+
+
+    // 문항별 통계 저장
+    saveQuestionResult(
+        q,
+        userAnswer
+    );
+
+
+});
 
 
     saveResult();
@@ -2147,6 +2174,7 @@ function editQuestion(id){
     .then(function(doc){
 
         const q = doc.data();
+        q.id = doc.id;
 
         document.getElementById("question").value = q.question;
 
@@ -2250,3 +2278,52 @@ document.getElementById("explanation").value = "";
 
 document.getElementById("image").value = "";
 
+function saveQuestionResult(q, selected){
+
+
+    if(!q.id){
+
+        console.log(
+            "문제 ID 없음",
+            q
+        );
+
+        return;
+
+    }
+
+
+    db.collection("questionStats")
+    .doc(q.id)
+    .set({
+
+        question:
+        q.question,
+
+        category:
+        q.category || "",
+
+
+        total:
+        firebase.firestore.FieldValue.increment(1),
+
+
+        correct:
+        firebase.firestore.FieldValue.increment(
+            selected === q.answer ? 1 : 0
+        ),
+
+
+        wrong:
+        firebase.firestore.FieldValue.increment(
+            selected === q.answer ? 0 : 1
+        )
+
+
+    },
+    {
+        merge:true
+    });
+
+
+}
