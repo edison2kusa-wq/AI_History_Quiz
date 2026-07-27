@@ -19,7 +19,8 @@ document.getElementById("quizScreen");
 
 // 기본 문제 + 관리자 추가 문제 합치기
 
-function getAllQuestions(){
+async function getAllQuestions(){
+
 
     const savedQuestions =
     JSON.parse(
@@ -27,10 +28,62 @@ function getAllQuestions(){
     ) || [];
 
 
+
+    let firestoreQuestions = [];
+
+
+
+    try{
+
+
+        const snapshot =
+        await db.collection("questions")
+        .get();
+
+
+
+        snapshot.forEach(function(doc){
+
+
+            const q = doc.data();
+
+
+            // 테스트 데이터 제외
+
+            if(q.question){
+
+                firestoreQuestions.push(q);
+
+            }
+
+
+        });
+
+
+
+    }
+
+    catch(error){
+
+        console.log(
+        "Firestore 문제 불러오기 오류",
+        error
+        );
+
+    }
+
+
+
     return [
+
         ...questions,
+
+        ...firestoreQuestions,
+
         ...savedQuestions
+
     ];
+
 
 }
 
@@ -66,7 +119,7 @@ document.getElementById("startBtn").onclick=function(){
 
 
 document.getElementById("settingStartBtn")
-.onclick=function(){
+.onclick=async function(){
 
 
     document.getElementById("mainMenu")
@@ -115,47 +168,36 @@ timeLeft = examSeconds;
 startTimer();
 
 
-    quizList = getAllQuestions().filter(function(q){
+    const allQuestions = await getAllQuestions();
 
+quizList = allQuestions.filter(function(q){
 
-        let result=true;
+    let result = true;
 
+    if(period !== "전체"){
 
+        result = result &&
+                 q.year === period;
 
-        if(period !== "전체"){
+    }
 
-            result =
-            result &&
-            q.year === period;
+    if(category !== "전체"){
 
-        }
+        result = result &&
+                 q.category === category;
 
+    }
 
+    if(level !== "전체"){
 
-        if(category !== "전체"){
+        result = result &&
+                 q.level === level;
 
-            result =
-            result &&
-            q.category === category;
+    }
 
-        }
+    return result;
 
-
-
-        if(level !== "전체"){
-
-            result =
-            result &&
-            q.level === level;
-
-        }
-
-
-
-        return result;
-
-
-    });
+});
 
 
 
@@ -363,7 +405,7 @@ if (currentQuestion === 0) {
 
 
 });
-
+document.getElementById("bookmarkBtn").style.display = "inline-block";
 }
 
 function startTimer() {
@@ -922,7 +964,7 @@ document.querySelectorAll(".category")
 .forEach(function(button){
 
 
-    button.onclick=function(){
+    button.onclick = async function(){
 
 
         const category =
@@ -936,11 +978,11 @@ document.querySelectorAll(".category")
 
 
 
-        quizList = getAllQuestions().filter(function(q){
+        const allQuestions = await getAllQuestions();
 
-        return q.category === category;
-
-        });
+quizList = allQuestions.filter(function(q){
+    return q.category === category;
+});
 
 
 
@@ -1800,3 +1842,411 @@ ${avg >= 80 ?
 
 
 };
+// 관리자 메뉴 열기
+
+document.getElementById("adminBtn")
+.onclick=function(){
+
+let password =
+prompt("관리자 비밀번호 입력");
+
+
+if(password === "1234"){
+
+document.getElementById("adminMenu")
+.style.display="block";
+
+
+loadAdminQuestions();
+
+
+}
+
+else{
+
+alert("관리자 권한 없음");
+
+}
+
+};
+
+
+
+// 문제 저장
+
+document.getElementById("saveQuestionBtn")
+.onclick=function(){
+
+
+
+let newQuestion={
+
+
+question:
+
+document.getElementById("adminQuestion").value,
+
+
+choices:[
+
+document.getElementById("choice1").value,
+
+document.getElementById("choice2").value,
+
+document.getElementById("choice3").value,
+
+document.getElementById("choice4").value
+
+],
+
+
+answer:
+
+Number(
+document.getElementById("adminAnswer").value
+),
+
+
+explanation:
+
+document.getElementById("adminExplain").value,
+
+
+category:
+
+document.getElementById("adminCategory").value,
+
+
+year:
+
+document.getElementById("adminPeriod").value,
+
+
+level:
+
+document.getElementById("adminLevel").value,
+
+
+image:
+
+document.getElementById("adminImage").value
+
+
+};
+
+
+
+
+let list =
+
+JSON.parse(
+
+localStorage.getItem("questions")
+
+)
+
+|| [];
+
+
+
+list.push(newQuestion);
+
+
+
+localStorage.setItem(
+
+"questions",
+
+JSON.stringify(list)
+
+);
+
+
+
+alert("문제 등록 완료");
+
+
+
+loadAdminQuestions();
+
+
+};
+
+
+
+
+// 등록 문제 보기
+
+function loadAdminQuestions(){
+
+
+let list =
+
+JSON.parse(
+
+localStorage.getItem("questions")
+
+)
+
+|| [];
+
+
+
+let html="";
+
+
+
+list.forEach(function(q,index){
+
+
+
+html += `
+
+
+<div style="
+border:1px solid #ccc;
+padding:10px;
+margin:10px;
+">
+
+
+${index+1}.
+${q.question}
+
+
+<button onclick="editQuestion('${doc.id}')">
+수정
+</button>
+
+<button onclick="deleteQuestion(${index})">
+삭제
+</button>
+
+
+</div>
+
+
+`;
+
+
+
+});
+
+
+
+document.getElementById(
+"questionList"
+).innerHTML=html;
+
+
+
+}
+
+
+
+// 삭제
+
+function deleteQuestion(index){
+
+
+let list =
+
+JSON.parse(
+
+localStorage.getItem("questions")
+
+)
+
+|| [];
+
+
+
+list.splice(index,1);
+
+
+
+localStorage.setItem(
+
+"questions",
+
+JSON.stringify(list)
+
+);
+
+
+
+loadAdminQuestions();
+
+
+}
+document.getElementById("bookmarkListBtn").onclick = function(){
+
+    const bookmarks =
+    JSON.parse(localStorage.getItem("bookmarks")) || [];
+
+    let html = "<h2>즐겨찾기 문제</h2>";
+
+    if(bookmarks.length === 0){
+
+        html += "<p>저장된 문제가 없습니다.</p>";
+
+    }else{
+
+        bookmarks.forEach(function(q, index){
+
+            html += `
+            <div style="border:1px solid #ccc;padding:10px;margin:10px;">
+
+                <h3>${index+1}. ${q.question}</h3>
+
+                <p>
+                분야 : ${q.category}
+                </p>
+
+                <button onclick="startBookmarkQuiz(${index})">
+                풀어보기
+                </button>
+
+            </div>
+            `;
+
+        });
+
+    }
+
+    document.getElementById("bookmarkList").innerHTML = html;
+
+};
+function startBookmarkQuiz(index){
+
+    const bookmarks =
+    JSON.parse(localStorage.getItem("bookmarks")) || [];
+
+    quizList = [ bookmarks[index] ];
+
+    currentQuestion = 0;
+
+    score = 0;
+
+    wrongAnswers = [];
+
+    userAnswers = [null];
+
+    mainMenu.style.display = "none";
+
+    quizScreen.style.display = "block";
+
+    showQuestion();
+}
+
+function editQuestion(id){
+
+    db.collection("questions")
+    .doc(id)
+    .get()
+    .then(function(doc){
+
+        const q = doc.data();
+
+        document.getElementById("question").value = q.question;
+
+        document.getElementById("choice1").value = q.choices[0];
+        document.getElementById("choice2").value = q.choices[1];
+        document.getElementById("choice3").value = q.choices[2];
+        document.getElementById("choice4").value = q.choices[3];
+
+        document.getElementById("answer").value = q.answer;
+
+        document.getElementById("category").value = q.category;
+
+        document.getElementById("level").value = q.level;
+
+        document.getElementById("explanation").value = q.explanation;
+
+        document.getElementById("image").value = q.image || "";
+
+        window.editDocId = id;
+
+    });
+
+}
+
+let list =
+JSON.parse(localStorage.getItem("questions")) || [];
+
+const newQuestion = {
+
+    question:
+    document.getElementById("question").value,
+
+    choices:[
+
+        document.getElementById("choice1").value,
+
+        document.getElementById("choice2").value,
+
+        document.getElementById("choice3").value,
+
+        document.getElementById("choice4").value
+
+    ],
+
+    answer:Number(
+        document.getElementById("answer").value
+    ),
+
+    category:
+    document.getElementById("category").value,
+
+    level:
+    document.getElementById("level").value,
+
+    explanation:
+    document.getElementById("explanation").value,
+
+    image:
+    document.getElementById("image").value
+
+};
+
+if(window.editIndex !== undefined){
+
+    list[window.editIndex] = newQuestion;
+
+    window.editIndex = undefined;
+
+}else{
+
+    list.push(newQuestion);
+
+}
+
+localStorage.setItem(
+    "questions",
+    JSON.stringify(list)
+);
+
+alert("저장 완료");
+
+loadAdminQuestions();
+
+document.getElementById("question").value = "";
+
+document.getElementById("choice1").value = "";
+
+document.getElementById("choice2").value = "";
+
+document.getElementById("choice3").value = "";
+
+document.getElementById("choice4").value = "";
+
+document.getElementById("answer").value = 0;
+
+document.getElementById("category").selectedIndex = 0;
+
+document.getElementById("level").selectedIndex = 0;
+
+document.getElementById("explanation").value = "";
+
+document.getElementById("image").value = "";
+

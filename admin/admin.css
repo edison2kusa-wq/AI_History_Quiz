@@ -136,3 +136,41 @@ button:hover {
     line-height:1.5;
 
 }
+
+#dashboard{
+
+display:flex;
+
+gap:15px;
+
+margin:20px 0;
+
+flex-wrap:wrap;
+
+}
+
+.card{
+
+width:180px;
+
+padding:20px;
+
+border-radius:10px;
+
+background:#2196F3;
+
+color:white;
+
+text-align:center;
+
+font-size:18px;
+
+}
+
+.card h3{
+
+font-size:35px;
+
+margin-top:10px;
+
+}

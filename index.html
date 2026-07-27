@@ -245,6 +245,141 @@ AI 추천 시험
 학습 리포트
 
 </button> 
+<hr>
+</div>
+<button id="adminBtn">
+관리자 문제 관리
+</button>
+
+
+<div id="adminMenu" style="display:none;">
+
+
+<h2>
+문제 등록
+</h2>
+
+
+<input id="adminQuestion"
+placeholder="문제 내용">
+
+
+<input id="choice1"
+placeholder="보기1">
+
+
+<input id="choice2"
+placeholder="보기2">
+
+
+<input id="choice3"
+placeholder="보기3">
+
+
+<input id="choice4"
+placeholder="보기4">
+
+
+<select id="adminAnswer">
+
+<option value="0">
+정답 1번
+</option>
+
+<option value="1">
+정답 2번
+</option>
+
+<option value="2">
+정답 3번
+</option>
+
+<option value="3">
+정답 4번
+</option>
+
+</select>
+
+
+
+<input id="adminExplain"
+placeholder="해설">
+
+
+<select id="adminCategory">
+
+<option value="정치">
+정치
+</option>
+
+<option value="경제">
+경제
+</option>
+
+<option value="사회">
+사회
+</option>
+
+<option value="문화">
+문화
+</option>
+
+
+</select>
+
+
+
+<select id="adminPeriod">
+
+<option value="고대">
+고대
+</option>
+
+<option value="고려">
+고려
+</option>
+
+<option value="조선">
+조선
+</option>
+
+<option value="근현대">
+근현대
+</option>
+
+</select>
+
+
+
+<select id="adminLevel">
+
+<option value="중">
+중
+</option>
+
+<option value="상">
+상
+</option>
+
+</select>
+
+
+
+<input id="adminImage"
+placeholder="이미지 경로">
+
+
+<button id="saveQuestionBtn">
+문제 저장
+</button>
+
+
+<div id="questionList">
+
+</div>
+
+
+</div>
 <div id="reportBox"></div>
 
 
@@ -288,7 +423,9 @@ AI 추천 시험
 
         <!-- 정답 결과 -->
         <div id="result"></div>
-
+       <button id="bookmarkBtn" style="display:none;">
+⭐ 즐겨찾기
+</button>
 
      <button id="prevBtn" style="display:none;">
     이전 문제
@@ -301,7 +438,7 @@ AI 추천 시험
 시험 제출
 </button>
 
-    </div>
+    
 
 </div>
 

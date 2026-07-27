@@ -6,21 +6,143 @@
 <meta charset="UTF-8">
 
 <title>
-문제 관리자
+AI 한국사 관리자 문제 등록
 </title>
 
-<link rel="stylesheet" href="admin.css">
+
+<style>
+
+body{
+
+font-family:
+Arial;
+
+padding:30px;
+
+}
+
+
+input,select,textarea{
+
+width:100%;
+
+padding:10px;
+
+margin:5px 0;
+
+}
+
+
+button{
+
+padding:12px;
+
+background:#2196F3;
+
+color:white;
+
+border:none;
+
+cursor:pointer;
+
+}
+
+#dashboard{
+
+display:flex;
+gap:15px;
+flex-wrap:wrap;
+margin:20px 0;
+
+}
+
+.card{
+
+width:180px;
+padding:20px;
+background:#2196F3;
+color:white;
+border-radius:10px;
+text-align:center;
+
+}
+
+.card h3{
+
+font-size:34px;
+margin-top:10px;
+
+}
+
+.questionBox{
+
+border:1px solid #ccc;
+padding:10px;
+margin:10px 0;
+border-radius:8px;
+
+}
+</style>
+
 
 </head>
 
 
 <body>
+<div id="loginArea">
+
+<h3>
+관리자 로그인
+</h3>
 
 
-<div class="container">
+<input id="adminEmail"
+placeholder="관리자 이메일">
 
+
+<input id="adminPassword"
+type="password"
+placeholder="비밀번호">
+
+
+<button id="adminLoginBtn">
+로그인
+</button>
+
+
+</div>
+
+
+<div id="adminArea" style="display:none;">
+<h2>관리자 대시보드</h2>
+
+<div id="dashboard">
+
+<div class="card">
+총 문제
+<h3 id="totalQuestion">0</h3>
+</div>
+
+<div class="card">
+회원 수
+<h3 id="totalUser">0</h3>
+</div>
+
+<div class="card">
+시험 횟수
+<h3 id="totalExam">0</h3>
+</div>
+
+<div class="card">
+오답 수
+<h3 id="totalWrong">0</h3>
+</div>
+
+</div>
+
+<hr>
 <h1>
-한국사 문제 관리자
+관리자 문제 등록
 </h1>
 
 
@@ -29,60 +151,37 @@ placeholder="문제 입력">
 
 
 <input id="choice1"
-placeholder="보기 1">
+placeholder="보기1">
 
 
 <input id="choice2"
-placeholder="보기 2">
+placeholder="보기2">
 
 
 <input id="choice3"
-placeholder="보기 3">
+placeholder="보기3">
 
 
 <input id="choice4"
-placeholder="보기 4">
-
+placeholder="보기4">
 
 
 <select id="answer">
 
 <option value="0">
-1번 정답
+정답 1번
 </option>
 
 <option value="1">
-2번 정답
+정답 2번
 </option>
 
 <option value="2">
-3번 정답
+정답 3번
 </option>
 
 <option value="3">
-4번 정답
-</option>
-
-</select>
-
-
-
-<select id="year">
-
-<option>
-고대
-</option>
-
-<option>
-고려
-</option>
-
-<option>
-조선
-</option>
-
-<option>
-근현대
+정답 4번
 </option>
 
 </select>
@@ -107,9 +206,6 @@ placeholder="보기 4">
 문화
 </option>
 
-<option>
-독립운동
-</option>
 
 </select>
 
@@ -125,52 +221,138 @@ placeholder="보기 4">
 상
 </option>
 
-<option>
-최상
-</option>
-
 </select>
 
 
 
 <textarea id="explanation"
-placeholder="해설"></textarea>
+placeholder="해설 입력">
+</textarea>
+
+
+<input id="image"
+placeholder="이미지 주소">
 
 
 <button id="saveBtn">
+
 문제 저장
+
+</button>
+<hr>
+
+<h2>
+등록 문제 목록
+</h2>
+
+
+<input id="searchQuestion"
+placeholder="문제 검색">
+<select id="filterCategory">
+
+    <option value="전체">
+    전체 분야
+    </option>
+
+    <option value="정치">
+    정치
+    </option>
+
+    <option value="경제">
+    경제
+    </option>
+
+    <option value="사회">
+    사회
+    </option>
+
+    <option value="문화">
+    문화
+    </option>
+
+</select>
+<select id="filterLevel">
+
+    <option value="전체">
+    전체 난이도
+    </option>
+
+    <option value="중">
+    중
+    </option>
+
+    <option value="상">
+    상
+    </option>
+
+</select>
+<button id="searchBtn">
+검색
+</button>
+<hr>
+
+<button id="resetBtn">
+전체보기
 </button>
 
 <hr>
 
-<h3>
-CSV 문제 일괄 등록
-</h3>
+<h2>
+엑셀 문제 업로드
+</h2>
 
 
 <input 
 type="file"
 id="csvFile"
-accept=".csv"
->
+accept=".csv">
 
 
-<button id="csvUploadBtn">
+<button id="uploadCsvBtn">
+
 CSV 업로드
+
+</button>
+<hr>
+
+<button id="downloadCsvBtn">
+CSV 다운로드
+</button>
+<div id="questionList"></div>
+
+<hr>
+
+<h2>서비스 통계</h2>
+
+<div id="statistics"></div>
+
+<div id="pageArea">
+
+<button id="prevPageBtn">
+◀ 이전
 </button>
 
-<input type="hidden" id="editId">
+<span id="pageInfo">
+1 / 1
+</span>
 
-<button id="viewBtn">
-등록 문제 보기
+<button id="nextPageBtn">
+다음 ▶
 </button>
-
-
-<div id="list"></div>
-
 
 </div>
 
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+<script src="../frontend/firebase-config.js"></script>
 
 <script src="admin.js"></script>
 
