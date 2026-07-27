@@ -625,7 +625,82 @@ weakCategory[c]++;
 
 
 });
+// Firebase 취약 분야 저장
 
+const user =
+auth.currentUser;
+
+
+if(user){
+
+
+let categoryData = {};
+
+
+quizList.forEach(function(q,index){
+
+
+let category =
+q.category || "기타";
+
+
+if(!categoryData[category]){
+
+categoryData[category]={
+
+total:0,
+
+correct:0
+
+};
+
+}
+
+
+categoryData[category].total++;
+
+
+if(userAnswers[index] === q.answer){
+
+categoryData[category].correct++;
+
+}
+
+
+});
+
+
+
+Object.keys(categoryData)
+.forEach(function(category){
+
+
+const data =
+categoryData[category];
+
+
+db.collection("users")
+.doc(user.uid)
+.collection("categoryStats")
+.doc(category)
+.set({
+
+category:category,
+
+total:data.total,
+
+correct:data.correct,
+
+updated:new Date()
+
+
+},{merge:true});
+
+
+});
+
+
+}
 
 
 localStorage.setItem(
@@ -689,19 +764,26 @@ if(user){
     .collection("quizHistory")
     .add({
 
-        date:
-        new Date().toLocaleString(),
+    date:
+    new Date().toLocaleString(),
 
-        score:
-        score,
+    score:
+    score,
 
-        total:
-        quizList.length,
+    total:
+    quizList.length,
 
-        wrongCount:
-        wrongAnswers.length
 
-    })
+    percent:
+    Math.round(
+        score / quizList.length * 100
+    ),
+
+
+    wrongCount:
+    wrongAnswers.length
+
+})
     .then(()=>{
 
         console.log(
@@ -725,7 +807,8 @@ if(user){
             .collection("wrongAnswers")
             .add({
 
-                question:
+                questionId:
+                q.id,
                 q.question,
 
                 choices:
@@ -779,6 +862,59 @@ function showResult(){
 
     const wrongCount =
     quizList.length - score;
+
+    // 취약 분야 분석
+
+let weakCategory = {};
+
+
+wrongAnswers.forEach(function(q){
+
+    const category =
+    q.category || "기타";
+
+
+    if(!weakCategory[category]){
+
+        weakCategory[category] = 0;
+
+    }
+
+
+    weakCategory[category]++;
+
+});
+
+
+
+let weakText = "";
+
+
+Object.keys(weakCategory)
+.sort(function(a,b){
+
+    return weakCategory[b] - weakCategory[a];
+
+})
+.slice(0,3)
+.forEach(function(category,index){
+
+
+    weakText += `
+
+    <p>
+
+    ${index+1}위 :
+    ${category}
+
+    (${weakCategory[category]}문제 오답)
+
+    </p>
+
+    `;
+
+
+});
 
 
     const usedTime =
@@ -885,7 +1021,28 @@ background:${color};
 시험시간 :
 ${min}분 ${sec}초
 </p>
+<hr>
 
+<h3>
+취약 분야 분석
+</h3>
+
+
+<div style="
+background:#f5f5f5;
+padding:15px;
+border-radius:10px;
+">
+
+
+${
+weakText
+||
+"전체 분야를 고르게 잘 풀었습니다."
+}
+
+
+</div>
 
 
 <button onclick="location.reload()">
@@ -896,6 +1053,13 @@ ${min}분 ${sec}초
 
 
 
+<button onclick="retryWrongQuestions()">
+
+오답 다시 풀기
+
+</button>
+
+
 <button onclick="
 document.getElementById('wrongNoteBtn').click();
 ">
@@ -903,7 +1067,6 @@ document.getElementById('wrongNoteBtn').click();
 오답노트 보기
 
 </button>
-
 
 </div>
 
@@ -958,8 +1121,163 @@ document.getElementById("historyBtn").onclick=function(){
 
 
 };
+document.getElementById("weakBtn").onclick = async function(){
+
+    const user = auth.currentUser;
 
 
+    if(!user){
+
+        alert(
+        "로그인이 필요합니다."
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+
+        const snapshot = await db.collection("users")
+        .doc(user.uid)
+        .collection("categoryStats")
+        .get();
+
+
+
+        if(snapshot.empty){
+
+            alert(
+            "아직 학습 데이터가 없습니다."
+            );
+
+            return;
+
+        }
+
+
+
+        let text =
+        "📈 나의 한국사 학습 분석\n\n";
+
+
+        let weakField = "";
+        let lowestRate = 101;
+
+
+
+        snapshot.forEach(function(doc){
+
+
+            const data =
+            doc.data();
+
+
+
+            const accuracy =
+            Math.round(
+                data.correct /
+                data.total *
+                100
+            );
+
+
+
+            let star;
+
+
+            if(accuracy >= 90){
+
+                star="★★★★★";
+
+            }
+            else if(accuracy >=70){
+
+                star="★★★★☆";
+
+            }
+            else if(accuracy >=50){
+
+                star="★★★☆☆";
+
+            }
+            else if(accuracy >=30){
+
+                star="★★☆☆☆";
+
+            }
+            else{
+
+                star="★☆☆☆☆";
+
+            }
+
+
+
+            text +=
+
+            data.category +
+            "\n" +
+
+            "응시 : " +
+            data.total +
+            "문제\n" +
+
+            "정답률 : " +
+            accuracy +
+            "%\n" +
+
+            "학습상태 : " +
+            star +
+            "\n\n";
+
+
+
+            if(accuracy < lowestRate){
+
+                lowestRate = accuracy;
+
+                weakField =
+                data.category;
+
+            }
+
+
+        });
+
+
+
+        text +=
+        "----------------\n";
+
+
+        text +=
+        "집중 학습 추천 : " +
+        weakField;
+
+
+
+        alert(text);
+
+
+
+    }
+    catch(error){
+
+
+        console.error(error);
+
+        alert(
+        "분석 데이터를 불러오지 못했습니다."
+        );
+
+
+    }
+
+
+};
 
 // 분야별 문제(다음 버전)
 // 분야별 메뉴 열기
@@ -1491,30 +1809,40 @@ document.getElementById("submitBtn").onclick = function(){
     wrongAnswers = [];
 
 
-    quizList.forEach(function(q,index){
+   quizList.forEach(function(q,index){
 
 
-    const userAnswer =
-    userAnswers[index];
+    const isCorrect =
+    userAnswers[index] === q.answer;
 
 
-    if(userAnswer === q.answer){
-
-        score++;
-
-    }
-
-    else{
-
-        wrongAnswers.push(q);
-
-    }
+    const correct =
+userAnswers[index] === q.answer;
 
 
-    // 문항별 통계 저장
-    saveQuestionResult(
+if(correct){
+
+    score++;
+
+}
+else{
+
+    wrongAnswers.push(q);
+
+}
+
+
+// 분야별 통계 저장
+
+saveCategoryStats(
+    q,
+    correct
+);
+
+
+    saveQuestionStats(
         q,
-        userAnswer
+        isCorrect
     );
 
 
@@ -2327,3 +2655,158 @@ function saveQuestionResult(q, selected){
 
 
 }
+
+function retryWrongQuestions(){
+
+
+    if(wrongAnswers.length === 0){
+
+        alert(
+            "틀린 문제가 없습니다."
+        );
+
+        return;
+
+    }
+
+
+    quizList = wrongAnswers;
+
+
+    currentQuestion = 0;
+
+    score = 0;
+
+    wrongAnswers = [];
+
+    userAnswers =
+    new Array(quizList.length)
+    .fill(null);
+
+
+
+    document.querySelector(".container")
+    .innerHTML = `
+
+    <h2 style="text-align:center">
+
+    오답 재시험 시작
+
+    </h2>
+
+    `;
+
+
+    document.getElementById("quizScreen")
+    .style.display="block";
+
+
+    showQuestion();
+
+
+}
+
+function saveQuestionStats(q,isCorrect){
+
+
+    if(!q.id){
+
+        return;
+
+    }
+
+
+    db.collection("questionStats")
+    .doc(q.id)
+    .set({
+
+        question:
+        q.question,
+
+        category:
+        q.category || "기타",
+
+        total:
+        firebase.firestore.FieldValue.increment(1),
+
+
+        correct:
+        firebase.firestore.FieldValue.increment(
+            isCorrect ? 1 : 0
+        ),
+
+
+        wrong:
+        firebase.firestore.FieldValue.increment(
+            isCorrect ? 0 : 1
+        )
+
+    },
+    {
+        merge:true
+    });
+
+
+}
+
+function saveCategoryStats(q, correct){
+
+
+    const user =
+    auth.currentUser;
+
+
+    if(!user){
+
+        return;
+
+    }
+
+
+    const category =
+    q.category || "기타";
+
+
+    const ref =
+
+    db.collection("users")
+    .doc(user.uid)
+    .collection("categoryStats")
+    .doc(category);
+
+
+
+    ref.set({
+
+        category:
+
+        category,
+
+
+        total:
+
+        firebase.firestore.FieldValue.increment(1),
+
+
+        correct:
+
+        firebase.firestore.FieldValue.increment(
+            correct ? 1 : 0
+        ),
+
+
+        wrong:
+
+        firebase.firestore.FieldValue.increment(
+            correct ? 0 : 1
+        )
+
+
+    },
+    {
+        merge:true
+    });
+
+
+}
+

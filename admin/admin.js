@@ -370,32 +370,61 @@ function uploadCSV() {
 
             for (const row of result.data) {
 
-                await db.collection("questions").add({
+                const docRef =
+await db.collection("questions")
+.add({
 
-                    question: row.question,
+    question: row.question,
 
-                    choices: [
+    choices: [
 
-                        row.choice1,
-                        row.choice2,
-                        row.choice3,
-                        row.choice4
+        row.choice1,
+        row.choice2,
+        row.choice3,
+        row.choice4
 
-                    ],
+    ],
 
-                    answer: Number(row.answer) - 1,
+    answer:
+    Number(row.answer) - 1,
 
-                    category: row.category,
+    category:
+    row.category,
 
-                    level: row.level,
+    level:
+    row.level,
 
-                    explanation: row.explanation || "",
+    explanation:
+    row.explanation || "",
 
-                    image: row.image || "",
+    image:
+    row.image || "",
 
-                    created: new Date()
+    created:
+    new Date()
 
-                });
+});
+
+
+// 문제 통계 초기 생성
+
+await db.collection("questionStats")
+.doc(docRef.id)
+.set({
+
+    question:
+    row.question,
+
+    category:
+    row.category,
+
+    total:0,
+
+    correct:0,
+
+    wrong:0
+
+});
 
                 count++;
 
@@ -566,5 +595,146 @@ async function loadStatistics(){
         </p>
 
     `;
+
+}
+
+// 문제 분석
+
+document.getElementById("analysisBtn")
+.onclick = loadQuestionAnalysis;
+
+
+
+async function loadQuestionAnalysis(){
+
+
+    const snapshot =
+    await db.collection("questionStats")
+    .get();
+
+
+
+    let list = [];
+
+
+
+    snapshot.forEach(function(doc){
+
+
+        const q = doc.data();
+
+
+
+        const wrongRate =
+
+        q.total > 0
+
+        ?
+
+        Math.round(
+            q.wrong / q.total * 100
+        )
+
+        :
+
+        0;
+
+
+
+        list.push({
+
+            question:
+            q.question,
+
+
+            category:
+            q.category,
+
+
+            total:
+            q.total,
+
+
+            wrong:
+            q.wrong,
+
+
+            wrongRate:
+            wrongRate
+
+        });
+
+
+
+    });
+
+
+
+    list.sort(function(a,b){
+
+        return b.wrongRate - a.wrongRate;
+
+    });
+
+
+
+    let html = `
+
+    <h3>
+    오답률 TOP 10
+    </h3>
+
+    `;
+
+
+
+    list.slice(0,10)
+    .forEach(function(q,index){
+
+
+        html += `
+
+        <div class="questionBox">
+
+
+        <h4>
+        ${index+1}위.
+        ${q.question}
+        </h4>
+
+
+        <p>
+        분야 : ${q.category}
+        </p>
+
+
+        <p>
+        응시 :
+        ${q.total}회
+        </p>
+
+
+        <p style="color:red">
+
+        오답률 :
+        ${q.wrongRate}%
+
+        </p>
+
+
+        </div>
+
+        `;
+
+
+    });
+
+
+
+    document.getElementById(
+    "analysisResult"
+    )
+    .innerHTML = html;
+
 
 }
