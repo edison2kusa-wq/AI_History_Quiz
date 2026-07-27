@@ -738,3 +738,21 @@ async function loadQuestionAnalysis(){
 
 
 }
+
+auth.onAuthStateChanged(function(user){
+
+
+    if(!user){
+
+        alert(
+        "관리자 로그인이 필요합니다."
+        );
+
+
+        location.href="../index.html";
+
+
+    }
+
+
+});

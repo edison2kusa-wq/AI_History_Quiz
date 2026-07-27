@@ -17,15 +17,15 @@ const quizScreen =
 document.getElementById("quizScreen");
 
 
-// 기본 문제 + 관리자 추가 문제 합치기
+// 기본 문제 + Firebase + 관리자 추가 문제 합치기
 
 async function getAllQuestions(){
 
 
     const savedQuestions =
-JSON.parse(
-localStorage.getItem("questions")
-) || [];
+    JSON.parse(
+        localStorage.getItem("questions")
+    ) || [];
 
 
 
@@ -46,10 +46,10 @@ localStorage.getItem("questions")
 
 
             const q = doc.data();
+
             q.id = doc.id;
 
 
-            // 테스트 데이터 제외
 
             if(q.question){
 
@@ -61,23 +61,28 @@ localStorage.getItem("questions")
         });
 
 
+        console.log(
+            "Firebase 문제:",
+            firestoreQuestions.length
+        );
+
 
     }
 
     catch(error){
 
         console.log(
-        "Firestore 문제 불러오기 오류",
-        error
+            "Firestore 문제 불러오기 오류",
+            error
         );
 
     }
 
 
 
-    return [
+    const allQuestions = [
 
-        ...questions,
+        ...(typeof questions !== "undefined" ? questions : []),
 
         ...firestoreQuestions,
 
@@ -86,11 +91,21 @@ localStorage.getItem("questions")
     ];
 
 
+
+    console.log(
+        "전체 문제 수:",
+        allQuestions.length
+    );
+
+
+
+    return allQuestions;
+
+
 }
 
+
 const MAX_QUESTIONS = 10;
-
-
 // 문제 섞기
 function shuffle(array) {
 
@@ -445,13 +460,14 @@ function updateTimer() {
     const timerElement =
 document.getElementById("timer");
 
+const timerBox =
+document.getElementById("timer");
 
-if(timerElement){
 
-    timerElement.innerText =
+if(timerBox){
+
+    timerBox.innerText =
     `⏰ 남은시간 : ${min}:${sec}`;
-
-}
 
 }
 
@@ -1452,11 +1468,34 @@ auth.signInWithEmailAndPassword(
     password
 )
 
-.then(function(){
+.then(function(userCredential){
+
 
     alert(
     "로그인 성공"
     );
+
+
+
+    const user =
+    userCredential.user;
+
+
+
+    if(
+    user.email === "admin@historyquiz.com"
+    ){
+
+        document.getElementById("adminBtn")
+        .style.display="block";
+
+
+        console.log(
+        "관리자 로그인"
+        );
+
+    }
+
 
 })
 
@@ -2283,18 +2322,63 @@ document.getElementById("adminImage").value
 
 };
 
-
+document.getElementById("saveQuestionBtn").onclick = function(){
 
 
 let list =
-
 JSON.parse(
-
 localStorage.getItem("questions")
+) || [];
 
-)
 
-|| [];
+
+const newQuestion = {
+
+
+question:
+document.getElementById("adminQuestion").value,
+
+
+choices:[
+
+document.getElementById("choice1").value,
+
+document.getElementById("choice2").value,
+
+document.getElementById("choice3").value,
+
+document.getElementById("choice4").value
+
+],
+
+
+answer:
+Number(
+document.getElementById("adminAnswer").value
+),
+
+
+category:
+document.getElementById("adminCategory").value,
+
+
+period:
+document.getElementById("adminPeriod").value,
+
+
+level:
+document.getElementById("adminLevel").value,
+
+
+explanation:
+document.getElementById("adminExplain").value,
+
+
+image:
+document.getElementById("adminImage").value
+
+
+};
 
 
 
@@ -2312,114 +2396,27 @@ JSON.stringify(list)
 
 
 
-alert("문제 등록 완료");
+db.collection("questions")
+.add(newQuestion)
+.then(function(){
 
+console.log(
+"Firestore 저장 완료"
+);
 
+})
+.catch(function(error){
 
-loadAdminQuestions();
-
-
-};
-
-
-
-
-// 등록 문제 보기
-
-function loadAdminQuestions(){
-
-
-let list =
-
-JSON.parse(
-
-localStorage.getItem("questions")
-
-)
-
-|| [];
-
-
-
-let html="";
-
-
-
-list.forEach(function(q,index){
-
-
-
-html += `
-
-
-<div style="
-border:1px solid #ccc;
-padding:10px;
-margin:10px;
-">
-
-
-${index+1}.
-${q.question}
-
-
-<button onclick="editQuestion('${doc.id}')">
-수정
-</button>
-
-<button onclick="deleteQuestion(${index})">
-삭제
-</button>
-
-
-</div>
-
-
-`;
-
-
+console.error(
+error
+);
 
 });
 
 
 
-document.getElementById(
-"questionList"
-).innerHTML=html;
-
-
-
-}
-
-
-
-// 삭제
-
-function deleteQuestion(index){
-
-
-let list =
-
-JSON.parse(
-
-localStorage.getItem("questions")
-
-)
-
-|| [];
-
-
-
-list.splice(index,1);
-
-
-
-localStorage.setItem(
-
-"questions",
-
-JSON.stringify(list)
-
+alert(
+"문제 저장 완료"
 );
 
 
@@ -2427,45 +2424,136 @@ JSON.stringify(list)
 loadAdminQuestions();
 
 
-}
-document.getElementById("bookmarkListBtn").onclick = function(){
-
-    const bookmarks =
-    JSON.parse(localStorage.getItem("bookmarks")) || [];
-
-    let html = "<h2>즐겨찾기 문제</h2>";
-
-    if(bookmarks.length === 0){
-
-        html += "<p>저장된 문제가 없습니다.</p>";
-
-    }else{
-
-        bookmarks.forEach(function(q, index){
-
-            html += `
-            <div style="border:1px solid #ccc;padding:10px;margin:10px;">
-
-                <h3>${index+1}. ${q.question}</h3>
-
-                <p>
-                분야 : ${q.category}
-                </p>
-
-                <button onclick="startBookmarkQuiz(${index})">
-                풀어보기
-                </button>
-
-            </div>
-            `;
-
-        });
-
-    }
-
-    document.getElementById("bookmarkList").innerHTML = html;
-
 };
+
+
+    .then(function(){
+
+        alert("등록 완료");
+
+        loadAdminQuestions();
+
+    });
+
+
+}
+
+.then(function(){
+
+    alert("Firebase 문제 저장 완료");
+
+    loadAdminQuestions();
+
+})
+
+.catch(function(error){
+
+    console.error(
+        "저장 오류:",
+        error
+    );
+
+});
+
+
+
+
+// 등록 문제 보기
+
+async function loadAdminQuestions(){
+
+    const list =
+    document.getElementById("questionList");
+
+
+    if(!list) return;
+
+
+    list.innerHTML="";
+
+
+    const snapshot =
+    await db.collection("questions").get();
+
+
+
+    snapshot.forEach(function(doc){
+
+
+        const q = doc.data();
+
+
+        const div =
+        document.createElement("div");
+
+
+        div.className="questionBox";
+
+
+        div.innerHTML = `
+
+        <b>${q.question}</b>
+        <br>
+
+        분야 : ${q.category}
+        /
+        시대 : ${q.period}
+        /
+        난이도 : ${q.level}
+
+        <br><br>
+
+
+        <button onclick="
+        editQuestion('${doc.id}')
+        ">
+        수정
+        </button>
+
+
+        <button onclick="
+        deleteQuestion('${doc.id}')
+        ">
+        삭제
+        </button>
+
+
+        `;
+
+
+        list.appendChild(div);
+
+
+    });
+
+
+}
+
+
+// 삭제
+function deleteQuestion(id){
+
+
+db.collection("questions")
+.doc(id)
+.delete()
+
+.then(function(){
+
+alert("삭제 완료");
+
+loadAdminQuestions();
+
+})
+
+.catch(function(error){
+
+console.error(error);
+
+});
+
+
+}
 function startBookmarkQuiz(index){
 
     const bookmarks =
@@ -2524,34 +2612,47 @@ document.getElementById("adminImage").value = q.image || "";
 let list =
 JSON.parse(localStorage.getItem("questions")) || [];
 
-const newQuestion = {
+ {
+
 
 question:
 document.getElementById("adminQuestion").value,
 
+
 choices:[
 
 document.getElementById("choice1").value,
+
 document.getElementById("choice2").value,
+
 document.getElementById("choice3").value,
+
 document.getElementById("choice4").value
 
 ],
 
+
 answer:
-Number(document.getElementById("adminAnswer").value),
+Number(
+document.getElementById("adminAnswer").value
+),
+
 
 category:
 document.getElementById("adminCategory").value,
 
+
 period:
 document.getElementById("adminPeriod").value,
+
 
 level:
 document.getElementById("adminLevel").value,
 
+
 explanation:
 document.getElementById("adminExplain").value,
+
 
 image:
 document.getElementById("adminImage").value
@@ -2574,7 +2675,21 @@ localStorage.setItem(
     "questions",
     JSON.stringify(list)
 );
+db.collection("questions")
+.add(newQuestion)
+.then(function(){
 
+    console.log("Firestore 문제 저장 완료");
+
+})
+.catch(function(error){
+
+    console.error(
+        "Firestore 저장 오류",
+        error
+    );
+
+});
 alert("저장 완료");
 
 loadAdminQuestions();
@@ -2806,3 +2921,145 @@ function saveCategoryStats(q, correct){
 
 }
 
+async function editQuestion(id){
+
+
+    const doc =
+    await db.collection("questions")
+    .doc(id)
+    .get();
+
+
+    const q = doc.data();
+
+
+
+    document.getElementById("adminQuestion").value =
+    q.question;
+
+
+    document.getElementById("choice1").value =
+    q.choices[0];
+
+
+    document.getElementById("choice2").value =
+    q.choices[1];
+
+
+    document.getElementById("choice3").value =
+    q.choices[2];
+
+
+    document.getElementById("choice4").value =
+    q.choices[3];
+
+
+    document.getElementById("adminAnswer").value =
+    q.answer;
+
+
+    document.getElementById("adminCategory").value =
+    q.category;
+
+
+    document.getElementById("adminPeriod").value =
+    q.period;
+
+
+    document.getElementById("adminLevel").value =
+    q.level;
+
+
+    document.getElementById("adminExplain").value =
+    q.explanation || "";
+
+
+    document.getElementById("adminImage").value =
+    q.image || "";
+
+
+
+    window.editDocId=id;
+
+
+}
+
+async function deleteQuestion(id){
+
+
+    const check =
+    confirm(
+    "문제를 삭제하시겠습니까?"
+    );
+
+
+    if(!check) return;
+
+
+
+    await db.collection("questions")
+    .doc(id)
+    .delete();
+
+
+
+    alert(
+    "삭제 완료"
+    );
+
+
+    loadAdminQuestions();
+
+
+}
+
+// 로그인 상태 확인 및 관리자 버튼 표시
+
+auth.onAuthStateChanged(function(user){
+
+
+    const adminBtn =
+    document.getElementById("adminBtn");
+
+
+    if(!adminBtn) return;
+
+
+
+    if(user){
+
+
+        console.log(
+            "로그인 사용자:",
+            user.email
+        );
+
+
+
+        // 관리자 이메일 확인
+
+        if(
+        user.email === "admin@historyquiz.com"
+        ){
+
+            adminBtn.style.display="block";
+
+
+            console.log(
+                "관리자 권한 활성화"
+            );
+
+        }
+
+
+    }
+    else{
+
+
+        adminBtn.style.display="none";
+
+
+    }
+
+
+});
