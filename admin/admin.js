@@ -15,10 +15,12 @@ window.onload = function () {
 
     console.log("admin.js 로드 완료");
 
-    // 로그인 버튼
     document.getElementById("adminLoginBtn").onclick = adminLogin;
-document.getElementById("saveBtn").onclick = saveQuestion;
-
+    document.getElementById("saveBtn").onclick = saveQuestion;
+    document.getElementById("searchBtn").onclick = searchQuestions;
+    document.getElementById("resetBtn").onclick = resetSearch;
+    document.getElementById("uploadCsvBtn").onclick = uploadCSV;
+    document.getElementById("downloadCsvBtn").onclick = downloadCSV;
 };
 
 async function adminLogin() {
@@ -46,9 +48,9 @@ async function adminLogin() {
         document.getElementById("loginArea").style.display = "none";
 document.getElementById("adminArea").style.display = "block";
 
-loadQuestions();
-loadDashboard();
-loadStatistics();
+await loadQuestions();
+await loadDashboard();
+await loadStatistics();
 
 alert("관리자 로그인 성공");
 
@@ -228,5 +230,318 @@ async function editQuestion(id) {
     document.getElementById("image").value = q.image || "";
 
     editDocId = id;
+
+}
+
+async function deleteQuestion(id) {
+
+    const result = confirm("정말 삭제하시겠습니까?");
+
+    if (!result) return;
+
+    try {
+
+        await db.collection("questions")
+            .doc(id)
+            .delete();
+
+        alert("삭제되었습니다.");
+
+        loadQuestions();
+        loadDashboard();
+
+    } catch (e) {
+
+        alert(e.message);
+
+    }
+
+}
+
+function searchQuestions() {
+
+    const keyword =
+        document.getElementById("searchQuestion")
+        .value
+        .trim()
+        .toLowerCase();
+
+    const category =
+        document.getElementById("filterCategory").value;
+
+    const level =
+        document.getElementById("filterLevel").value;
+
+    const result = questionCache.filter(function (q) {
+
+        const matchKeyword =
+            keyword === "" ||
+            q.question.toLowerCase().includes(keyword);
+
+        const matchCategory =
+            category === "전체" ||
+            q.category === category;
+
+        const matchLevel =
+            level === "전체" ||
+            q.level === level;
+
+        return (
+            matchKeyword &&
+            matchCategory &&
+            matchLevel
+        );
+
+    });
+
+    renderSearchResult(result);
+
+}
+
+function renderSearchResult(list) {
+
+    let html = "";
+
+    list.forEach(function (q) {
+
+        html += `
+        <div class="questionBox">
+
+            <h3>${q.question}</h3>
+
+            <p>분야 : ${q.category}</p>
+
+            <p>난이도 : ${q.level}</p>
+
+            <button onclick="editQuestion('${q.id}')">
+            수정
+            </button>
+
+            <button onclick="deleteQuestion('${q.id}')">
+            삭제
+            </button>
+
+        </div>
+        `;
+
+    });
+
+    document.getElementById("questionList").innerHTML = html;
+
+    document.getElementById("pageInfo").innerText =
+        `${list.length}건 검색`;
+
+}
+
+function resetSearch() {
+
+    document.getElementById("searchQuestion").value = "";
+
+    document.getElementById("filterCategory").value = "전체";
+
+    document.getElementById("filterLevel").value = "전체";
+
+    currentPage = 1;
+
+    renderPage();
+
+}
+
+function uploadCSV() {
+
+    const file =
+        document.getElementById("csvFile").files[0];
+
+    if (!file) {
+
+        alert("CSV 파일을 선택하세요.");
+        return;
+
+    }
+
+    Papa.parse(file, {
+
+        header: true,
+        skipEmptyLines: true,
+
+        complete: async function(result) {
+
+            let count = 0;
+
+            for (const row of result.data) {
+
+                await db.collection("questions").add({
+
+                    question: row.question,
+
+                    choices: [
+
+                        row.choice1,
+                        row.choice2,
+                        row.choice3,
+                        row.choice4
+
+                    ],
+
+                    answer: Number(row.answer) - 1,
+
+                    category: row.category,
+
+                    level: row.level,
+
+                    explanation: row.explanation || "",
+
+                    image: row.image || "",
+
+                    created: new Date()
+
+                });
+
+                count++;
+
+            }
+
+            alert(count + "개 등록 완료");
+
+            loadQuestions();
+            loadDashboard();
+
+        }
+
+    });
+
+}
+
+async function downloadCSV() {
+
+    const snapshot =
+        await db.collection("questions").get();
+
+    let csv =
+"question,choice1,choice2,choice3,choice4,answer,category,level,explanation,image\n";
+
+    snapshot.forEach(function(doc){
+
+        const q = doc.data();
+
+        csv +=
+
+`"${q.question}","${q.choices[0]}","${q.choices[1]}","${q.choices[2]}","${q.choices[3]}",${q.answer+1},"${q.category}","${q.level}","${q.explanation||""}","${q.image||""}"\n`;
+
+    });
+
+    const blob = new Blob(
+
+        ["\uFEFF"+csv],
+
+        {
+
+            type:"text/csv;charset=utf-8;"
+
+        }
+
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+
+    a.href = url;
+
+    a.download = "questions.csv";
+
+    a.click();
+
+    URL.revokeObjectURL(url);
+
+}
+
+async function loadDashboard() {
+
+    // 문제 수
+    const questionSnap =
+        await db.collection("questions").get();
+
+    document.getElementById("totalQuestion").innerText =
+        questionSnap.size;
+
+    // 회원 수
+    const userSnap =
+        await db.collection("users").get();
+
+    document.getElementById("totalUser").innerText =
+        userSnap.size;
+
+    let examCount = 0;
+    let wrongCount = 0;
+
+    for (const user of userSnap.docs) {
+
+        const quizSnap =
+            await db.collection("users")
+            .doc(user.id)
+            .collection("quizHistory")
+            .get();
+
+        examCount += quizSnap.size;
+
+        quizSnap.forEach(function(doc){
+
+            wrongCount +=
+                doc.data().wrongCount || 0;
+
+        });
+
+    }
+
+    document.getElementById("totalExam").innerText =
+        examCount;
+
+    document.getElementById("totalWrong").innerText =
+        wrongCount;
+
+}
+
+async function loadStatistics(){
+
+    const userSnap =
+        await db.collection("users").get();
+
+    let exam = 0;
+
+    let wrong = 0;
+
+    for(const user of userSnap.docs){
+
+        const quizSnap =
+            await db.collection("users")
+            .doc(user.id)
+            .collection("quizHistory")
+            .get();
+
+        exam += quizSnap.size;
+
+        quizSnap.forEach(function(doc){
+
+            wrong +=
+                doc.data().wrongCount || 0;
+
+        });
+
+    }
+
+    document.getElementById("statistics").innerHTML = `
+
+        <p>회원 수 : ${userSnap.size}명</p>
+
+        <p>누적 시험 : ${exam}회</p>
+
+        <p>누적 오답 : ${wrong}문제</p>
+
+        <p>평균 응시 :
+        ${userSnap.size > 0 ? (exam / userSnap.size).toFixed(1) : 0}회
+        </p>
+
+    `;
 
 }
