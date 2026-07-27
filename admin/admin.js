@@ -1,559 +1,232 @@
-// 관리자 문제 관리 프로그램
+// ===============================
+// AI 한국사 관리자
+// admin.js
+// ===============================
 
-
-// 문제 목록
+// 전역 변수
 let currentPage = 1;
-
 const pageSize = 20;
 
 let questionCache = [];
+let editDocId = null;
 
-function loadQuestions(){
+// 페이지가 열리면 실행
+window.onload = function () {
 
-    db.collection("questions")
-    .get()
-    .then(function(snapshot){
+    console.log("admin.js 로드 완료");
 
-        questionCache = [];
-
-        snapshot.forEach(function(doc){
-
-            const q = doc.data();
-
-            q.id = doc.id;
-
-            questionCache.push(q);
-
-        });
-
-        currentPage = 1;
-
-        renderPage();
-
-        document.getElementById("totalQuestion").innerText =
-            questionCache.length;
-
-    });
-
-}
-
-
-document.getElementById(
-"questionList"
-).innerHTML = html;
-
-
-});
-
-
-}
-
-function editQuestion(id){
-
-    db.collection("questions")
-    .doc(id)
-    .get()
-    .then(function(doc){
-
-        const q = doc.data();
-
-        document.getElementById("question").value = q.question;
-        document.getElementById("choice1").value = q.choices[0];
-        document.getElementById("choice2").value = q.choices[1];
-        document.getElementById("choice3").value = q.choices[2];
-        document.getElementById("choice4").value = q.choices[3];
-
-        document.getElementById("answer").value = q.answer;
-        document.getElementById("category").value = q.category;
-        document.getElementById("level").value = q.level;
-        document.getElementById("explanation").value = q.explanation;
-        document.getElementById("image").value = q.image || "";
-
-        window.editDocId = id;
-
-    });
-
-}
-
-// 삭제
-
-function deleteQuestion(id){
-
-
-if(confirm("삭제하시겠습니까?")){
-
-
-db.collection("questions")
-.doc(id)
-.delete()
-
-.then(function(){
-
-
-alert("삭제 완료");
-
-
-loadQuestions();
-
-loadDashboard();
-
-loadStatistics();
-
-
-});
-
-
-}
-
-
-}
-
-
-
-
-
-// 관리자 로그인
-
-document.getElementById("adminLoginBtn")
-.onclick=function(){
-
-
-const email =
-document.getElementById("adminEmail").value;
-
-
-const password =
-document.getElementById("adminPassword").value;
-
-
-
-auth.signInWithEmailAndPassword(
-email,
-password
-)
-
-.then(function(){
-
-    alert("관리자 로그인 성공");
-
-    document.getElementById("loginArea").style.display="none";
-    document.getElementById("adminArea").style.display="block";
-
-    loadQuestions();
-
-    loadDashboard();
-
-    loadStatistics();
-
-})
-
-
-.catch(function(error){
-
-
-alert(
-"로그인 실패 : "
-+ error.message
-);
-
-
-});
-
+    // 로그인 버튼
+    document.getElementById("adminLoginBtn").onclick = adminLogin;
+document.getElementById("saveBtn").onclick = saveQuestion;
 
 };
 
+async function adminLogin() {
 
+    const email =
+        document.getElementById("adminEmail").value.trim();
 
+    const password =
+        document.getElementById("adminPassword").value;
 
+    if (email === "" || password === "") {
 
-// 문제 저장
+        alert("이메일과 비밀번호를 입력하세요.");
 
-document.getElementById("saveBtn").onclick = function(){
+        return;
+    }
+
+    try {
+
+        await auth.signInWithEmailAndPassword(
+            email,
+            password
+        );
+
+        document.getElementById("loginArea").style.display = "none";
+document.getElementById("adminArea").style.display = "block";
+
+loadQuestions();
+loadDashboard();
+loadStatistics();
+
+alert("관리자 로그인 성공");
+
+    } catch (e) {
+
+        console.error(e);
+
+        alert("로그인 실패\n\n" + e.message);
+
+    }
+
+}
+
+async function loadQuestions() {
+
+    const snapshot = await db.collection("questions").get();
+
+    questionCache = [];
+
+    snapshot.forEach(function(doc) {
+
+        const q = doc.data();
+
+        q.id = doc.id;
+
+        questionCache.push(q);
+
+    });
+
+    renderPage();
+
+}
+
+function renderPage() {
+
+    const start = (currentPage - 1) * pageSize;
+    const end = start + pageSize;
+
+    const pageItems = questionCache.slice(start, end);
+
+    let html = "";
+
+    pageItems.forEach(function(q) {
+
+        html += `
+        <div class="questionBox">
+
+            <h3>${q.question}</h3>
+
+            <p>분야 : ${q.category}</p>
+
+            <p>난이도 : ${q.level}</p>
+
+            <button onclick="editQuestion('${q.id}')">수정</button>
+
+            <button onclick="deleteQuestion('${q.id}')">삭제</button>
+
+        </div>
+        `;
+
+    });
+
+    document.getElementById("questionList").innerHTML = html;
+
+    const totalPage = Math.max(
+        1,
+        Math.ceil(questionCache.length / pageSize)
+    );
+
+    document.getElementById("pageInfo").innerText =
+        `${currentPage} / ${totalPage}`;
+
+}
+
+function clearForm() {
+
+    document.getElementById("question").value = "";
+    document.getElementById("choice1").value = "";
+    document.getElementById("choice2").value = "";
+    document.getElementById("choice3").value = "";
+    document.getElementById("choice4").value = "";
+
+    document.getElementById("answer").selectedIndex = 0;
+    document.getElementById("category").selectedIndex = 0;
+    document.getElementById("level").selectedIndex = 0;
+
+    document.getElementById("explanation").value = "";
+    document.getElementById("image").value = "";
+
+}
+
+async function saveQuestion() {
 
     const data = {
 
-        question:
-        document.getElementById("question").value,
+        question: document.getElementById("question").value,
 
-        choices:[
+        choices: [
 
             document.getElementById("choice1").value,
-
             document.getElementById("choice2").value,
-
             document.getElementById("choice3").value,
-
             document.getElementById("choice4").value
 
         ],
 
-        answer:Number(
-            document.getElementById("answer").value
-        ),
+        answer: Number(document.getElementById("answer").value),
 
-        category:
-        document.getElementById("category").value,
+        category: document.getElementById("category").value,
 
-        level:
-        document.getElementById("level").value,
+        level: document.getElementById("level").value,
 
-        explanation:
-        document.getElementById("explanation").value,
+        explanation: document.getElementById("explanation").value,
 
-        image:
-        document.getElementById("image").value,
+        image: document.getElementById("image").value,
 
-        updated:new Date()
+        created: new Date()
 
     };
 
+    try {
 
-    if(window.editDocId){
+        if (editDocId) {
 
-        db.collection("questions")
-        .doc(window.editDocId)
-        .update(data)
+    await db.collection("questions")
+        .doc(editDocId)
+        .update(data);
 
-        .then(function(){
+    editDocId = null;
 
-            alert("문제 수정 완료");
+    alert("문제가 수정되었습니다.");
 
-            window.editDocId = null;
+} else {
 
-            clearForm();
+    await db.collection("questions")
+        .add(data);
 
-            loadQuestions();
-
-loadDashboard();
-
-loadStatistics();
-
-        });
-
-    }
-
-    else{
-
-        data.created = new Date();
-
-        db.collection("questions")
-        .add(data)
-
-        .then(function(){
-
-            alert("문제 등록 완료");
-
-            clearForm();
-
-            loadQuestions();
-
-loadDashboard();
-
-loadStatistics();
-
-        });
-
-    }
-
-};
-
-function clearForm(){
-
-    document.getElementById("question").value="";
-
-    document.getElementById("choice1").value="";
-
-    document.getElementById("choice2").value="";
-
-    document.getElementById("choice3").value="";
-
-    document.getElementById("choice4").value="";
-
-    document.getElementById("answer").selectedIndex=0;
-
-    document.getElementById("category").selectedIndex=0;
-
-    document.getElementById("level").selectedIndex=0;
-
-    document.getElementById("explanation").value="";
-
-    document.getElementById("image").value="";
+    alert("문제가 등록되었습니다.");
 
 }
 
+        alert("문제가 등록되었습니다.");
 
-document.getElementById("downloadCsvBtn").onclick = function(){
+        clearForm();
 
-    db.collection("questions")
-    .get()
-    .then(function(snapshot){
+        loadQuestions();
 
-        let csv =
-"question,choice1,choice2,choice3,choice4,answer,category,level,explanation,image\n";
+        loadDashboard();
 
-        snapshot.forEach(function(doc){
+    } catch (e) {
 
-            const q = doc.data();
-
-            csv += `"${q.question}","${q.choices[0]}","${q.choices[1]}","${q.choices[2]}","${q.choices[3]}",${q.answer+1},"${q.category}","${q.level}","${q.explanation || ""}","${q.image || ""}"\n`;
-
-        });
-
-        const blob = new Blob(
-            ["\uFEFF"+csv],
-            {type:"text/csv;charset=utf-8;"}
-        );
-
-        const url = URL.createObjectURL(blob);
-
-        const a = document.createElement("a");
-
-        a.href = url;
-        a.download = "questions.csv";
-
-        a.click();
-
-        URL.revokeObjectURL(url);
-
-    });
-
-};
-
-document.getElementById("searchBtn").onclick = function(){
-
-    const keyword =
-    document.getElementById("searchQuestion")
-    .value
-    .trim()
-    .toLowerCase();
-
-    const category =
-    document.getElementById("filterCategory").value;
-    const level =
-document.getElementById("filterLevel").value;
-    db.collection("questions")
-    .get()
-    .then(function(snapshot){
-
-        let html = "";
-
-        snapshot.forEach(function(doc){
-
-            const q = doc.data();
-
-            const matchKeyword =
-                !keyword ||
-                (q.question &&
-                q.question.toLowerCase().includes(keyword));
-
-            const matchCategory =
-                category === "전체" ||
-                q.category === category;
-            const matchLevel =
-
-level === "전체" ||
-
-q.level === level;
-            if(
-matchKeyword &&
-
-matchCategory &&
-
-matchLevel
-
-){
-
-                html += `
-
-                <div class="questionBox">
-
-                    <h3>${q.question}</h3>
-
-                    <p>분야 : ${q.category}</p>
-
-                    <p>난이도 : ${q.level}</p>
-
-                    <button onclick="editQuestion('${doc.id}')">
-                    수정
-                    </button>
-
-                    <button onclick="deleteQuestion('${doc.id}')">
-                    삭제
-                    </button>
-
-                </div>
-
-                `;
-
-            }
-
-        });
-
-        document.getElementById("questionList").innerHTML = html;
-
-    });
-
-};
-
-document.getElementById("resetBtn").onclick = function(){
-
-    document.getElementById("searchQuestion").value = "";
-    document.getElementById("filterLevel").value = "전체";
-    loadQuestions();
-
-loadDashboard();
-
-loadStatistics();
-    
-};
-
-function renderPage(){
-
-    const totalPage =
-    Math.ceil(questionCache.length / pageSize);
-
-    document.getElementById("pageInfo").innerText =
-    `${currentPage} / ${totalPage}`;
-
-}
-
-document.getElementById("prevPageBtn").onclick = function(){
-
-    if(currentPage > 1){
-
-        currentPage--;
-
-        renderPage();
+        alert(e.message);
 
     }
 
-};
-
-document.getElementById("nextPageBtn").onclick = function(){
-
-    const totalPage =
-    Math.ceil(questionCache.length / pageSize);
-
-    if(currentPage < totalPage){
-
-        currentPage++;
-
-        renderPage();
-
-    }
-
-};
-
-function loadStatistics(){
-
-    db.collection("users")
-    .get()
-    .then(async function(snapshot){
-
-        let userCount = snapshot.size;
-
-        let totalExam = 0;
-        let totalWrong = 0;
-
-        for(const doc of snapshot.docs){
-
-            const quiz =
-            await db.collection("users")
-            .doc(doc.id)
-            .collection("quizHistory")
-            .get();
-
-            totalExam += quiz.size;
-
-            quiz.forEach(function(item){
-
-                totalWrong +=
-                item.data().wrongCount || 0;
-
-            });
-
-        }
-
-        document.getElementById("statistics").innerHTML = `
-
-<p>누적 시험 : ${totalExam}회</p>
-
-<p>누적 오답 : ${totalWrong}문제</p>
-
-<p>회원당 평균 시험 :
-${userCount > 0 ? (totalExam/userCount).toFixed(1) : 0}회
-</p>
-
-`;
-
-    });
-
 }
 
-async function loadDashboard(){
+async function editQuestion(id) {
 
-    // 문제 수
-    const questionSnapshot =
-    await db.collection("questions").get();
-
-    document.getElementById("totalQuestion").innerText =
-    questionSnapshot.size;
-
-
-    // 회원 수
-    const userSnapshot =
-    await db.collection("users").get();
-
-    document.getElementById("totalUser").innerText =
-    userSnapshot.size;
-
-
-    let examCount = 0;
-
-    let wrongCount = 0;
-
-
-    for(const user of userSnapshot.docs){
-
-        const quizSnapshot =
-        await db.collection("users")
-        .doc(user.id)
-        .collection("quizHistory")
+    const doc = await db.collection("questions")
+        .doc(id)
         .get();
 
-        examCount += quizSnapshot.size;
+    const q = doc.data();
 
+    document.getElementById("question").value = q.question;
 
-        quizSnapshot.forEach(function(doc){
+    document.getElementById("choice1").value = q.choices[0];
+    document.getElementById("choice2").value = q.choices[1];
+    document.getElementById("choice3").value = q.choices[2];
+    document.getElementById("choice4").value = q.choices[3];
 
-            wrongCount +=
-            doc.data().wrongCount || 0;
+    document.getElementById("answer").value = q.answer;
+    document.getElementById("category").value = q.category;
+    document.getElementById("level").value = q.level;
+    document.getElementById("explanation").value = q.explanation || "";
+    document.getElementById("image").value = q.image || "";
 
-        });
-
-    }
-
-
-    document.getElementById("totalExam").innerText =
-    examCount;
-
-    document.getElementById("totalWrong").innerText =
-    wrongCount;
-
-}
-
-async function loadDashboard(){
-
-    const questionSnap =
-    await db.collection("questions").get();
-
-    document.getElementById("totalQuestion").innerText =
-        questionSnap.size;
-
-    const userSnap =
-    await db.collection("users").get();
-
-    document.getElementById("totalUser").innerText =
-        userSnap.size;
+    editDocId = id;
 
 }
