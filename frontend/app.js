@@ -23,9 +23,9 @@ async function getAllQuestions(){
 
 
     const savedQuestions =
-    JSON.parse(
-        localStorage.getItem("questions")
-    ) || [];
+JSON.parse(
+localStorage.getItem("questions")
+) || [];
 
 
 
@@ -332,20 +332,6 @@ if(q.image){
 
     document.getElementById("question").innerText =
     q.question;
-
-    const img =
-    document.getElementById("questionImage");
-
-    if(q.image && q.image.trim() !== ""){
-
-        img.src = q.image;
-        img.style.display = "block";
-
-    }else{
-
-        img.style.display = "none";
-
-    }
 
     const choiceBox =
     document.getElementById("choices");
@@ -750,8 +736,6 @@ return q.category;
 });
 
 // 로그인 사용자 확인 후 저장
-
-const user = auth.currentUser;
 
 
 if(user){
