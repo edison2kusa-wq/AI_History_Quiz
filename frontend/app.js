@@ -442,8 +442,16 @@ function updateTimer() {
     const min = String(Math.floor(timeLeft / 60)).padStart(2, "0");
     const sec = String(timeLeft % 60).padStart(2, "0");
 
-    document.getElementById("timer").innerText =
-        `⏰ 남은시간 : ${min}:${sec}`;
+    const timerElement =
+document.getElementById("timer");
+
+
+if(timerElement){
+
+    timerElement.innerText =
+    `⏰ 남은시간 : ${min}:${sec}`;
+
+}
 
 }
 
@@ -2490,22 +2498,22 @@ function editQuestion(id){
         const q = doc.data();
         q.id = doc.id;
 
-        document.getElementById("question").value = q.question;
+        document.getElementById("adminQuestion").value = q.question;
 
-        document.getElementById("choice1").value = q.choices[0];
-        document.getElementById("choice2").value = q.choices[1];
-        document.getElementById("choice3").value = q.choices[2];
-        document.getElementById("choice4").value = q.choices[3];
+document.getElementById("choice1").value = q.choices[0];
+document.getElementById("choice2").value = q.choices[1];
+document.getElementById("choice3").value = q.choices[2];
+document.getElementById("choice4").value = q.choices[3];
 
-        document.getElementById("answer").value = q.answer;
+document.getElementById("adminAnswer").value = q.answer;
 
-        document.getElementById("category").value = q.category;
+document.getElementById("adminCategory").value = q.category;
 
-        document.getElementById("level").value = q.level;
+document.getElementById("adminLevel").value = q.level;
 
-        document.getElementById("explanation").value = q.explanation;
+document.getElementById("adminExplain").value = q.explanation || "";
 
-        document.getElementById("image").value = q.image || "";
+document.getElementById("adminImage").value = q.image || "";
 
         window.editDocId = id;
 
@@ -2518,36 +2526,35 @@ JSON.parse(localStorage.getItem("questions")) || [];
 
 const newQuestion = {
 
-    question:
-    document.getElementById("question").value,
+question:
+document.getElementById("adminQuestion").value,
 
-    choices:[
+choices:[
 
-        document.getElementById("choice1").value,
+document.getElementById("choice1").value,
+document.getElementById("choice2").value,
+document.getElementById("choice3").value,
+document.getElementById("choice4").value
 
-        document.getElementById("choice2").value,
+],
 
-        document.getElementById("choice3").value,
+answer:
+Number(document.getElementById("adminAnswer").value),
 
-        document.getElementById("choice4").value
+category:
+document.getElementById("adminCategory").value,
 
-    ],
+period:
+document.getElementById("adminPeriod").value,
 
-    answer:Number(
-        document.getElementById("answer").value
-    ),
+level:
+document.getElementById("adminLevel").value,
 
-    category:
-    document.getElementById("category").value,
+explanation:
+document.getElementById("adminExplain").value,
 
-    level:
-    document.getElementById("level").value,
-
-    explanation:
-    document.getElementById("explanation").value,
-
-    image:
-    document.getElementById("image").value
+image:
+document.getElementById("adminImage").value
 
 };
 
@@ -2572,7 +2579,7 @@ alert("저장 완료");
 
 loadAdminQuestions();
 
-document.getElementById("question").value = "";
+document.getElementById("adminQuestion").value = "";
 
 document.getElementById("choice1").value = "";
 
@@ -2582,15 +2589,17 @@ document.getElementById("choice3").value = "";
 
 document.getElementById("choice4").value = "";
 
-document.getElementById("answer").value = 0;
+document.getElementById("adminAnswer").value = 0;
 
-document.getElementById("category").selectedIndex = 0;
+document.getElementById("adminCategory").selectedIndex = 0;
 
-document.getElementById("level").selectedIndex = 0;
+document.getElementById("adminPeriod").selectedIndex = 0;
 
-document.getElementById("explanation").value = "";
+document.getElementById("adminLevel").selectedIndex = 0;
 
-document.getElementById("image").value = "";
+document.getElementById("adminExplain").value = "";
+
+document.getElementById("adminImage").value = "";
 
 function saveQuestionResult(q, selected){
 
@@ -2702,8 +2711,9 @@ function saveQuestionStats(q,isCorrect){
     }
 
 
-    db.collection("questionStats")
-    .doc(q.id)
+    db.collection("users")
+.doc(user.uid)
+.collection("stats")
     .set({
 
         question:
