@@ -7,30 +7,35 @@ let currentPage = 1;
 const pageSize = 20;
 
 let questionCache = [];
+
 function loadQuestions(){
 
+    db.collection("questions")
+    .get()
+    .then(function(snapshot){
 
-db.collection("questions")
-.get()
-.then(function(snapshot){
+        questionCache = [];
 
-    questionCache = [];
+        snapshot.forEach(function(doc){
 
-    snapshot.forEach(function(doc){
+            const q = doc.data();
 
-        const q = doc.data();
+            q.id = doc.id;
 
-        q.id = doc.id;
+            questionCache.push(q);
 
-        questionCache.push(q);
+        });
+
+        currentPage = 1;
+
+        renderPage();
+
+        document.getElementById("totalQuestion").innerText =
+            questionCache.length;
 
     });
 
-    currentPage = 1;
-
-    renderPage();
-
-});
+}
 
 
 document.getElementById(
@@ -129,26 +134,16 @@ password
 
 .then(function(){
 
+    alert("관리자 로그인 성공");
 
-alert("관리자 로그인 성공");
+    document.getElementById("loginArea").style.display="none";
+    document.getElementById("adminArea").style.display="block";
 
+    loadQuestions();
 
-document.getElementById(
-"loginArea"
-).style.display="none";
+    loadDashboard();
 
-
-document.getElementById(
-"adminArea"
-).style.display="block";
-
-
-loadQuestions();
-
-loadDashboard();
-
-loadStatistics();
-
+    loadStatistics();
 
 })
 
@@ -481,15 +476,15 @@ function loadStatistics(){
 
         document.getElementById("statistics").innerHTML = `
 
-        <h2>서비스 통계</h2>
+<p>누적 시험 : ${totalExam}회</p>
 
-        <p>회원수 : ${userCount}명</p>
+<p>누적 오답 : ${totalWrong}문제</p>
 
-        <p>응시횟수 : ${totalExam}회</p>
+<p>회원당 평균 시험 :
+${userCount > 0 ? (totalExam/userCount).toFixed(1) : 0}회
+</p>
 
-        <p>누적 오답 : ${totalWrong}문제</p>
-
-        `;
+`;
 
     });
 
@@ -544,5 +539,21 @@ async function loadDashboard(){
 
     document.getElementById("totalWrong").innerText =
     wrongCount;
+
+}
+
+async function loadDashboard(){
+
+    const questionSnap =
+    await db.collection("questions").get();
+
+    document.getElementById("totalQuestion").innerText =
+        questionSnap.size;
+
+    const userSnap =
+    await db.collection("users").get();
+
+    document.getElementById("totalUser").innerText =
+        userSnap.size;
 
 }
