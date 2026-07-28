@@ -16,120 +16,141 @@ window.onload = function () {
     console.log("admin.js 로드 완료");
 
 
-    if(document.getElementById("periodAnalysisBtn"))
+    if (document.getElementById("periodAnalysisBtn"))
         document.getElementById("periodAnalysisBtn").onclick = loadPeriodAnalysis;
 
 
-    if(document.getElementById("adminLoginBtn"))
+    if (document.getElementById("adminLoginBtn"))
         document.getElementById("adminLoginBtn").onclick = adminLogin;
 
 
-    if(document.getElementById("saveBtn"))
+    if (document.getElementById("saveBtn"))
         document.getElementById("saveBtn").onclick = saveQuestion;
 
 
-    if(document.getElementById("searchBtn"))
+    if (document.getElementById("searchBtn"))
         document.getElementById("searchBtn").onclick = searchQuestions;
 
 
-    if(document.getElementById("resetBtn"))
+    if (document.getElementById("resetBtn"))
         document.getElementById("resetBtn").onclick = resetSearch;
 
 
-    if(document.getElementById("uploadCsvBtn"))
+    if (document.getElementById("uploadCsvBtn"))
         document.getElementById("uploadCsvBtn").onclick = uploadCSV;
 
 
-    if(document.getElementById("downloadCsvBtn"))
+    if (document.getElementById("downloadCsvBtn"))
         document.getElementById("downloadCsvBtn").onclick = downloadCSV;
 
 
-    if(document.getElementById("prevPageBtn"))
-    document.getElementById("prevPageBtn").onclick=function(){
+    if (document.getElementById("prevPageBtn"))
+        document.getElementById("prevPageBtn").onclick=function(){
 
-        if(currentPage>1){
+            if(currentPage>1){
 
-            currentPage--;
+                currentPage--;
 
-            renderPage();
+                renderPage();
+
+            }
+
+        };
+
+
+    if (document.getElementById("nextPageBtn"))
+        document.getElementById("nextPageBtn").onclick=function(){
+
+            const totalPage =
+            Math.ceil(questionCache.length/pageSize);
+
+
+            if(currentPage<totalPage){
+
+                currentPage++;
+
+                renderPage();
+
+            }
+
+        };
+
+
+};
+
+    async function adminLogin() {
+
+        const email =
+            document.getElementById("adminEmail").value.trim();
+
+        const password =
+            document.getElementById("adminPassword").value;
+
+        if (email === "" || password === "") {
+
+            alert("이메일과 비밀번호를 입력하세요.");
+
+            return;
+        }
+
+        try {
+
+            await auth.signInWithEmailAndPassword(
+                email,
+                password
+            );
+
+            document.getElementById("loginArea").style.display = "none";
+            document.getElementById("adminArea").style.display = "block";
+
+            await loadQuestions();
+            await loadDashboard();
+            await loadStatistics();
+
+            alert("관리자 로그인 성공");
+
+        } catch (e) {
+
+            console.error(e);
+
+            alert("로그인 실패\n\n" + e.message);
 
         }
 
-    };    
-
-async function adminLogin() {
-
-    const email =
-        document.getElementById("adminEmail").value.trim();
-
-    const password =
-        document.getElementById("adminPassword").value;
-
-    if (email === "" || password === "") {
-
-        alert("이메일과 비밀번호를 입력하세요.");
-
-        return;
     }
 
-    try {
+    async function loadQuestions() {
 
-        await auth.signInWithEmailAndPassword(
-            email,
-            password
-        );
+        const snapshot = await db.collection("questions").get();
 
-        document.getElementById("loginArea").style.display = "none";
-document.getElementById("adminArea").style.display = "block";
+        questionCache = [];
 
-await loadQuestions();
-await loadDashboard();
-await loadStatistics();
+        snapshot.forEach(function (doc) {
 
-alert("관리자 로그인 성공");
+            const q = doc.data();
 
-    } catch (e) {
+            q.id = doc.id;
 
-        console.error(e);
+            questionCache.push(q);
 
-        alert("로그인 실패\n\n" + e.message);
+        });
+
+        renderPage();
 
     }
 
-}
+    function renderPage() {
 
-async function loadQuestions() {
+        const start = (currentPage - 1) * pageSize;
+        const end = start + pageSize;
 
-    const snapshot = await db.collection("questions").get();
+        const pageItems = questionCache.slice(start, end);
 
-    questionCache = [];
+        let html = "";
 
-    snapshot.forEach(function(doc) {
+        pageItems.forEach(function (q) {
 
-        const q = doc.data();
-
-        q.id = doc.id;
-
-        questionCache.push(q);
-
-    });
-
-    renderPage();
-
-}
-
-function renderPage() {
-
-    const start = (currentPage - 1) * pageSize;
-    const end = start + pageSize;
-
-    const pageItems = questionCache.slice(start, end);
-
-    let html = "";
-
-    pageItems.forEach(function(q) {
-
-        html += `
+            html += `
         <div class="questionBox">
 
             <h3>${q.question}</h3>
@@ -157,280 +178,280 @@ function renderPage() {
         </div>
         `;
 
-    });
+        });
 
-    document.getElementById("questionList").innerHTML = html;
+        document.getElementById("questionList").innerHTML = html;
 
-    const totalPage = Math.max(
-        1,
-        Math.ceil(questionCache.length / pageSize)
-    );
+        const totalPage = Math.max(
+            1,
+            Math.ceil(questionCache.length / pageSize)
+        );
 
-    document.getElementById("pageInfo").innerText =
-        `${currentPage} / ${totalPage}`;
+        document.getElementById("pageInfo").innerText =
+            `${currentPage} / ${totalPage}`;
 
-}
+    }
 
-function clearForm() {
+    function clearForm() {
 
-    document.getElementById("question").value = "";
-    document.getElementById("choice1").value = "";
-    document.getElementById("choice2").value = "";
-    document.getElementById("choice3").value = "";
-    document.getElementById("choice4").value = "";
+        document.getElementById("question").value = "";
+        document.getElementById("choice1").value = "";
+        document.getElementById("choice2").value = "";
+        document.getElementById("choice3").value = "";
+        document.getElementById("choice4").value = "";
 
-    document.getElementById("answer").selectedIndex = 0;
-    document.getElementById("category").selectedIndex = 0;
-    document.getElementById("level").selectedIndex = 0;
+        document.getElementById("answer").selectedIndex = 0;
+        document.getElementById("category").selectedIndex = 0;
+        document.getElementById("level").selectedIndex = 0;
 
-    document.getElementById("explanation").value = "";
-    document.getElementById("image").value = "";
-    document.getElementById("source").value="";
+        document.getElementById("explanation").value = "";
+        document.getElementById("image").value = "";
+        document.getElementById("source").value = "";
 
-document.getElementById("keywords").value="";
+        document.getElementById("keywords").value = "";
 
-}
+    }
 
-async function saveQuestion(){
+    async function saveQuestion() {
 
-    const imageUrl = await uploadImage();
+        const imageUrl = await uploadImage();
 
-    const data = {
+        const data = {
 
-        question:
-        document.getElementById("question").value,
-
-
-        choices:[
-
-            document.getElementById("choice1").value,
-            document.getElementById("choice2").value,
-            document.getElementById("choice3").value,
-            document.getElementById("choice4").value
-
-        ],
+            question:
+                document.getElementById("question").value,
 
 
-        answer:
-        Number(document.getElementById("answer").value),
+            choices: [
+
+                document.getElementById("choice1").value,
+                document.getElementById("choice2").value,
+                document.getElementById("choice3").value,
+                document.getElementById("choice4").value
+
+            ],
 
 
-        period:
-        document.getElementById("period").value,
+            answer:
+                Number(document.getElementById("answer").value),
 
 
-        category:
-        document.getElementById("category").value,
+            period:
+                document.getElementById("period").value,
 
 
-        level:
-        document.getElementById("level").value,
+            category:
+                document.getElementById("category").value,
 
 
-        type:
-        document.getElementById("type").value,
+            level:
+                document.getElementById("level").value,
 
 
-        source:
-        document.getElementById("source").value,
+            type:
+                document.getElementById("type").value,
 
 
-        keywords:
-        document.getElementById("keywords").value
-        .split(",")
-        .map(k=>k.trim()),
+            source:
+                document.getElementById("source").value,
 
 
-        explanation:
-        document.getElementById("explanation").value,
+            keywords:
+                document.getElementById("keywords").value
+                    .split(",")
+                    .map(k => k.trim()),
 
 
-        image:
-        imageUrl,
+            explanation:
+                document.getElementById("explanation").value,
 
 
-        // AI 분석용 데이터
-        difficultyScore:70,
-
-        viewCount:0,
-
-        solveCount:0,
-
-        correctCount:0,
-
-        wrongCount:0,
+            image:
+                imageUrl,
 
 
-        createdBy:
-        auth.currentUser.uid,
+            // AI 분석용 데이터
+            difficultyScore: 70,
+
+            viewCount: 0,
+
+            solveCount: 0,
+
+            correctCount: 0,
+
+            wrongCount: 0,
 
 
-        created:
-        firebase.firestore.FieldValue.serverTimestamp(),
+            createdBy:
+                auth.currentUser.uid,
 
 
-        updated:
-        firebase.firestore.FieldValue.serverTimestamp()
-
-    };
+            created:
+                firebase.firestore.FieldValue.serverTimestamp(),
 
 
-    try{
+            updated:
+                firebase.firestore.FieldValue.serverTimestamp()
+
+        };
 
 
-        if(editDocId){
-
-            await db.collection("questions")
-            .doc(editDocId)
-            .update(data);
+        try {
 
 
-            alert("문제가 수정되었습니다.");
+            if (editDocId) {
 
-            editDocId=null;
-
-
-        }else{
-
-
-            await db.collection("questions")
-            .add(data);
+                await db.collection("questions")
+                    .doc(editDocId)
+                    .update(data);
 
 
-            alert("문제가 등록되었습니다.");
+                alert("문제가 수정되었습니다.");
+
+                editDocId = null;
+
+
+            } else {
+
+
+                await db.collection("questions")
+                    .add(data);
+
+
+                alert("문제가 등록되었습니다.");
+
+            }
+
+
+            clearForm();
+
+            await loadQuestions();
+
+
+        }
+        catch (e) {
+
+            console.error(e);
+
+            alert(
+                "저장 오류 : " + e.message
+            );
 
         }
 
-
-        clearForm();
-
-        await loadQuestions();
-
-
-    }
-    catch(e){
-
-        console.error(e);
-
-        alert(
-            "저장 오류 : "+e.message
-        );
-
     }
 
-}
+    async function editQuestion(id) {
 
-async function editQuestion(id) {
+        const doc = await db.collection("questions")
+            .doc(id)
+            .get();
 
-    const doc = await db.collection("questions")
-        .doc(id)
-        .get();
+        const q = doc.data();
 
-    const q = doc.data();
+        document.getElementById("question").value = q.question;
 
-    document.getElementById("question").value = q.question;
+        document.getElementById("choice1").value = q.choices[0];
+        document.getElementById("choice2").value = q.choices[1];
+        document.getElementById("choice3").value = q.choices[2];
+        document.getElementById("choice4").value = q.choices[3];
 
-    document.getElementById("choice1").value = q.choices[0];
-    document.getElementById("choice2").value = q.choices[1];
-    document.getElementById("choice3").value = q.choices[2];
-    document.getElementById("choice4").value = q.choices[3];
-
-    document.getElementById("answer").value = q.answer;
-    document.getElementById("category").value = q.category;
-    document.getElementById("level").value = q.level;
-    document.getElementById("period").value =
-q.period || "고대";
+        document.getElementById("answer").value = q.answer;
+        document.getElementById("category").value = q.category;
+        document.getElementById("level").value = q.level;
+        document.getElementById("period").value =
+            q.period || "고대";
 
 
-document.getElementById("type").value =
-q.type || "기출";
+        document.getElementById("type").value =
+            q.type || "기출";
 
 
-document.getElementById("source").value =
-q.source || "";
+        document.getElementById("source").value =
+            q.source || "";
 
 
-document.getElementById("keywords").value =
-(q.keywords || []).join(",");
-    document.getElementById("explanation").value = q.explanation || "";
-    document.getElementById("image").value = q.image || "";
+        document.getElementById("keywords").value =
+            (q.keywords || []).join(",");
+        document.getElementById("explanation").value = q.explanation || "";
+        document.getElementById("image").value = q.image || "";
 
-    editDocId = id;
-
-}
-
-async function deleteQuestion(id) {
-
-    const result = confirm("정말 삭제하시겠습니까?");
-
-    if (!result) return;
-
-    try {
-
-        await db.collection("questions")
-    .doc(id)
-    .delete();
-
-        alert("삭제되었습니다.");
-
-        loadQuestions();
-        loadDashboard();
-
-    } catch (e) {
-
-        alert(e.message);
+        editDocId = id;
 
     }
 
-}
+    async function deleteQuestion(id) {
 
-function searchQuestions() {
+        const result = confirm("정말 삭제하시겠습니까?");
 
-    const keyword =
-        document.getElementById("searchQuestion")
-        .value
-        .trim()
-        .toLowerCase();
+        if (!result) return;
 
-    const category =
-        document.getElementById("filterCategory").value;
+        try {
 
-    const level =
-        document.getElementById("filterLevel").value;
+            await db.collection("questions")
+                .doc(id)
+                .delete();
 
-    const result = questionCache.filter(function (q) {
+            alert("삭제되었습니다.");
 
-        const matchKeyword =
-            keyword === "" ||
-            q.question.toLowerCase().includes(keyword);
+            loadQuestions();
+            loadDashboard();
 
-        const matchCategory =
-            category === "전체" ||
-            q.category === category;
+        } catch (e) {
 
-        const matchLevel =
-            level === "전체" ||
-            q.level === level;
+            alert(e.message);
 
-        return (
-            matchKeyword &&
-            matchCategory &&
-            matchLevel
-        );
+        }
 
-    });
+    }
 
-    renderSearchResult(result);
+    function searchQuestions() {
 
-}
+        const keyword =
+            document.getElementById("searchQuestion")
+                .value
+                .trim()
+                .toLowerCase();
 
-function renderSearchResult(list) {
+        const category =
+            document.getElementById("filterCategory").value;
 
-    let html = "";
+        const level =
+            document.getElementById("filterLevel").value;
 
-    list.forEach(function (q) {
+        const result = questionCache.filter(function (q) {
 
-        html += `
+            const matchKeyword =
+                keyword === "" ||
+                q.question.toLowerCase().includes(keyword);
+
+            const matchCategory =
+                category === "전체" ||
+                q.category === category;
+
+            const matchLevel =
+                level === "전체" ||
+                q.level === level;
+
+            return (
+                matchKeyword &&
+                matchCategory &&
+                matchLevel
+            );
+
+        });
+
+        renderSearchResult(result);
+
+    }
+
+    function renderSearchResult(list) {
+
+        let html = "";
+
+        list.forEach(function (q) {
+
+            html += `
         <div class="questionBox">
 
             <h3>${q.question}</h3>
@@ -462,301 +483,301 @@ function renderSearchResult(list) {
         </div>
         `;
 
-    });
+        });
 
-    document.getElementById("questionList").innerHTML = html;
+        document.getElementById("questionList").innerHTML = html;
 
-    document.getElementById("pageInfo").innerText =
-        `${list.length}건 검색`;
-
-}
-
-function resetSearch() {
-
-    document.getElementById("searchQuestion").value = "";
-
-    document.getElementById("filterCategory").value = "전체";
-
-    document.getElementById("filterLevel").value = "전체";
-
-    currentPage = 1;
-
-    renderPage();
-
-}
-
-function uploadCSV() {
-
-    const file =
-        document.getElementById("csvFile").files[0];
-
-    if (!file) {
-
-        alert("CSV 파일을 선택하세요.");
-        return;
+        document.getElementById("pageInfo").innerText =
+            `${list.length}건 검색`;
 
     }
 
-    Papa.parse(file, {
+    function resetSearch() {
 
-        header: true,
-        skipEmptyLines: true,
+        document.getElementById("searchQuestion").value = "";
 
-        complete: async function(result) {
+        document.getElementById("filterCategory").value = "전체";
 
-            let count = 0;
+        document.getElementById("filterLevel").value = "전체";
 
-            for (const row of result.data) {
+        currentPage = 1;
 
-                
-const docRef =
+        renderPage();
 
-await db.collection("questions")
-.add({
+    }
 
-    question:
-    row.question,
+    function uploadCSV() {
 
+        const file =
+            document.getElementById("csvFile").files[0];
 
-    choices:[
+        if (!file) {
 
-        row.choice1,
-        row.choice2,
-        row.choice3,
-        row.choice4
+            alert("CSV 파일을 선택하세요.");
+            return;
 
-    ],
+        }
 
+        Papa.parse(file, {
 
-    answer:
-    Number(row.answer)-1,
+            header: true,
+            skipEmptyLines: true,
 
+            complete: async function (result) {
 
-    period:
-    row.period || "전체",
+                let count = 0;
 
-
-    category:
-    row.category || "기타",
+                for (const row of result.data) {
 
 
-    level:
-    row.level || "중",
+                    const docRef =
+
+                        await db.collection("questions")
+                            .add({
+
+                                question:
+                                    row.question,
 
 
-    type:
-    row.type || "예상",
+                                choices: [
+
+                                    row.choice1,
+                                    row.choice2,
+                                    row.choice3,
+                                    row.choice4
+
+                                ],
 
 
-    source:
-    row.source || "",
+                                answer:
+                                    Number(row.answer) - 1,
 
 
-    keywords:
-
-    row.keywords
-    ?
-    row.keywords
-    .split(",")
-    .map(k=>k.trim())
-
-    :
-    [],
+                                period:
+                                    row.period || "전체",
 
 
-
-    explanation:
-    row.explanation || "",
-
-
-    image:
-    row.image || "",
+                                category:
+                                    row.category || "기타",
 
 
-    created:
-
-    firebase.firestore.FieldValue.serverTimestamp()
-
-});
+                                level:
+                                    row.level || "중",
 
 
-// 문제 통계 초기 생성
+                                type:
+                                    row.type || "예상",
 
-await db.collection("questionStats")
-.doc(docRef.id)
-.set({
 
-    question:
-    row.question,
+                                source:
+                                    row.source || "",
 
-    category:
-    row.category,
 
-    total:0,
+                                keywords:
 
-    correct:0,
+                                    row.keywords
+                                        ?
+                                        row.keywords
+                                            .split(",")
+                                            .map(k => k.trim())
 
-    wrong:0
+                                        :
+                                        [],
 
-});
 
-                count++;
+
+                                explanation:
+                                    row.explanation || "",
+
+
+                                image:
+                                    row.image || "",
+
+
+                                created:
+
+                                    firebase.firestore.FieldValue.serverTimestamp()
+
+                            });
+
+
+                    // 문제 통계 초기 생성
+
+                    await db.collection("questionStats")
+                        .doc(docRef.id)
+                        .set({
+
+                            question:
+                                row.question,
+
+                            category:
+                                row.category,
+
+                            total: 0,
+
+                            correct: 0,
+
+                            wrong: 0
+
+                        });
+
+                    count++;
+
+                }
+
+                alert(count + "개 등록 완료");
+
+                loadQuestions();
+                loadDashboard();
 
             }
 
-            alert(count + "개 등록 완료");
-
-            loadQuestions();
-            loadDashboard();
-
-        }
-
-    });
-
-}
-
-async function downloadCSV() {
-
-    const snapshot =
-        await db.collection("questions").get();
-
-    let csv =
-"question,choice1,choice2,choice3,choice4,answer,category,level,explanation,image\n";
-
-    snapshot.forEach(function(doc){
-
-        const q = doc.data();
-
-        csv +=
-
-`"${q.question}","${q.choices[0]}","${q.choices[1]}","${q.choices[2]}","${q.choices[3]}",${q.answer+1},"${q.category}","${q.level}","${q.explanation||""}","${q.image||""}"\n`;
-
-    });
-
-    const blob = new Blob(
-
-        ["\uFEFF"+csv],
-
-        {
-
-            type:"text/csv;charset=utf-8;"
-
-        }
-
-    );
-
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-
-    a.href = url;
-
-    a.download = "questions.csv";
-
-    a.click();
-
-    URL.revokeObjectURL(url);
-
-}
-
-async function loadDashboard() {
-
-    // 문제 수
-    const questionSnap =
-        await db.collection("questions").get();
-
-    document.getElementById("totalQuestion").innerText =
-        questionSnap.size;
-
-    // 회원 수
-    const userSnap =
-        await db.collection("users").get();
-
-    document.getElementById("totalUser").innerText =
-        userSnap.size;
-
-    let examCount = 0;
-    let wrongCount = 0;
-
-    for (const user of userSnap.docs) {
-
-        const quizSnap =
-            await db.collection("users")
-            .doc(user.id)
-            .collection("quizHistory")
-            .get();
-
-        examCount += quizSnap.size;
-
-        quizSnap.forEach(function(doc){
-
-            wrongCount +=
-                doc.data().wrongCount || 0;
-
         });
 
     }
 
-    document.getElementById("totalExam").innerText =
-        examCount;
+    async function downloadCSV() {
 
-    document.getElementById("totalWrong").innerText =
-        wrongCount;
+        const snapshot =
+            await db.collection("questions").get();
 
-}
+        let csv =
+            "question,choice1,choice2,choice3,choice4,answer,category,level,explanation,image\n";
 
-async function uploadImage() {
+        snapshot.forEach(function (doc) {
 
-    const file =
-        document.getElementById("imageFile").files[0];
+            const q = doc.data();
 
-    if (!file) {
-        return document.getElementById("image").value || "";
-    }
+            csv +=
 
-    const fileName =
-        "history_images/" + Date.now() + "_" + file.name;
-
-    const storageRef = storage.ref(fileName);
-
-    await storageRef.put(file);
-
-    const url = await storageRef.getDownloadURL();
-
-    document.getElementById("image").value = url;
-
-    return url;
-}
-
-async function loadStatistics(){
-
-    const userSnap =
-        await db.collection("users").get();
-
-    let exam = 0;
-
-    let wrong = 0;
-
-    for(const user of userSnap.docs){
-
-        const quizSnap =
-            await db.collection("users")
-            .doc(user.id)
-            .collection("quizHistory")
-            .get();
-
-        exam += quizSnap.size;
-
-        quizSnap.forEach(function(doc){
-
-            wrong +=
-                doc.data().wrongCount || 0;
+                `"${q.question}","${q.choices[0]}","${q.choices[1]}","${q.choices[2]}","${q.choices[3]}",${q.answer + 1},"${q.category}","${q.level}","${q.explanation || ""}","${q.image || ""}"\n`;
 
         });
 
+        const blob = new Blob(
+
+            ["\uFEFF" + csv],
+
+            {
+
+                type: "text/csv;charset=utf-8;"
+
+            }
+
+        );
+
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+
+        a.href = url;
+
+        a.download = "questions.csv";
+
+        a.click();
+
+        URL.revokeObjectURL(url);
+
     }
 
-    document.getElementById("statistics").innerHTML = `
+    async function loadDashboard() {
+
+        // 문제 수
+        const questionSnap =
+            await db.collection("questions").get();
+
+        document.getElementById("totalQuestion").innerText =
+            questionSnap.size;
+
+        // 회원 수
+        const userSnap =
+            await db.collection("users").get();
+
+        document.getElementById("totalUser").innerText =
+            userSnap.size;
+
+        let examCount = 0;
+        let wrongCount = 0;
+
+        for (const user of userSnap.docs) {
+
+            const quizSnap =
+                await db.collection("users")
+                    .doc(user.id)
+                    .collection("quizHistory")
+                    .get();
+
+            examCount += quizSnap.size;
+
+            quizSnap.forEach(function (doc) {
+
+                wrongCount +=
+                    doc.data().wrongCount || 0;
+
+            });
+
+        }
+
+        document.getElementById("totalExam").innerText =
+            examCount;
+
+        document.getElementById("totalWrong").innerText =
+            wrongCount;
+
+    }
+
+    async function uploadImage() {
+
+        const file =
+            document.getElementById("imageFile").files[0];
+
+        if (!file) {
+            return document.getElementById("image").value || "";
+        }
+
+        const fileName =
+            "history_images/" + Date.now() + "_" + file.name;
+
+        const storageRef = storage.ref(fileName);
+
+        await storageRef.put(file);
+
+        const url = await storageRef.getDownloadURL();
+
+        document.getElementById("image").value = url;
+
+        return url;
+    }
+
+    async function loadStatistics() {
+
+        const userSnap =
+            await db.collection("users").get();
+
+        let exam = 0;
+
+        let wrong = 0;
+
+        for (const user of userSnap.docs) {
+
+            const quizSnap =
+                await db.collection("users")
+                    .doc(user.id)
+                    .collection("quizHistory")
+                    .get();
+
+            exam += quizSnap.size;
+
+            quizSnap.forEach(function (doc) {
+
+                wrong +=
+                    doc.data().wrongCount || 0;
+
+            });
+
+        }
+
+        document.getElementById("statistics").innerHTML = `
 
         <p>회원 수 : ${userSnap.size}명</p>
 
@@ -770,89 +791,89 @@ async function loadStatistics(){
 
     `;
 
-}
+    }
 
-// 문제 분석
+    // 문제 분석
 
-document.getElementById("analysisBtn")
-.onclick = loadQuestionAnalysis;
-
-
-
-async function loadQuestionAnalysis(){
-
-
-    const snapshot =
-    await db.collection("questionStats")
-    .get();
+    document.getElementById("analysisBtn")
+        .onclick = loadQuestionAnalysis;
 
 
 
-    let list = [];
+    async function loadQuestionAnalysis() {
+
+
+        const snapshot =
+            await db.collection("questionStats")
+                .get();
 
 
 
-    snapshot.forEach(function(doc){
-
-
-        const q = doc.data();
+        let list = [];
 
 
 
-        const wrongRate =
+        snapshot.forEach(function (doc) {
 
-        q.total > 0
 
-        ?
-
-        Math.round(
-            q.wrong / q.total * 100
-        )
-
-        :
-
-        0;
+            const q = doc.data();
 
 
 
-        list.push({
+            const wrongRate =
 
-            question:
-            q.question,
+                q.total > 0
 
+                    ?
 
-            category:
-            q.category,
+                    Math.round(
+                        q.wrong / q.total * 100
+                    )
 
+                    :
 
-            total:
-            q.total,
-
-
-            wrong:
-            q.wrong,
+                    0;
 
 
-            wrongRate:
-            wrongRate
+
+            list.push({
+
+                question:
+                    q.question,
+
+
+                category:
+                    q.category,
+
+
+                total:
+                    q.total,
+
+
+                wrong:
+                    q.wrong,
+
+
+                wrongRate:
+                    wrongRate
+
+            });
+
+
 
         });
 
 
 
-    });
+        list.sort(function (a, b) {
+
+            return b.wrongRate - a.wrongRate;
+
+        });
 
 
 
-    list.sort(function(a,b){
-
-        return b.wrongRate - a.wrongRate;
-
-    });
-
-
-
-    let html = `
+        let html = `
 
     <h3>
     오답률 TOP 10
@@ -862,17 +883,17 @@ async function loadQuestionAnalysis(){
 
 
 
-    list.slice(0,10)
-    .forEach(function(q,index){
+        list.slice(0, 10)
+            .forEach(function (q, index) {
 
 
-        html += `
+                html += `
 
         <div class="questionBox">
 
 
         <h4>
-        ${index+1}위.
+        ${index + 1}위.
         ${q.question}
         </h4>
 
@@ -901,79 +922,79 @@ async function loadQuestionAnalysis(){
         `;
 
 
-    });
+            });
 
 
 
-    document.getElementById(
-    "analysisResult"
-    )
-    .innerHTML = html;
-
-
-};
-
-
-async function loadPeriodAnalysis(){
-
-    const snapshot =
-    await db.collection("questionStats").get();
-
-
-    const result={};
-
-
-    snapshot.forEach(function(doc){
-
-        const q=doc.data();
-
-        const period =
-        q.period || "기타";
-
-
-        if(!result[period]){
-
-            result[period]={
-                total:0,
-                wrong:0
-            };
-
-        }
-
-
-        result[period].total += q.total || 0;
-
-        result[period].wrong += q.wrong || 0;
-
-
-    });
-
-
-
-    let html="<h3>시대별 오답률</h3>";
-
-
-    Object.keys(result).forEach(function(key){
-
-
-        const rate =
-
-        result[key].total>0
-
-        ?
-
-        Math.round(
-            result[key].wrong /
-            result[key].total *
-            100
+        document.getElementById(
+            "analysisResult"
         )
-
-        :
-
-        0;
+            .innerHTML = html;
 
 
-        html += `
+    };
+
+
+    async function loadPeriodAnalysis() {
+
+        const snapshot =
+            await db.collection("questionStats").get();
+
+
+        const result = {};
+
+
+        snapshot.forEach(function (doc) {
+
+            const q = doc.data();
+
+            const period =
+                q.period || "기타";
+
+
+            if (!result[period]) {
+
+                result[period] = {
+                    total: 0,
+                    wrong: 0
+                };
+
+            }
+
+
+            result[period].total += q.total || 0;
+
+            result[period].wrong += q.wrong || 0;
+
+
+        });
+
+
+
+        let html = "<h3>시대별 오답률</h3>";
+
+
+        Object.keys(result).forEach(function (key) {
+
+
+            const rate =
+
+                result[key].total > 0
+
+                    ?
+
+                    Math.round(
+                        result[key].wrong /
+                        result[key].total *
+                        100
+                    )
+
+                    :
+
+                    0;
+
+
+            html += `
 
         <p>
         ${key} :
@@ -983,15 +1004,15 @@ async function loadPeriodAnalysis(){
         `;
 
 
-    });
+        });
 
 
-    document.getElementById(
-        "analysisResult"
-    ).innerHTML += html;
+        document.getElementById(
+            "analysisResult"
+        ).innerHTML += html;
 
 
-}
+    }
 
 /*
 auth.onAuthStateChanged(async function(user){
