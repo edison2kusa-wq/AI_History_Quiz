@@ -54,7 +54,7 @@ function increment(num = 1) {
 }
 
 // 현재 로그인 사용자
-function currentUser() {
+function getCurrentUser() {
     return auth.currentUser;
 }
 
