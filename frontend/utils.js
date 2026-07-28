@@ -12,8 +12,12 @@ function $(id) {
 }
 
 function show(id) {
+
     const el = $(id);
-    if (el) el.style.display = "block";
+
+    if (el)
+        el.style.display = "";
+
 }
 
 function hide(id) {

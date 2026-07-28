@@ -923,3 +923,17 @@ if ($("myHistoryBtn")) {
         loadMyHistory;
 
 }
+
+// ===========================================
+// Quiz 시작
+// ===========================================
+
+document.addEventListener(
+"DOMContentLoaded",
+function(){
+
+    console.log("quiz 초기화");
+
+    initQuiz();
+
+});
