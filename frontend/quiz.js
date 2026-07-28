@@ -518,52 +518,6 @@ async function saveQuestionResult(q, selected){
 }
 
 // ===========================================
-// 오답 저장
-// ===========================================
-
-async function saveWrongAnswer(q, selected){
-
-    if(selected === q.answer) return;
-
-    const user = auth.currentUser;
-
-    if(!user) return;
-
-    await db.collection("users")
-
-    .doc(user.uid)
-
-    .collection("wrongAnswers")
-
-    .doc(q.id)
-
-    .set({
-
-        question : q.question,
-
-        choices : q.choices,
-
-        answer : q.answer,
-
-        explanation : q.explanation,
-
-        category : q.category,
-
-        period : q.period,
-
-        level : q.level,
-
-        image : q.image,
-
-        created :
-
-        firebase.firestore.FieldValue.serverTimestamp()
-
-    });
-
-}
-
-// ===========================================
 // 즐겨찾기
 // ===========================================
 
@@ -678,20 +632,33 @@ async function saveQuizHistory() {
 
         .add({
 
-            score: score,
+score: score,
 
-            total: quizList.length,
+total: quizList.length,
 
-            percent:
-                Math.round(score / quizList.length * 100),
+percent:
+Math.round(score / quizList.length * 100),
 
-            wrongCount:
-                wrongAnswers.length,
+wrongCount:
+wrongAnswers.length,
 
-            created:
-                firebase.firestore.FieldValue.serverTimestamp()
 
-        });
+period:
+$("periodSelect").value,
+
+
+category:
+$("categorySelect").value,
+
+
+level:
+$("levelSelect").value,
+
+
+created:
+firebase.firestore.FieldValue.serverTimestamp()
+
+});
 
 }
 

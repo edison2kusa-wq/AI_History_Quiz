@@ -136,48 +136,7 @@ function renderReport(){
         </p>
 
         `;
-        const weak =
-getWeakArea();
-
-
-let weakHTML =
-
-`
-
-<h3>
-🎯 취약 분야
-</h3>
-
-`;
-
-
-
-weak.forEach(function(item,index){
-
-
-weakHTML +=
-
-`
-
-<p>
-
-${index+1}위 :
-
-${item.name}
-
-(${item.score}%)
-
-</p>
-
-`;
-
-
-});
-
-
-
-box.innerHTML += weakHTML;
-drawReportCharts();
+        
         return;
 
     }
@@ -305,7 +264,7 @@ drawReportCharts();
 
     `;
 
-
+    drawReportCharts();
 }
 
 // =====================================
@@ -566,7 +525,7 @@ function drawScoreTrend(){
     const canvas =
 
     document.getElementById(
-        "reportScoreChart"
+        "scoreChart"
     );
 
 
@@ -712,7 +671,7 @@ function drawPeriodChart(){
     const canvas =
 
     document.getElementById(
-        "periodReportChart"
+       "correctWrongChart"
     );
 
 
@@ -833,7 +792,7 @@ function drawCategoryReportChart(){
     const canvas =
 
     document.getElementById(
-        "categoryReportChart"
+        "categoryChart"
     );
 
 
@@ -939,3 +898,30 @@ function drawCategoryReportChart(){
 
 
 }
+
+// =====================================
+// Report 초기화
+// =====================================
+
+document.addEventListener(
+"DOMContentLoaded",
+function(){
+
+    console.log("report 초기화");
+
+
+    const btn =
+    document.getElementById(
+        "reportBtn"
+    );
+
+
+    if(btn){
+
+        btn.onclick =
+        loadReport;
+
+    }
+
+
+});

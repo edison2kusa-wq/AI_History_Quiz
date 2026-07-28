@@ -635,3 +635,27 @@ function analyzeWrongCategory(){
 
 
 }
+
+// =====================================
+// Wrong Note 초기화
+// =====================================
+
+document.addEventListener(
+"DOMContentLoaded",
+function(){
+
+    console.log("wrongnote 초기화");
+
+    const btn =
+    document.getElementById(
+        "wrongNoteBtn"
+    );
+
+    if(btn){
+
+        btn.onclick =
+        loadWrongNote;
+
+    }
+
+});

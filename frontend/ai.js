@@ -156,7 +156,21 @@ candidates.slice(0,20);
 
 
         wrongAnswers=[];
+        userAnswers =
+new Array(
+quizList.length
+)
+.fill(null);
 
+
+timeLeft =
+quizList.length * 60;
+
+
+startTimer();
+
+
+buildQuestionNav();
 
 
         document
@@ -181,9 +195,9 @@ candidates.slice(0,20);
 
         showQuestion();
 
-        showAIResult();
-
         saveAIRecommend();
+
+        showAIResult();
 
 
     }
@@ -516,10 +530,9 @@ function showAIResult(){
 
 
     const box =
-
-    document.getElementById(
-        "reportBox"
-    );
+document.getElementById(
+"aiResultBox"
+);
 
 
 
@@ -706,3 +719,31 @@ function getAIReason(){
 
 
 }
+
+// =====================================
+// AI 추천 버튼 연결
+// =====================================
+
+document.addEventListener(
+"DOMContentLoaded",
+function(){
+
+    console.log("AI 추천 초기화");
+
+
+    const btn =
+    document.getElementById(
+        "aiRecommendBtn"
+    );
+
+
+    if(btn){
+
+        btn.onclick =
+        startAIRecommend;
+
+    }
+
+
+});
+
