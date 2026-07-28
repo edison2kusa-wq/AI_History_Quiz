@@ -414,11 +414,6 @@ else{
 
     wrongAnswers.push(q);
 
-    saveWrongAnswer(
-        q,
-        selected
-    );
-
 }
 
     `
@@ -664,8 +659,6 @@ solveCount:0,
 
 correctCount:0,
 
-wrongCount:0,
-
 updated:
 firebase.firestore.FieldValue.serverTimestamp()
 
@@ -687,13 +680,7 @@ function showReport() {
         Math.round(score / quizList.length * 100);
 
     $("reportBox").innerHTML =
-    if(typeof showAIResult === "function"){
-
-    showAIResult();
-
-}
-
-        `
+       `
 <h2>시험 결과</h2>
 
 <p>
