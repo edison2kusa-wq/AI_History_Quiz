@@ -14,22 +14,35 @@ let editDocId = null;
 window.onload = function () {
 
     console.log("admin.js 로드 완료");
-    document.getElementById("periodAnalysisBtn").onclick = loadPeriodAnalysis;
-    document.getElementById("adminLoginBtn").onclick = adminLogin;
-    document.getElementById("saveBtn").onclick = saveQuestion;
-    document.getElementById("searchBtn").onclick = searchQuestions;
-    document.getElementById("resetBtn").onclick = resetSearch;
-    document.getElementById("uploadCsvBtn").onclick = uploadCSV;
-    document.getElementById("downloadCsvBtn").onclick = downloadCSV;
-    document.getElementById("prevPageBtn").onclick=function(){
 
-    if(currentPage>1){
 
-        currentPage--;
+    if(document.getElementById("periodAnalysisBtn"))
+        document.getElementById("periodAnalysisBtn").onclick = loadPeriodAnalysis;
 
-        renderPage();
 
-    }
+    if(document.getElementById("adminLoginBtn"))
+        document.getElementById("adminLoginBtn").onclick = adminLogin;
+
+
+    if(document.getElementById("saveBtn"))
+        document.getElementById("saveBtn").onclick = saveQuestion;
+
+
+    if(document.getElementById("searchBtn"))
+        document.getElementById("searchBtn").onclick = searchQuestions;
+
+
+    if(document.getElementById("resetBtn"))
+        document.getElementById("resetBtn").onclick = resetSearch;
+
+
+    if(document.getElementById("uploadCsvBtn"))
+        document.getElementById("uploadCsvBtn").onclick = uploadCSV;
+
+
+    if(document.getElementById("downloadCsvBtn"))
+        document.getElementById("downloadCsvBtn").onclick = downloadCSV;
+
 
 };
 
