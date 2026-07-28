@@ -191,66 +191,83 @@ async function saveQuestion(){
 
     const imageUrl = await uploadImage();
 
-
-    const data={
+    const data = {
 
         question:
         document.getElementById("question").value,
 
+
         choices:[
 
-            choice1.value,
-            choice2.value,
-            choice3.value,
-            choice4.value
+            document.getElementById("choice1").value,
+            document.getElementById("choice2").value,
+            document.getElementById("choice3").value,
+            document.getElementById("choice4").value
 
         ],
 
+
         answer:
-        Number(answer.value),
+        Number(document.getElementById("answer").value),
+
 
         period:
-        period.value,
+        document.getElementById("period").value,
+
 
         category:
-        category.value,
+        document.getElementById("category").value,
+
 
         level:
-        level.value,
+        document.getElementById("level").value,
+
 
         type:
-        type.value,
+        document.getElementById("type").value,
+
 
         source:
-        source.value,
+        document.getElementById("source").value,
+
 
         keywords:
-        keywords.value.split(",")
+        document.getElementById("keywords").value
+        .split(",")
         .map(k=>k.trim()),
 
+
         explanation:
-        explanation.value,
+        document.getElementById("explanation").value,
+
 
         image:
         imageUrl,
 
+
+        // AI 분석용 데이터
+        difficultyScore:70,
+
+        viewCount:0,
+
+        solveCount:0,
+
+        correctCount:0,
+
+        wrongCount:0,
+
+
+        createdBy:
+        auth.currentUser.uid,
+
+
         created:
+        firebase.firestore.FieldValue.serverTimestamp(),
+
+
+        updated:
         firebase.firestore.FieldValue.serverTimestamp()
-       difficultyScore:70,
 
-viewCount:0,
-
-solveCount:0,
-
-correctCount:0,
-
-wrongCount:0,
-
-createdBy:
-auth.currentUser.uid,
-
-updated:
-firebase.firestore.FieldValue.serverTimestamp()
     };
 
 
@@ -259,16 +276,12 @@ firebase.firestore.FieldValue.serverTimestamp()
 
         if(editDocId){
 
-
             await db.collection("questions")
             .doc(editDocId)
             .update(data);
 
 
-            alert(
-            "문제가 수정되었습니다."
-            );
-
+            alert("문제가 수정되었습니다.");
 
             editDocId=null;
 
@@ -280,10 +293,7 @@ firebase.firestore.FieldValue.serverTimestamp()
             .add(data);
 
 
-            alert(
-            "문제가 등록되었습니다."
-            );
-
+            alert("문제가 등록되었습니다.");
 
         }
 
@@ -294,17 +304,15 @@ firebase.firestore.FieldValue.serverTimestamp()
 
 
     }
-
     catch(e){
 
         console.error(e);
 
         alert(
-        "저장 오류 : "+e.message
+            "저장 오류 : "+e.message
         );
 
     }
-
 
 }
 
