@@ -62,25 +62,47 @@ async function startAIRecommend(){
 
             const q = doc.data();
 
-
-            q.id =
-            doc.id;
+q.id = doc.id;
 
 
-
-            if(
-
-            !weakCategory ||
-
-            q.category===weakCategory
-
-            ){
+// 문제 통계 가져오기
+const statDoc = await db
+.collection("questionStats")
+.doc(doc.id)
+.get();
 
 
-                candidates.push(q);
+if(statDoc.exists){
+
+    const stat = statDoc.data();
+
+    q.solveCount =
+    stat.total || 0;
 
 
-            }
+    q.wrongCount =
+    stat.wrong || 0;
+
+
+}
+else{
+
+    q.solveCount=0;
+
+    q.wrongCount=0;
+
+}
+
+
+
+if(
+!weakCategory ||
+q.category===weakCategory
+){
+
+    candidates.push(q);
+
+}
 
 
         });
@@ -538,7 +560,7 @@ function calculateAIWeight(q, weakCategory, level){
 // 추천 결과 메시지
 // =====================================
 
-function showAIResult(){
+async function showAIResult(){
 
     const box =
     document.getElementById(
@@ -549,8 +571,21 @@ function showAIResult(){
     if(!box) return;
 
 
+   let weak=[];
+
+
+if(typeof getWeakArea === "function"){
+
+    let weak=[];
+
+if(typeof getWeakArea==="function"){
+
     const weak =
-    getWeakArea();
+await getWeakArea();
+
+}
+
+}
 
 
     let weakHtml="";
@@ -636,13 +671,75 @@ function showAIResult(){
     <p>
     ${aiQuizList.length}문제 생성
     </p>
+   <h4>
+📌 추천 문제 분석
+</h4>
+
+
+${
+aiQuizList.slice(0,5)
+
+.map(function(q,index){
+
+    const reasons =
+    getQuestionAIReason(q);
+
+
+    return `
+
+    <div class="questionBox">
+
+    <b>
+    ${index+1}번 문제
+    </b>
+
+    <p>
+    ${q.question}
+    </p>
+
+
+    <p>
+    🤖 AI 추천 점수 :
+    ${
+    calculateAIWeight(
+        q,
+        "",
+        ""
+    )
+    }
+    점
+    </p>
+
+
+    <ul>
+
+    ${
+    reasons.map(function(r){
+
+        return `
+        <li>
+        ${r}
+        </li>
+        `;
+
+    }).join("")
+
+    }
+
+    </ul>
 
 
     </div>
 
-
     `;
 
+
+}).join("")
+
+}
+    </div>
+
+    `;
 
 }
 
@@ -786,6 +883,67 @@ function getAIReason(){
 
 }
 
+//
+function getQuestionAIReason(q){
+
+    let reason=[];
+
+
+    if(q.wrongCount > 0){
+
+        reason.push(
+            "전체 오답률 높은 문제"
+        );
+
+    }
+
+
+    if(q.solveCount > 0){
+
+        const rate =
+
+        Math.round(
+            q.wrongCount /
+            q.solveCount *
+            100
+        );
+
+
+        reason.push(
+            "전체 오답률 "
+            + rate
+            + "%"
+        );
+
+    }
+
+
+    if(q.category){
+
+        reason.push(
+            q.category
+            +
+            " 분야 학습"
+        );
+
+    }
+
+
+    if(q.level){
+
+        reason.push(
+            "난이도 : "
+            +
+            q.level
+        );
+
+    }
+
+
+    return reason;
+
+}
+
 // =====================================
 // AI 추천 버튼 연결
 // =====================================
@@ -813,3 +971,114 @@ function(){
 
 });
 
+function getQuestionAIReason(q){
+
+    let reason=[];
+
+
+    if(q.wrongCount){
+
+        reason.push(
+        "전체 오답률 높은 문제"
+        );
+
+    }
+
+
+    if(q.solveCount){
+
+        const rate =
+        Math.round(
+            q.wrongCount /
+            q.solveCount *
+            100
+        );
+
+
+        reason.push(
+        "전체 오답률 "
+        + rate
+        + "%"
+        );
+
+    }
+
+
+    if(q.category){
+
+        reason.push(
+        q.category+" 분야 학습"
+        );
+
+    }
+
+
+    if(q.level){
+
+        reason.push(
+        "난이도 : "+q.level
+        );
+
+    }
+
+
+    return reason;
+
+}
+
+function createAICoachingReport(){
+
+    const total =
+    quizList.length;
+
+
+    const rate =
+    Math.round(
+        score /
+        total *
+        100
+    );
+
+
+    let message="";
+
+
+    if(rate>=90){
+
+        message=
+        "최상위 수준입니다. 고난도 문제와 사료 분석 문제를 추천합니다.";
+
+    }
+
+    else if(rate>=70){
+
+        message=
+        "기본 개념은 안정적입니다. 취약 시대 반복 학습이 필요합니다.";
+
+    }
+
+    else{
+
+        message=
+        "기초 개념 복습 후 시대별 학습을 권장합니다.";
+
+    }
+
+
+
+    return {
+
+
+        score:rate,
+
+
+        message:message,
+
+
+        weak:getWeakArea()
+
+
+    };
+
+
+}

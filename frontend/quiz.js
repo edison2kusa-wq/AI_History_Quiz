@@ -414,10 +414,12 @@ else{
 
     wrongAnswers.push(q);
 
-}
+    saveWrongAnswer(
+        q,
+        selected
+    );
 
-    // 결과 출력
-    $("result").innerHTML =
+}
 
     `
     <h3>
@@ -436,8 +438,11 @@ else{
     // 통계 저장
     saveQuestionResult(q, selected);
 
-    // 오답 저장
+    if(selected !== q.answer){
+
     saveWrongAnswer(q, selected);
+
+}
 
     // 즐겨찾기 버튼
     show("bookmarkBtn");
@@ -682,6 +687,11 @@ function showReport() {
         Math.round(score / quizList.length * 100);
 
     $("reportBox").innerHTML =
+    if(typeof showAIResult === "function"){
+
+    showAIResult();
+
+}
 
         `
 <h2>시험 결과</h2>
@@ -705,6 +715,13 @@ ${wrongAnswers.length}문제
 `;
 
     drawChart();
+
+
+if(typeof showAIResult === "function"){
+
+    showAIResult();
+
+}
 
 }
 
@@ -910,3 +927,69 @@ function(){
     initQuiz();
 
 });
+
+// ===========================================
+// 오답 저장
+// ===========================================
+
+async function saveWrongAnswer(q, selected){
+
+
+    const user = auth.currentUser;
+
+
+    if(!user) return;
+
+
+    await db.collection("users")
+
+    .doc(user.uid)
+
+    .collection("wrongAnswers")
+
+    .add({
+
+        questionId:
+        q.id,
+
+
+        question:
+        q.question,
+
+
+        choices:
+        q.choices,
+
+
+        answer:
+        q.answer,
+
+
+        selected:
+        selected,
+
+
+        category:
+        q.category || "",
+
+
+        period:
+        q.period || "",
+
+
+        level:
+        q.level || "",
+
+
+        explanation:
+        q.explanation || "",
+
+
+        created:
+        firebase.firestore.FieldValue.serverTimestamp()
+
+
+    });
+
+
+}
