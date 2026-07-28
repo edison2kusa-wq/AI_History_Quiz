@@ -45,6 +45,12 @@ console.log("db 확인:", typeof db);
     if (document.getElementById("downloadCsvBtn"))
         document.getElementById("downloadCsvBtn").onclick = downloadCSV;
 
+    if(document.getElementById("analysisBtn")){
+
+document.getElementById("analysisBtn")
+.onclick = loadQuestionAnalysis;
+
+}
 
     if (document.getElementById("prevPageBtn"))
         document.getElementById("prevPageBtn").onclick=function(){
@@ -867,11 +873,6 @@ document.getElementById(
 
     // 문제 분석
 
-    document.getElementById("analysisBtn")
-        .onclick = loadQuestionAnalysis;
-
-
-
     async function loadQuestionAnalysis() {
 
 
@@ -1133,3 +1134,7 @@ auth.onAuthStateChanged(async function(user){
 
 });
 */
+window.editQuestion = editQuestion;
+window.deleteQuestion = deleteQuestion;
+window.loadQuestionAnalysis = loadQuestionAnalysis;
+window.loadPeriodAnalysis = loadPeriodAnalysis;
