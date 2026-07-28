@@ -806,10 +806,16 @@ document.getElementById(
 
     async function uploadImage() {
 
-    const url =
-        document.getElementById("image").value.trim();
+    const image =
+        document.getElementById("image");
 
-    return url;
+    if (!image) {
+
+        return "";
+
+    }
+
+    return image.value.trim();
 
 }
 
