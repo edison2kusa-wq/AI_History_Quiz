@@ -271,18 +271,9 @@ async function saveQuestion(){
         created:
         firebase.firestore.FieldValue.serverTimestamp(),
 
-difficultyScore:70,
 
-viewCount:0,
-
-solveCount:0,
-
-correctCount:0,
-
-wrongCount:0,
-
-updated:
-firebase.firestore.FieldValue.serverTimestamp()
+        updated:
+        firebase.firestore.FieldValue.serverTimestamp()
 
     };
 
