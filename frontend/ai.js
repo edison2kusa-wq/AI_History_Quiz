@@ -470,60 +470,67 @@ async function analyzeUserLevel(){
 
 function calculateAIWeight(q, weakCategory, level){
 
+    let weight = 0;
 
-    let weight=0;
 
-    // 많이 틀린 문제 우선
-if(q.wrongCount){
-
-    weight += q.wrongCount * 5;
-
-}
-
-    // 취약 분야
-
-    if(
-        q.category===weakCategory
-    ){
+    // 1. 개인 취약 분야
+    if(q.category === weakCategory){
 
         weight += 50;
 
     }
 
 
+    // 2. 사용자 수준 맞춤
+    if(q.level === level){
 
-    // 난이도 일치
-
-    if(
-        q.level===level
-    ){
-
-        weight +=30;
+        weight += 30;
 
     }
 
 
-
-    // 오답 경험 문제
-
+    // 3. 내가 틀린 문제
     if(
-        wrongAnswers.some(
-            function(w){
+        wrongAnswers.some(function(w){
 
-                return w.id===q.id;
+            return w.id === q.id;
 
-            }
-        )
+        })
     ){
 
-        weight +=100;
+        weight += 100;
 
     }
 
+
+    // 4. 전체 사용자 오답률 반영
+    if(q.wrongCount){
+
+        weight += q.wrongCount * 5;
+
+    }
+
+
+    // 5. 많이 출제된 문제 우선
+    if(q.solveCount){
+
+        weight += Math.min(
+            q.solveCount,
+            20
+        );
+
+    }
+
+
+    // 6. 오래 안 푼 문제 보정
+    if(q.updated){
+
+        weight += 5;
+
+    }
 
 
     return weight;
-
 
 }
 
@@ -533,15 +540,56 @@ if(q.wrongCount){
 
 function showAIResult(){
 
-
     const box =
-document.getElementById(
-"aiResultBox"
-);
-
+    document.getElementById(
+        "reportBox"
+    );
 
 
     if(!box) return;
+
+
+    const weak =
+    getWeakArea();
+
+
+    let weakHtml="";
+
+
+    weak.forEach(function(item,index){
+
+        weakHtml +=
+
+        `
+        <p>
+        ${index+1}순위 :
+        ${item.name}
+        (${item.score}%)
+        </p>
+        `;
+
+    });
+
+
+
+    const reason = getAIReason();
+
+
+
+    let reasonHtml="";
+
+
+    reason.text.forEach(function(item){
+
+        reasonHtml +=
+
+        `
+        <li>
+        ${item}
+        </li>
+        `;
+
+    });
 
 
 
@@ -554,26 +602,39 @@ document.getElementById(
 
 
     <h3>
-    🤖 AI 추천 시험 생성 완료
+    🤖 AI 학습 분석 완료
     </h3>
 
 
+    <h4>
+    📌 취약 분야
+    </h4>
+
+
+    ${weakHtml}
+
+
+
+    <h4>
+    🎯 추천 기준
+    </h4>
+
+
+    <ul>
+
+    ${reasonHtml}
+
+    </ul>
+
+
+
+    <h4>
+    📝 추천 문제
+    </h4>
+
+
     <p>
-
-    학습 데이터를 분석하여
-
-    취약 분야 중심으로
-
-    문제를 구성했습니다.
-
-    </p>
-
-
-    <p>
-
-    추천 문제 :
-    ${aiQuizList.length}개
-
+    ${aiQuizList.length}문제 생성
     </p>
 
 
