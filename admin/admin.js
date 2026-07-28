@@ -4,9 +4,6 @@
 // ===============================
 
 // 전역 변수
-const db = firebase.firestore();
-const auth = firebase.auth();
-const storage = firebase.storage();
 let currentPage = 1;
 const pageSize = 20;
 
