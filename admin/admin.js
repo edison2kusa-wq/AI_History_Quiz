@@ -58,27 +58,7 @@ window.onload = function () {
 
         }
 
-    };
-
-
-    if(document.getElementById("nextPageBtn"))
-    document.getElementById("nextPageBtn").onclick=function(){
-
-        const totalPage =
-        Math.ceil(questionCache.length/pageSize);
-
-
-        if(currentPage<totalPage){
-
-            currentPage++;
-
-            renderPage();
-
-        }
-
-    };
-
-};
+    };    
 
 async function adminLogin() {
 
