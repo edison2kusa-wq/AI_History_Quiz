@@ -1,5 +1,21 @@
 // console.log(db);
+const examRule = {
 
+    "선사":5,
+
+    "고대":7,
+
+    "고려":7,
+
+    "조선":15,
+
+    "개항기":5,
+
+    "일제강점기":6,
+
+    "현대":5
+
+};
 let quizList = [];
 let currentQuestion = 0;
 let score = 0;
@@ -22,88 +38,75 @@ document.getElementById("quizScreen");
 async function getAllQuestions(){
 
 
-    const savedQuestions =
-    JSON.parse(
-        localStorage.getItem("questions")
-    ) || [];
+let firestoreQuestions=[];
+
+
+try{
+
+
+const snapshot =
+await db.collection("questions").get();
 
 
 
-    let firestoreQuestions = [];
+snapshot.forEach(function(doc){
+
+
+let q = doc.data();
+
+
+q.id = doc.id;
 
 
 
-    try{
+firestoreQuestions.push({
+
+id:q.id,
+
+question:q.question,
+
+choices:q.choices,
+
+answer:Number(q.answer),
+
+category:q.category || "전체",
+
+period:q.period || "전체",
+
+level:q.level || "중",
+
+explanation:q.explanation || "",
+
+image:q.image || ""
+
+});
 
 
-        const snapshot =
-        await db.collection("questions")
-        .get();
-
-
-
-        snapshot.forEach(function(doc){
-
-
-            const q = doc.data();
-
-            q.id = doc.id;
-
-
-
-            if(q.question){
-
-                firestoreQuestions.push(q);
-
-            }
-
-
-        });
-
-
-        console.log(
-            "Firebase 문제:",
-            firestoreQuestions.length
-        );
-
-
-    }
-
-    catch(error){
-
-        console.log(
-            "Firestore 문제 불러오기 오류",
-            error
-        );
-
-    }
-
-
-
-    const allQuestions = [
-
-        ...(typeof questions !== "undefined" ? questions : []),
-
-        ...firestoreQuestions,
-
-        ...savedQuestions
-
-    ];
-
-
-
-    console.log(
-        "전체 문제 수:",
-        allQuestions.length
-    );
-
-
-
-    return allQuestions;
+});
 
 
 }
+catch(error){
 
+console.log(
+"Firebase 불러오기 오류",
+error
+);
+
+}
+
+
+
+return [
+
+...questions,
+
+...firestoreQuestions
+
+];
+
+
+}
 
 const MAX_QUESTIONS = 10;
 // 문제 섞기
@@ -255,7 +258,68 @@ quizList = allQuestions.filter(function(q){
 
 
 };
+function createHistoryExam(allQuestions){
 
+
+let exam=[];
+
+
+
+Object.keys(examRule)
+.forEach(function(period){
+
+
+let list =
+allQuestions.filter(
+q=>q.period===period
+);
+
+
+shuffle(list);
+
+
+exam.push(
+...list.slice(
+0,
+examRule[period]
+)
+);
+
+
+});
+
+
+
+if(exam.length < 50){
+
+
+let remain =
+allQuestions.filter(
+q=>!exam.includes(q)
+);
+
+
+shuffle(remain);
+
+
+exam.push(
+...remain.slice(
+0,
+50-exam.length
+)
+);
+
+
+}
+
+
+
+shuffle(exam);
+
+
+return exam;
+
+}
 function createQuestionNav(){
 
     const nav =
@@ -470,6 +534,30 @@ if(timerBox){
     `⏰ 남은시간 : ${min}:${sec}`;
 
 }
+// 문제 이미지 표시
+
+const img =
+document.getElementById("questionImage");
+
+
+if(q.image && q.image !== ""){
+
+
+    img.src = q.image;
+
+    img.style.display="block";
+
+
+}else{
+
+
+    img.src="";
+
+    img.style.display="none";
+
+
+}
+
 
 // 정답 확인
 function checkAnswer(selected){
@@ -1134,7 +1222,7 @@ document.getElementById("historyBtn").onclick=function(){
 document.getElementById("weakBtn").onclick = async function(){
 
     const user = auth.currentUser;
-
+    loadWeakAnalysis();
 
     if(!user){
 
@@ -1321,7 +1409,13 @@ document.querySelectorAll(".category")
 
 
 
-        const allQuestions = await getAllQuestions();
+        const all =
+await getAllQuestions();
+
+
+
+quizList =
+createHistoryExam(all);
 
 quizList = allQuestions.filter(function(q){
     return q.category === category;
@@ -1853,14 +1947,21 @@ document.getElementById("submitBtn").onclick = function(){
 userAnswers[index] === q.answer;
 
 
-if(correct){
+if(selected === q.answer){
+
 
     score++;
 
-}
-else{
+
+}else{
+
 
     wrongAnswers.push(q);
+
+
+
+    saveWrongAnswer(q);
+
 
 }
 
@@ -1933,10 +2034,37 @@ choices:q.choices,
 
 answer:q.answer,
 
+category:q.category,
+
+period:q.period,
+
+level:q.level,
+
 explanation:q.explanation
 
 });
+quizList = recommendList;
 
+
+currentQuestion = 0;
+
+score = 0;
+
+wrongAnswers = [];
+
+userAnswers =
+Array(quizList.length).fill(null);
+
+
+document.getElementById("mainMenu")
+.style.display="none";
+
+
+document.getElementById("quizScreen")
+.style.display="block";
+
+
+showQuestion();
 
 });
 
@@ -1997,7 +2125,7 @@ showQuestion();
 document.getElementById("reportBtn")
 .onclick=function(){
 
-
+loadReport();
 const history =
 
 JSON.parse(
@@ -2258,72 +2386,64 @@ alert("관리자 권한 없음");
 
 };
 
-
-
 // 문제 저장
 
 document.getElementById("saveQuestionBtn")
 .onclick=function(){
 
 
+const newQuestion = {
 
-let newQuestion={
-
-
-question:
-
-document.getElementById("adminQuestion").value,
+    question:
+    document.getElementById("adminQuestion").value,
 
 
-choices:[
+    choices:[
 
-document.getElementById("choice1").value,
+        document.getElementById("choice1").value,
 
-document.getElementById("choice2").value,
+        document.getElementById("choice2").value,
 
-document.getElementById("choice3").value,
+        document.getElementById("choice3").value,
 
-document.getElementById("choice4").value
+        document.getElementById("choice4").value
 
-],
-
-
-answer:
-
-Number(
-document.getElementById("adminAnswer").value
-),
+    ],
 
 
-explanation:
-
-document.getElementById("adminExplain").value,
-
-
-category:
-
-document.getElementById("adminCategory").value,
+    answer:
+    Number(
+        document.getElementById("adminAnswer").value
+    ),
 
 
-year:
-
-document.getElementById("adminPeriod").value,
-
-
-level:
-
-document.getElementById("adminLevel").value,
+    explanation:
+    document.getElementById("adminExplain").value,
 
 
-image:
+    category:
+    document.getElementById("adminCategory").value,
 
-document.getElementById("adminImage").value
 
+    period:
+    document.getElementById("adminPeriod").value,
+
+
+    level:
+    document.getElementById("adminLevel").value,
+
+
+    image:
+    document.getElementById("adminImage").value,
+
+
+    createdAt:
+    new Date().toISOString()
 
 };
 
-document.getElementById("saveQuestionBtn").onclick = function(){
 
+// 브라우저 저장
 
 let list =
 JSON.parse(
@@ -2331,116 +2451,23 @@ localStorage.getItem("questions")
 ) || [];
 
 
-
-const newQuestion = {
-
-
-question:
-document.getElementById("adminQuestion").value,
-
-
-choices:[
-
-document.getElementById("choice1").value,
-
-document.getElementById("choice2").value,
-
-document.getElementById("choice3").value,
-
-document.getElementById("choice4").value
-
-],
-
-
-answer:
-Number(
-document.getElementById("adminAnswer").value
-),
-
-
-category:
-document.getElementById("adminCategory").value,
-
-
-period:
-document.getElementById("adminPeriod").value,
-
-
-level:
-document.getElementById("adminLevel").value,
-
-
-explanation:
-document.getElementById("adminExplain").value,
-
-
-image:
-document.getElementById("adminImage").value
-
-
-};
-
-
-
 list.push(newQuestion);
 
 
-
 localStorage.setItem(
-
 "questions",
-
 JSON.stringify(list)
-
 );
 
 
+// Firebase 저장
 
 db.collection("questions")
 .add(newQuestion)
-.then(function(){
-
-console.log(
-"Firestore 저장 완료"
-);
-
-})
-.catch(function(error){
-
-console.error(
-error
-);
-
-});
-
-
-
-alert(
-"문제 저장 완료"
-);
-
-
-
-loadAdminQuestions();
-
-
-};
-
-
-    .then(function(){
-
-        alert("등록 완료");
-
-        loadAdminQuestions();
-
-    });
-
-
-}
 
 .then(function(){
 
-    alert("Firebase 문제 저장 완료");
+    alert("문제 저장 완료");
 
     loadAdminQuestions();
 
@@ -2449,14 +2476,14 @@ loadAdminQuestions();
 .catch(function(error){
 
     console.error(
-        "저장 오류:",
+        "Firebase 저장 오류",
         error
     );
 
 });
 
 
-
+};
 
 // 등록 문제 보기
 
@@ -2530,8 +2557,12 @@ async function loadAdminQuestions(){
 }
 
 
-// 삭제
 function deleteQuestion(id){
+
+
+if(!confirm("삭제하시겠습니까?")){
+    return;
+}
 
 
 db.collection("questions")
@@ -2540,20 +2571,24 @@ db.collection("questions")
 
 .then(function(){
 
-alert("삭제 완료");
+    alert("삭제 완료");
 
-loadAdminQuestions();
+    loadAdminQuestions();
 
 })
 
 .catch(function(error){
 
-console.error(error);
+    console.error(
+        "삭제 오류",
+        error
+    );
 
 });
 
 
 }
+
 function startBookmarkQuiz(index){
 
     const bookmarks =
@@ -2606,213 +2641,6 @@ document.getElementById("adminImage").value = q.image || "";
         window.editDocId = id;
 
     });
-
-}
-
-let list =
-JSON.parse(localStorage.getItem("questions")) || [];
-
- {
-
-
-question:
-document.getElementById("adminQuestion").value,
-
-
-choices:[
-
-document.getElementById("choice1").value,
-
-document.getElementById("choice2").value,
-
-document.getElementById("choice3").value,
-
-document.getElementById("choice4").value
-
-],
-
-
-answer:
-Number(
-document.getElementById("adminAnswer").value
-),
-
-
-category:
-document.getElementById("adminCategory").value,
-
-
-period:
-document.getElementById("adminPeriod").value,
-
-
-level:
-document.getElementById("adminLevel").value,
-
-
-explanation:
-document.getElementById("adminExplain").value,
-
-
-image:
-document.getElementById("adminImage").value
-
-};
-
-if(window.editIndex !== undefined){
-
-    list[window.editIndex] = newQuestion;
-
-    window.editIndex = undefined;
-
-}else{
-
-    list.push(newQuestion);
-
-}
-
-localStorage.setItem(
-    "questions",
-    JSON.stringify(list)
-);
-db.collection("questions")
-.add(newQuestion)
-.then(function(){
-
-    console.log("Firestore 문제 저장 완료");
-
-})
-.catch(function(error){
-
-    console.error(
-        "Firestore 저장 오류",
-        error
-    );
-
-});
-alert("저장 완료");
-
-loadAdminQuestions();
-
-document.getElementById("adminQuestion").value = "";
-
-document.getElementById("choice1").value = "";
-
-document.getElementById("choice2").value = "";
-
-document.getElementById("choice3").value = "";
-
-document.getElementById("choice4").value = "";
-
-document.getElementById("adminAnswer").value = 0;
-
-document.getElementById("adminCategory").selectedIndex = 0;
-
-document.getElementById("adminPeriod").selectedIndex = 0;
-
-document.getElementById("adminLevel").selectedIndex = 0;
-
-document.getElementById("adminExplain").value = "";
-
-document.getElementById("adminImage").value = "";
-
-function saveQuestionResult(q, selected){
-
-
-    if(!q.id){
-
-        console.log(
-            "문제 ID 없음",
-            q
-        );
-
-        return;
-
-    }
-
-
-    db.collection("questionStats")
-    .doc(q.id)
-    .set({
-
-        question:
-        q.question,
-
-        category:
-        q.category || "",
-
-
-        total:
-        firebase.firestore.FieldValue.increment(1),
-
-
-        correct:
-        firebase.firestore.FieldValue.increment(
-            selected === q.answer ? 1 : 0
-        ),
-
-
-        wrong:
-        firebase.firestore.FieldValue.increment(
-            selected === q.answer ? 0 : 1
-        )
-
-
-    },
-    {
-        merge:true
-    });
-
-
-}
-
-function retryWrongQuestions(){
-
-
-    if(wrongAnswers.length === 0){
-
-        alert(
-            "틀린 문제가 없습니다."
-        );
-
-        return;
-
-    }
-
-
-    quizList = wrongAnswers;
-
-
-    currentQuestion = 0;
-
-    score = 0;
-
-    wrongAnswers = [];
-
-    userAnswers =
-    new Array(quizList.length)
-    .fill(null);
-
-
-
-    document.querySelector(".container")
-    .innerHTML = `
-
-    <h2 style="text-align:center">
-
-    오답 재시험 시작
-
-    </h2>
-
-    `;
-
-
-    document.getElementById("quizScreen")
-    .style.display="block";
-
-
-    showQuestion();
-
 
 }
 
@@ -3063,3 +2891,688 @@ auth.onAuthStateChanged(function(user){
 
 
 });
+
+auth.onAuthStateChanged(async function(user){
+
+    const btn =
+    document.getElementById("adminBtn");
+
+
+    if(!btn) return;
+
+
+    if(user){
+
+
+        const doc =
+        await db.collection("users")
+        .doc(user.uid)
+        .get();
+
+
+
+        if(
+            doc.exists &&
+            doc.data().role==="admin"
+        ){
+
+            btn.style.display="block";
+
+        }
+
+    }
+
+
+});
+
+document.getElementById("submitBtn")
+.onclick=function(){
+
+
+let correct=0;
+
+
+quizList.forEach(function(q,index){
+
+
+if(
+userAnswers[index]
+===
+q.answer
+){
+
+correct++;
+
+}
+
+
+});
+
+
+let score =
+Math.round(
+correct /
+quizList.length *
+100
+);
+
+
+
+alert(
+
+"시험 종료\n\n"+
+"점수 : "+
+score+
+"점\n"+
+"정답 : "+
+correct+
+"개"
+
+);
+
+
+
+saveExamResult(
+score,
+correct
+);
+
+
+};
+
+function getGrade(score){
+
+
+if(score>=90)
+return "1급";
+
+if(score>=80)
+return "2급";
+
+if(score>=70)
+return "3급";
+
+return "불합격";
+
+
+}
+
+async function saveExamResult(
+score,
+correct
+){
+
+
+const user =
+auth.currentUser;
+
+
+if(!user){
+
+console.log(
+"로그인 사용자 아님"
+);
+
+return;
+
+}
+
+
+
+const weak =
+analyzeWeakArea();
+
+
+
+await db.collection("users")
+.doc(user.uid)
+.collection("quizHistory")
+.add({
+
+score:score,
+
+correct:correct,
+
+total:quizList.length,
+
+
+grade:getGrade(score),
+
+
+weakCategory:
+weak.category,
+
+
+weakPeriod:
+weak.period,
+
+
+date:
+new Date()
+
+
+});
+
+
+console.log(
+"시험 결과 저장 완료"
+);
+
+
+}
+
+function analyzeWeakArea(){
+
+
+let category={};
+
+let period={};
+
+
+
+quizList.forEach(function(q,index){
+
+
+if(
+userAnswers[index]
+!==q.answer
+){
+
+
+category[q.category]
+=
+(category[q.category]||0)+1;
+
+
+period[q.period]
+=
+(period[q.period]||0)+1;
+
+
+}
+
+
+});
+
+
+
+return {
+
+
+category:
+Object.keys(category)
+.sort(
+(a,b)=>category[b]-category[a]
+)
+.slice(0,3),
+
+
+period:
+Object.keys(period)
+.sort(
+(a,b)=>period[b]-period[a]
+)
+.slice(0,3)
+
+
+
+};
+
+
+}
+
+async function loadMyHistory(){
+
+
+const user =
+auth.currentUser;
+
+
+if(!user){
+
+alert(
+"로그인이 필요합니다."
+);
+
+return;
+
+}
+
+
+
+const snapshot =
+await db.collection("users")
+.doc(user.uid)
+.collection("quizHistory")
+.orderBy(
+"date",
+"desc"
+)
+.get();
+
+
+
+let html =
+"<h2>시험 기록</h2>";
+
+
+
+snapshot.forEach(function(doc){
+
+
+const q =
+doc.data();
+
+
+
+html += `
+
+<div class="questionBox">
+
+
+<h3>
+${q.score}점
+(${q.grade})
+</h3>
+
+
+<p>
+정답 :
+${q.correct}/${q.total}
+</p>
+
+
+<p>
+취약 분야 :
+${q.weakCategory.join(",")}
+</p>
+
+
+<p>
+취약 시대 :
+${q.weakPeriod.join(",")}
+</p>
+
+
+</div>
+
+`;
+
+
+
+});
+
+
+document.getElementById(
+"myHistory"
+)
+.innerHTML=html;
+
+
+}
+
+function saveWrongAnswer(q){
+
+
+const user = auth.currentUser;
+
+
+if(!user){
+
+    console.log(
+    "로그인 사용자 아님"
+    );
+
+    return;
+
+}
+
+
+
+db.collection("users")
+.doc(user.uid)
+.collection("wrongAnswers")
+.add({
+
+
+question:
+q.question,
+
+
+choices:
+q.choices,
+
+
+answer:
+q.answer,
+
+
+explanation:
+q.explanation || "",
+
+
+category:
+q.category || "",
+
+
+period:
+q.period || "",
+
+
+level:
+q.level || "",
+
+
+date:
+new Date()
+
+
+})
+
+.then(function(){
+
+
+console.log(
+"오답 저장 완료"
+);
+
+
+})
+
+.catch(function(error){
+
+
+console.error(
+"오답 저장 오류",
+error
+);
+
+
+});
+
+
+}
+
+async function loadWeakAnalysis(){
+
+
+const user =
+auth.currentUser;
+
+
+if(!user){
+
+alert(
+"로그인이 필요합니다."
+);
+
+return;
+
+}
+
+
+
+const snapshot =
+await db.collection("users")
+.doc(user.uid)
+.collection("quizHistory")
+.get();
+
+
+
+let category={};
+
+let period={};
+
+
+
+snapshot.forEach(function(doc){
+
+
+const data =
+doc.data();
+
+
+
+(data.weakCategory || [])
+.forEach(function(c){
+
+category[c]
+=
+(category[c]||0)+1;
+
+});
+
+
+
+(data.weakPeriod || [])
+.forEach(function(p){
+
+period[p]
+=
+(period[p]||0)+1;
+
+});
+
+
+});
+
+
+
+let html = `
+
+<h2>
+📈 취약 분야 분석
+</h2>
+
+<h3>
+분야별 약점
+</h3>
+
+`;
+
+
+
+Object.keys(category)
+.sort(
+(a,b)=>category[b]-category[a]
+)
+.forEach(function(c,index){
+
+
+html += `
+
+<p>
+${index+1}위.
+${c}
+:
+${category[c]}회 오답
+</p>
+
+`;
+
+});
+
+
+
+html += `
+
+<h3>
+시대별 약점
+</h3>
+
+`;
+
+
+
+Object.keys(period)
+.sort(
+(a,b)=>period[b]-period[a]
+)
+.forEach(function(p,index){
+
+
+html += `
+
+<p>
+${index+1}위.
+${p}
+:
+${period[p]}회 오답
+</p>
+
+`;
+
+});
+
+
+
+document.getElementById(
+"weakAnalysis"
+)
+.innerHTML=html;
+
+
+}
+
+async function loadReport(){
+
+
+const user =
+auth.currentUser;
+
+
+if(!user){
+
+alert(
+"로그인이 필요합니다."
+);
+
+return;
+
+}
+
+
+
+const snapshot =
+await db.collection("users")
+.doc(user.uid)
+.collection("quizHistory")
+.orderBy("date")
+.get();
+
+
+
+let labels=[];
+
+let scores=[];
+
+
+
+snapshot.forEach(function(doc){
+
+
+const data =
+doc.data();
+
+
+labels.push(
+new Date(
+data.date.seconds*1000
+)
+.toLocaleDateString()
+);
+
+
+scores.push(
+data.score
+);
+
+
+});
+
+
+
+document.getElementById(
+"reportChart"
+)
+.innerHTML=`
+
+<h2>
+점수 변화
+</h2>
+
+<canvas id="scoreChart"></canvas>
+
+`;
+
+
+
+new Chart(
+
+document.getElementById(
+"scoreChart"
+),
+
+{
+
+type:"line",
+
+
+data:{
+
+
+labels:labels,
+
+
+datasets:[{
+
+label:"시험 점수",
+
+data:scores,
+
+
+borderColor:"#2196F3",
+
+backgroundColor:
+"rgba(33,150,243,0.2)",
+
+
+tension:0.3
+
+}]
+
+},
+
+
+options:{
+
+
+responsive:true,
+
+
+scales:{
+
+
+y:{
+
+beginAtZero:true,
+
+max:100
+
+}
+
+
+}
+
+
+}
+
+}
+
+
+);
+
+
+
+}

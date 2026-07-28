@@ -100,9 +100,21 @@ function renderPage() {
 
             <h3>${q.question}</h3>
 
-            <p>분야 : ${q.category}</p>
+            <p>
+시대 : ${q.period || ""}
+</p>
 
-            <p>난이도 : ${q.level}</p>
+<p>
+분야 : ${q.category}
+</p>
+
+<p>
+난이도 : ${q.level}
+</p>
+
+<p>
+유형 : ${q.type || ""}
+</p>
 
             <button onclick="editQuestion('${q.id}')">수정</button>
 
@@ -139,6 +151,9 @@ function clearForm() {
 
     document.getElementById("explanation").value = "";
     document.getElementById("image").value = "";
+    document.getElementById("source").value="";
+
+document.getElementById("keywords").value="";
 
 }
 
@@ -160,24 +175,24 @@ async function saveQuestion() {
         answer: Number(document.getElementById("answer").value),
 
         category: document.getElementById("category").value,
-
         level: document.getElementById("level").value,
-
+        period:document.getElementById("period").value,
+        type:document.getElementById("type").value,
+        source:document.getElementById("source").value,
+        keywords:document.getElementById("keywords").value.split(",").map(k=>k.trim()),
         explanation: document.getElementById("explanation").value,
-
         image: imageUrl,
-
-        created: new Date()
+        created:firebase.firestore.FieldValue.serverTimestamp()
 
     };
 
     try {
 
-        if (editDocId) {
+       if (editDocId) {
 
     await db.collection("questions")
-        .doc(editDocId)
-        .update(data);
+    .doc(editDocId)
+    .update(data);
 
     editDocId = null;
 
@@ -186,13 +201,28 @@ async function saveQuestion() {
 } else {
 
     await db.collection("questions")
-        .add(data);
+    .add(data);
+
+    if (editDocId) {
+
+    await db.collection("questions")
+    .doc(editDocId)
+    .update(data);
+
+    editDocId=null;
+
+    alert("문제가 수정되었습니다.");
+
+}else{
+
+    await db.collection("questions")
+    .add(data);
 
     alert("문제가 등록되었습니다.");
 
 }
 
-        alert("문제가 등록되었습니다.");
+}
 
         clearForm();
 
@@ -211,7 +241,7 @@ async function saveQuestion() {
 async function editQuestion(id) {
 
     const doc = await db.collection("questions")
-        .doc(id)
+        .doc(q.id)
         .get();
 
     const q = doc.data();
@@ -226,6 +256,20 @@ async function editQuestion(id) {
     document.getElementById("answer").value = q.answer;
     document.getElementById("category").value = q.category;
     document.getElementById("level").value = q.level;
+    document.getElementById("period").value =
+q.period || "고대";
+
+
+document.getElementById("type").value =
+q.type || "기출";
+
+
+document.getElementById("source").value =
+q.source || "";
+
+
+document.getElementById("keywords").value =
+(q.keywords || []).join(",");
     document.getElementById("explanation").value = q.explanation || "";
     document.getElementById("image").value = q.image || "";
 
@@ -242,7 +286,7 @@ async function deleteQuestion(id) {
     try {
 
         await db.collection("questions")
-            .doc(id)
+            .doc(q.id)
             .delete();
 
         alert("삭제되었습니다.");
@@ -309,9 +353,21 @@ function renderSearchResult(list) {
 
             <h3>${q.question}</h3>
 
-            <p>분야 : ${q.category}</p>
+            <p>
+시대 : ${q.period || ""}
+</p>
 
-            <p>난이도 : ${q.level}</p>
+<p>
+분야 : ${q.category}
+</p>
+
+<p>
+난이도 : ${q.level}
+</p>
+
+<p>
+유형 : ${q.type || ""}
+</p>
 
             <button onclick="editQuestion('${q.id}')">
             수정
@@ -739,7 +795,7 @@ async function loadQuestionAnalysis(){
 
 }
 
-auth.onAuthStateChanged(function(user){
+auth.onAuthStateChanged(async function(user){
 
 
     if(!user){
@@ -748,11 +804,39 @@ auth.onAuthStateChanged(function(user){
         "관리자 로그인이 필요합니다."
         );
 
+        location.href="../index.html";
+
+        return;
+
+    }
+
+
+    const adminDoc =
+    await db.collection("users")
+    .doc(user.uid)
+    .get();
+
+
+
+    if(
+        !adminDoc.exists ||
+        adminDoc.data().role !== "admin"
+    ){
+
+        alert(
+        "관리자 권한이 없습니다."
+        );
 
         location.href="../index.html";
 
+        return;
 
     }
+
+
+    console.log(
+        "관리자 인증 완료"
+    );
 
 
 });
