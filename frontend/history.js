@@ -880,3 +880,17 @@ function drawCategoryChart(){
 
 
 }
+
+// =====================================
+// History 시작
+// =====================================
+
+document.addEventListener(
+"DOMContentLoaded",
+function(){
+
+    console.log("history 초기화");
+
+    initHistory();
+
+});
