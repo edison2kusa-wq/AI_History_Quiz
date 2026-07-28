@@ -807,8 +807,7 @@ document.getElementById(
     async function uploadImage() {
 
     const url =
-    document.getElementById("image").value.trim();
-
+        document.getElementById("image").value.trim();
 
     return url;
 
