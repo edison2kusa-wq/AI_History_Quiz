@@ -4,6 +4,9 @@
 // ===============================
 
 // 전역 변수
+const db = firebase.firestore();
+const auth = firebase.auth();
+const storage = firebase.storage();
 let currentPage = 1;
 const pageSize = 20;
 
@@ -44,24 +47,36 @@ window.onload = function () {
         document.getElementById("downloadCsvBtn").onclick = downloadCSV;
 
 
-};
+    if(document.getElementById("prevPageBtn"))
+    document.getElementById("prevPageBtn").onclick=function(){
+
+        if(currentPage>1){
+
+            currentPage--;
+
+            renderPage();
+
+        }
+
+    };
 
 
-document.getElementById("nextPageBtn").onclick=function(){
+    if(document.getElementById("nextPageBtn"))
+    document.getElementById("nextPageBtn").onclick=function(){
 
-    const totalPage =
-    Math.ceil(
-        questionCache.length/pageSize
-    );
+        const totalPage =
+        Math.ceil(questionCache.length/pageSize);
 
 
-    if(currentPage<totalPage){
+        if(currentPage<totalPage){
 
-        currentPage++;
+            currentPage++;
 
-        renderPage();
+            renderPage();
 
-    }
+        }
+
+    };
 
 };
 
