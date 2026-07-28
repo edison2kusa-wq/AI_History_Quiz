@@ -51,6 +51,7 @@ document.getElementById("nextPageBtn").onclick=function(){
     }
 
 };
+};
 
 async function adminLogin() {
 
@@ -235,7 +236,21 @@ async function saveQuestion(){
 
         created:
         firebase.firestore.FieldValue.serverTimestamp()
+       difficultyScore:70,
 
+viewCount:0,
+
+solveCount:0,
+
+correctCount:0,
+
+wrongCount:0,
+
+createdBy:
+auth.currentUser.uid,
+
+updated:
+firebase.firestore.FieldValue.serverTimestamp()
     };
 
 
@@ -481,7 +496,7 @@ function uploadCSV() {
 
             for (const row of result.data) {
 
-                const docRef =
+                
 const docRef =
 
 await db.collection("questions")
@@ -549,29 +564,6 @@ await db.collection("questions")
     created:
 
     firebase.firestore.FieldValue.serverTimestamp()
-
-});
-
-
-// 문제 통계 초기 생성
-
-await db.collection("questionStats")
-.doc(docRef.id)
-.set({
-
-    question:
-    row.question,
-
-
-    category:
-    row.category || "기타",
-
-
-    total:0,
-
-    correct:0,
-
-    wrong:0
 
 });
 
@@ -956,12 +948,3 @@ auth.onAuthStateChanged(async function(user){
 
 });
 */
-{
-difficultyScore:70,
-viewCount:0,
-solveCount:0,
-correctCount:0,
-wrongCount:0,
-createdBy:"",
-updated:"",
-}
