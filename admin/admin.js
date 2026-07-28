@@ -1036,36 +1036,3 @@ auth.onAuthStateChanged(async function(user){
 
 });
 */
-const db = firebase.firestore();
-
-
-function saveQuestion(){
-
-const question =
-document.getElementById("question").value;
-
-
-const answer =
-document.getElementById("answer").value;
-
-
-db.collection("questions")
-.add({
-
-question: question,
-
-answer: Number(answer),
-
-created:
-new Date()
-
-})
-
-.then(()=>{
-
-alert("문제가 저장되었습니다");
-
-});
-
-
-}
