@@ -911,7 +911,7 @@ async function loadQuestionAnalysis(){
     .innerHTML = html;
 
 
-}
+};
 
 
 async function loadPeriodAnalysis(){
