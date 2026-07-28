@@ -21,6 +21,35 @@ window.onload = function () {
     document.getElementById("resetBtn").onclick = resetSearch;
     document.getElementById("uploadCsvBtn").onclick = uploadCSV;
     document.getElementById("downloadCsvBtn").onclick = downloadCSV;
+    document.getElementById("prevPageBtn").onclick=function(){
+
+    if(currentPage>1){
+
+        currentPage--;
+
+        renderPage();
+
+    }
+
+};
+
+
+document.getElementById("nextPageBtn").onclick=function(){
+
+    const totalPage =
+    Math.ceil(
+        questionCache.length/pageSize
+    );
+
+
+    if(currentPage<totalPage){
+
+        currentPage++;
+
+        renderPage();
+
+    }
+
 };
 
 async function adminLogin() {
@@ -157,115 +186,117 @@ document.getElementById("keywords").value="";
 
 }
 
-async function saveQuestion() {
+async function saveQuestion(){
+
     const imageUrl = await uploadImage();
-    const data = {
 
-        question: document.getElementById("question").value,
 
-        choices: [
+    const data={
 
-            document.getElementById("choice1").value,
-            document.getElementById("choice2").value,
-            document.getElementById("choice3").value,
-            document.getElementById("choice4").value
+        question:
+        document.getElementById("question").value,
+
+        choices:[
+
+            choice1.value,
+            choice2.value,
+            choice3.value,
+            choice4.value
 
         ],
 
-        answer: Number(document.getElementById("answer").value),
+        answer:
+        Number(answer.value),
 
-        category: document.getElementById("category").value,
-        level: document.getElementById("level").value,
-        period:document.getElementById("period").value,
-        type:document.getElementById("type").value,
-        source:document.getElementById("source").value,
-        keywords:document.getElementById("keywords").value.split(",").map(k=>k.trim()),
-        explanation: document.getElementById("explanation").value,
-        image: imageUrl,
-        created:firebase.firestore.FieldValue.serverTimestamp()
+        period:
+        period.value,
+
+        category:
+        category.value,
+
+        level:
+        level.value,
+
+        type:
+        type.value,
+
+        source:
+        source.value,
+
+        keywords:
+        keywords.value.split(",")
+        .map(k=>k.trim()),
+
+        explanation:
+        explanation.value,
+
+        image:
+        imageUrl,
+
+        created:
+        firebase.firestore.FieldValue.serverTimestamp()
 
     };
 
-    try {
 
-       if (editDocId) {
-
-    await db.collection("questions")
-    .doc(editDocId)
-    .update(data);
-
-    editDocId = null;
-
-    alert("문제가 수정되었습니다.");
-
-} else {
-
-    await db.collection("questions")
-    .add(data);
-
-    try {
+    try{
 
 
-    if(editDocId){
-
-        await db.collection("questions")
-        .doc(editDocId)
-        .update(data);
+        if(editDocId){
 
 
-        alert("문제가 수정되었습니다.");
-
-        editDocId=null;
-
-
-    }else{
+            await db.collection("questions")
+            .doc(editDocId)
+            .update(data);
 
 
-        await db.collection("questions")
-        .add(data);
+            alert(
+            "문제가 수정되었습니다."
+            );
 
 
-        alert("문제가 등록되었습니다.");
-
-    }
+            editDocId=null;
 
 
-    clearForm();
-
-    await loadQuestions();
-
-    await loadDashboard();
+        }else{
 
 
-}
-catch(e){
+            await db.collection("questions")
+            .add(data);
 
-    console.error(e);
 
-    alert(
-        "저장 오류 : " + e.message
-    );
+            alert(
+            "문제가 등록되었습니다."
+            );
 
-}
+
+        }
+
 
         clearForm();
 
-        loadQuestions();
+        await loadQuestions();
 
-        loadDashboard();
-
-    } catch (e) {
-
-        alert(e.message);
 
     }
+
+    catch(e){
+
+        console.error(e);
+
+        alert(
+        "저장 오류 : "+e.message
+        );
+
+    }
+
 
 }
 
 async function editQuestion(id) {
 
     const doc = await db.collection("questions")
-        .doc(q.id)
+        .doc(id)
         .get();
 
     const q = doc.data();
@@ -310,8 +341,8 @@ async function deleteQuestion(id) {
     try {
 
         await db.collection("questions")
-            .doc(q.id)
-            .delete();
+    .doc(id)
+    .delete();
 
         alert("삭제되었습니다.");
 
@@ -451,12 +482,16 @@ function uploadCSV() {
             for (const row of result.data) {
 
                 const docRef =
+const docRef =
+
 await db.collection("questions")
 .add({
 
-    question: row.question,
+    question:
+    row.question,
 
-    choices: [
+
+    choices:[
 
         row.choice1,
         row.choice2,
@@ -465,23 +500,78 @@ await db.collection("questions")
 
     ],
 
+
     answer:
-    Number(row.answer) - 1,
+    Number(row.answer)-1,
+
+
+    period:
+    row.period || "전체",
+
 
     category:
-    row.category,
+    row.category || "기타",
+
 
     level:
-    row.level,
+    row.level || "중",
+
+
+    type:
+    row.type || "예상",
+
+
+    source:
+    row.source || "",
+
+
+    keywords:
+
+    row.keywords
+    ?
+    row.keywords
+    .split(",")
+    .map(k=>k.trim())
+
+    :
+    [],
+
+
 
     explanation:
     row.explanation || "",
 
+
     image:
     row.image || "",
 
+
     created:
-    new Date()
+
+    firebase.firestore.FieldValue.serverTimestamp()
+
+});
+
+
+// 문제 통계 초기 생성
+
+await db.collection("questionStats")
+.doc(docRef.id)
+.set({
+
+    question:
+    row.question,
+
+
+    category:
+    row.category || "기타",
+
+
+    total:0,
+
+    correct:0,
+
+    wrong:0
 
 });
 
@@ -819,6 +909,7 @@ async function loadQuestionAnalysis(){
 
 }
 
+/*
 auth.onAuthStateChanged(async function(user){
 
 
@@ -864,3 +955,13 @@ auth.onAuthStateChanged(async function(user){
 
 
 });
+*/
+{
+difficultyScore:70,
+viewCount:0,
+solveCount:0,
+correctCount:0,
+wrongCount:0,
+createdBy:"",
+updated:"",
+}
