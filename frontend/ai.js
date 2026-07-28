@@ -473,7 +473,12 @@ function calculateAIWeight(q, weakCategory, level){
 
     let weight=0;
 
+    // 많이 틀린 문제 우선
+if(q.wrongCount){
 
+    weight += q.wrongCount * 5;
+
+}
 
     // 취약 분야
 

@@ -414,12 +414,6 @@ else{
 
     wrongAnswers.push(q);
 
-
-    saveWrongAnswer(
-        q,
-        selected
-    );
-
 }
 
     // 결과 출력
@@ -477,43 +471,42 @@ async function saveQuestionResult(q, selected){
 
     if(!q.id) return;
 
+
     await db.collection("questionStats")
-
     .doc(q.id)
-
     .set({
 
-        question : q.question,
+        question:q.question,
 
-        category : q.category,
+        category:q.category,
 
-        total :
+        period:q.period || "",
 
+        level:q.level || "",
+
+        type:q.type || "",
+
+        total:
         firebase.firestore.FieldValue.increment(1),
 
-        correct :
 
+        correct:
         firebase.firestore.FieldValue.increment(
-
             selected===q.answer ? 1 : 0
-
         ),
 
-        wrong :
 
+        wrong:
         firebase.firestore.FieldValue.increment(
-
             selected===q.answer ? 0 : 1
-
         )
 
+
     },
-
     {
-
         merge:true
-
     });
+
 
 }
 
@@ -656,6 +649,19 @@ $("levelSelect").value,
 
 
 created:
+firebase.firestore.FieldValue.serverTimestamp(),
+
+difficultyScore:70,
+
+viewCount:0,
+
+solveCount:0,
+
+correctCount:0,
+
+wrongCount:0,
+
+updated:
 firebase.firestore.FieldValue.serverTimestamp()
 
 });

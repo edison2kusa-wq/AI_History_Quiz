@@ -14,7 +14,7 @@ let editDocId = null;
 window.onload = function () {
 
     console.log("admin.js 로드 완료");
-
+    document.getElementById("periodAnalysisBtn").onclick = loadPeriodAnalysis;
     document.getElementById("adminLoginBtn").onclick = adminLogin;
     document.getElementById("saveBtn").onclick = saveQuestion;
     document.getElementById("searchBtn").onclick = searchQuestions;
@@ -905,6 +905,86 @@ async function loadQuestionAnalysis(){
     "analysisResult"
     )
     .innerHTML = html;
+
+
+}
+
+
+async function loadPeriodAnalysis(){
+
+    const snapshot =
+    await db.collection("questionStats").get();
+
+
+    const result={};
+
+
+    snapshot.forEach(function(doc){
+
+        const q=doc.data();
+
+        const period =
+        q.period || "기타";
+
+
+        if(!result[period]){
+
+            result[period]={
+                total:0,
+                wrong:0
+            };
+
+        }
+
+
+        result[period].total += q.total || 0;
+
+        result[period].wrong += q.wrong || 0;
+
+
+    });
+
+
+
+    let html="<h3>시대별 오답률</h3>";
+
+
+    Object.keys(result).forEach(function(key){
+
+
+        const rate =
+
+        result[key].total>0
+
+        ?
+
+        Math.round(
+            result[key].wrong /
+            result[key].total *
+            100
+        )
+
+        :
+
+        0;
+
+
+        html += `
+
+        <p>
+        ${key} :
+        ${rate}%
+        </p>
+
+        `;
+
+
+    });
+
+
+    document.getElementById(
+        "analysisResult"
+    ).innerHTML += html;
 
 
 }
