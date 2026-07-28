@@ -318,32 +318,53 @@ async function getWeakCategory(){
 
 
 
-    snapshot.forEach(function(doc){
+    for(const doc of snapshot.docs){
 
 
-        const q =
-        doc.data();
+    const q = doc.data();
+
+    q.id = doc.id;
 
 
-        const c =
-
-        q.category || "전체";
-
-
-
-        if(!count[c]){
+    const statDoc =
+        await db
+        .collection("questionStats")
+        .doc(doc.id)
+        .get();
 
 
-            count[c]=0;
+    if(statDoc.exists){
+
+        const stat = statDoc.data();
+
+        q.solveCount =
+        stat.total || 0;
 
 
-        }
+        q.wrongCount =
+        stat.wrong || 0;
+
+    }
+    else{
+
+        q.solveCount = 0;
+
+        q.wrongCount = 0;
+
+    }
 
 
-        count[c]++;
 
+    if(
+        !weakCategory ||
+        q.category === weakCategory
+    ){
 
-    });
+        candidates.push(q);
+
+    }
+
+}
 
 
 
@@ -571,19 +592,11 @@ async function showAIResult(){
     if(!box) return;
 
 
-   let weak=[];
-
+  let weak = [];
 
 if(typeof getWeakArea === "function"){
 
-    let weak=[];
-
-if(typeof getWeakArea==="function"){
-
-    const weak =
-await getWeakArea();
-
-}
+    weak = await getWeakArea();
 
 }
 
@@ -880,67 +893,6 @@ function getAIReason(){
 
     };
 
-
-}
-
-//
-function getQuestionAIReason(q){
-
-    let reason=[];
-
-
-    if(q.wrongCount > 0){
-
-        reason.push(
-            "전체 오답률 높은 문제"
-        );
-
-    }
-
-
-    if(q.solveCount > 0){
-
-        const rate =
-
-        Math.round(
-            q.wrongCount /
-            q.solveCount *
-            100
-        );
-
-
-        reason.push(
-            "전체 오답률 "
-            + rate
-            + "%"
-        );
-
-    }
-
-
-    if(q.category){
-
-        reason.push(
-            q.category
-            +
-            " 분야 학습"
-        );
-
-    }
-
-
-    if(q.level){
-
-        reason.push(
-            "난이도 : "
-            +
-            q.level
-        );
-
-    }
-
-
-    return reason;
 
 }
 
