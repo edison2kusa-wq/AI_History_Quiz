@@ -14,7 +14,7 @@ let editDocId = null;
 window.onload = function () {
 
     console.log("admin.js 로드 완료");
-    document.getElementById("periodAnalysisBtn").onclick = loadPeriodAnalysis;
+
     document.getElementById("adminLoginBtn").onclick = adminLogin;
     document.getElementById("saveBtn").onclick = saveQuestion;
     document.getElementById("searchBtn").onclick = searchQuestions;
@@ -988,7 +988,6 @@ async function loadPeriodAnalysis(){
 
 
 }
-
 /*
 auth.onAuthStateChanged(async function(user){
 
