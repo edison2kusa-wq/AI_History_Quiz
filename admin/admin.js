@@ -2,7 +2,7 @@
 // AI 한국사 관리자
 // admin.js
 // ===============================
-
+console.log("ADMIN JS TEST");
 // 전역 변수
 let currentPage = 1;
 const pageSize = 20;
