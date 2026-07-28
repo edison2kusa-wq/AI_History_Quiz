@@ -14,6 +14,8 @@ let editDocId = null;
 window.onload = function () {
 
     console.log("admin.js 로드 완료");
+    console.log("현재 페이지:", location.href);
+console.log("db 확인:", typeof db);
 
 
     if (document.getElementById("periodAnalysisBtn"))
@@ -532,7 +534,16 @@ window.onload = function () {
 
 
             const rows = result.data;
+            document.getElementById(
+"uploadProgress"
+).style.display="block";
 
+
+const total =
+rows.length;
+
+
+let current = 0;    
 
             // 기존 문제 확인
 
@@ -560,7 +571,7 @@ window.onload = function () {
 
 
             for(const row of rows){
-
+            current++;       
 
                 // 중복 검사
 
@@ -643,7 +654,25 @@ window.onload = function () {
 
 
                 success++;
+                const percent =
+Math.round(
+(current / total) * 100
+);
 
+
+document.getElementById(
+"uploadBar"
+).value =
+percent;
+
+
+document.getElementById(
+"uploadText"
+).innerText =
+
+`등록 중...
+${current}/${total} 문제
+(${percent}%)`;
 
             }
 
@@ -658,7 +687,15 @@ window.onload = function () {
 중복 제외 : ${duplicate}개`
 
             );
+            document.getElementById(
+"uploadText"
+).innerText =
+"업로드 완료";
 
+
+document.getElementById(
+"uploadBar"
+).value=100;
 
 
             loadQuestions();
