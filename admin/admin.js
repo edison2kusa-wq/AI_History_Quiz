@@ -508,133 +508,168 @@ window.onload = function () {
 
     function uploadCSV() {
 
-        const file =
-            document.getElementById("csvFile").files[0];
-
-        if (!file) {
-
-            alert("CSV 파일을 선택하세요.");
-            return;
-
-        }
-
-        Papa.parse(file, {
-
-            header: true,
-            skipEmptyLines: true,
-
-            complete: async function (result) {
-
-                let count = 0;
-
-                for (const row of result.data) {
+    const file =
+        document.getElementById("csvFile").files[0];
 
 
-                    const docRef =
+    if (!file) {
 
-                        await db.collection("questions")
-                            .add({
+        alert("CSV 파일을 선택하세요.");
 
-                                question:
-                                    row.question,
+        return;
 
-
-                                choices: [
-
-                                    row.choice1,
-                                    row.choice2,
-                                    row.choice3,
-                                    row.choice4
-
-                                ],
+    }
 
 
-                                answer:
-                                    Number(row.answer) - 1,
+    Papa.parse(file, {
+
+        header:true,
+
+        skipEmptyLines:true,
 
 
-                                period:
-                                    row.period || "전체",
+        complete: async function(result){
 
 
-                                category:
-                                    row.category || "기타",
+            const rows = result.data;
 
 
-                                level:
-                                    row.level || "중",
+            // 기존 문제 확인
+
+            const snapshot =
+                await db.collection("questions").get();
 
 
-                                type:
-                                    row.type || "예상",
+            let existing = new Set();
 
 
-                                source:
-                                    row.source || "",
+            snapshot.forEach(function(doc){
 
+                existing.add(
+                    doc.data().question
+                );
 
-                                keywords:
-
-                                    row.keywords
-                                        ?
-                                        row.keywords
-                                            .split(",")
-                                            .map(k => k.trim())
-
-                                        :
-                                        [],
+            });
 
 
 
-                                explanation:
-                                    row.explanation || "",
+            let success = 0;
+
+            let duplicate = 0;
 
 
-                                image:
-                                    row.image || "",
+
+            for(const row of rows){
 
 
-                                created:
+                // 중복 검사
 
-                                    firebase.firestore.FieldValue.serverTimestamp()
+                if(
+                    existing.has(row.question)
+                ){
 
-                            });
+                    duplicate++;
 
-
-                    // 문제 통계 초기 생성
-
-                    await db.collection("questionStats")
-                        .doc(docRef.id)
-                        .set({
-
-                            question:
-                                row.question,
-
-                            category:
-                                row.category,
-
-                            total: 0,
-
-                            correct: 0,
-
-                            wrong: 0
-
-                        });
-
-                    count++;
+                    continue;
 
                 }
 
-                alert(count + "개 등록 완료");
 
-                loadQuestions();
-                loadDashboard();
+
+                await db.collection("questions")
+                .add({
+
+                    question:
+                    row.question,
+
+
+                    choices:[
+
+                        row.choice1,
+                        row.choice2,
+                        row.choice3,
+                        row.choice4
+
+                    ],
+
+
+                    answer:
+                    Number(row.answer)-1,
+
+
+                    period:
+                    row.period || "전체",
+
+
+                    category:
+                    row.category || "기타",
+
+
+                    level:
+                    row.level || "중",
+
+
+                    type:
+                    row.type || "예상",
+
+
+                    explanation:
+                    row.explanation || "",
+
+
+                    image:
+                    row.image || "",
+
+
+                    keywords:
+
+                    row.keywords
+                    ?
+                    row.keywords
+                    .split(",")
+                    :
+                    [],
+
+
+                    created:
+
+                    firebase.firestore.FieldValue.serverTimestamp()
+
+                });
+
+
+
+                existing.add(row.question);
+
+
+                success++;
+
 
             }
 
-        });
 
-    }
+
+            alert(
+
+`업로드 완료
+
+신규 등록 : ${success}개
+
+중복 제외 : ${duplicate}개`
+
+            );
+
+
+
+            loadQuestions();
+
+
+        }
+
+    });
+
+
+}
 
     async function downloadCSV() {
 
