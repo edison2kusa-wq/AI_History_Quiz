@@ -14,8 +14,7 @@ let editDocId = null;
 window.onload = function () {
 
     console.log("admin.js 로드 완료");
-    document.getElementById("periodAnalysisBtn")
-.onclick = loadPeriodAnalysis;
+    document.getElementById("periodAnalysisBtn").onclick = loadPeriodAnalysis;
     document.getElementById("adminLoginBtn").onclick = adminLogin;
     document.getElementById("saveBtn").onclick = saveQuestion;
     document.getElementById("searchBtn").onclick = searchQuestions;
@@ -1037,3 +1036,36 @@ auth.onAuthStateChanged(async function(user){
 
 });
 */
+const db = firebase.firestore();
+
+
+function saveQuestion(){
+
+const question =
+document.getElementById("question").value;
+
+
+const answer =
+document.getElementById("answer").value;
+
+
+db.collection("questions")
+.add({
+
+question: question,
+
+answer: Number(answer),
+
+created:
+new Date()
+
+})
+
+.then(()=>{
+
+alert("문제가 저장되었습니다");
+
+});
+
+
+}
