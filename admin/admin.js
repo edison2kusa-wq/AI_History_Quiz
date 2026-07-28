@@ -806,26 +806,13 @@ document.getElementById(
 
     async function uploadImage() {
 
-        const file =
-            document.getElementById("imageFile").files[0];
+    const url =
+    document.getElementById("image").value.trim();
 
-        if (!file) {
-            return document.getElementById("image").value || "";
-        }
 
-        const fileName =
-            "history_images/" + Date.now() + "_" + file.name;
+    return url;
 
-        const storageRef = storage.ref(fileName);
-
-        await storageRef.put(file);
-
-        const url = await storageRef.getDownloadURL();
-
-        document.getElementById("image").value = url;
-
-        return url;
-    }
+}
 
     async function loadStatistics() {
 
