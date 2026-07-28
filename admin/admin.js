@@ -203,24 +203,48 @@ async function saveQuestion() {
     await db.collection("questions")
     .add(data);
 
-    if (editDocId) {
+    try {
 
-    await db.collection("questions")
-    .doc(editDocId)
-    .update(data);
 
-    editDocId=null;
+    if(editDocId){
 
-    alert("문제가 수정되었습니다.");
+        await db.collection("questions")
+        .doc(editDocId)
+        .update(data);
 
-}else{
 
-    await db.collection("questions")
-    .add(data);
+        alert("문제가 수정되었습니다.");
 
-    alert("문제가 등록되었습니다.");
+        editDocId=null;
+
+
+    }else{
+
+
+        await db.collection("questions")
+        .add(data);
+
+
+        alert("문제가 등록되었습니다.");
+
+    }
+
+
+    clearForm();
+
+    await loadQuestions();
+
+    await loadDashboard();
+
 
 }
+catch(e){
+
+    console.error(e);
+
+    alert(
+        "저장 오류 : " + e.message
+    );
 
 }
 

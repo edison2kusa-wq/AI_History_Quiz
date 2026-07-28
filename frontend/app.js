@@ -531,8 +531,6 @@ document.getElementById("timer");
 if(timerBox){
 
     timerBox.innerText =
-    `⏰ 남은시간 : ${min}:${sec}`;
-
 }
 // 문제 이미지 표시
 
@@ -2463,8 +2461,6 @@ JSON.stringify(list)
 // Firebase 저장
 
 db.collection("questions")
-.add(newQuestion)
-
 .then(function(){
 
     alert("문제 저장 완료");
