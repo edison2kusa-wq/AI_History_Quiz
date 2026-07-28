@@ -1,3574 +1,669 @@
-// console.log(db);
-const examRule = {
+// =====================================
+// AI 한국사 심화 퀴즈
+// app.js
+// =====================================
 
-    "선사":5,
 
-    "고대":7,
+// =====================================
+// 페이지 시작
+// =====================================
 
-    "고려":7,
+window.onload=function(){
 
-    "조선":15,
 
-    "개항기":5,
-
-    "일제강점기":6,
-
-    "현대":5
-
-};
-let quizList = [];
-let currentQuestion = 0;
-let score = 0;
-let wrongAnswers = [];
-let timer;
-let timeLeft = 0;
-let examSeconds = 0;
-
-let userAnswers = [];
-let questionNav;
-const mainMenu =
-document.getElementById("mainMenu");
-
-const quizScreen =
-document.getElementById("quizScreen");
-
-
-// 기본 문제 + Firebase + 관리자 추가 문제 합치기
-
-async function getAllQuestions(){
-
-
-let firestoreQuestions=[];
-
-
-try{
-
-
-const snapshot =
-await db.collection("questions").get();
-
-
-
-snapshot.forEach(function(doc){
-
-
-let q = doc.data();
-
-
-q.id = doc.id;
-
-
-
-firestoreQuestions.push({
-
-id:q.id,
-
-question:q.question,
-
-choices:q.choices,
-
-answer:Number(q.answer),
-
-category:q.category || "전체",
-
-period:q.period || "전체",
-
-level:q.level || "중",
-
-explanation:q.explanation || "",
-
-image:q.image || ""
-
-});
-
-
-});
-
-
-}
-catch(error){
-
-console.log(
-"Firebase 불러오기 오류",
-error
-);
-
-}
-
-
-
-return [
-
-...questions,
-
-...firestoreQuestions
-
-];
-
-
-}
-
-const MAX_QUESTIONS = 10;
-// 문제 섞기
-function shuffle(array) {
-
-    for (let i = array.length - 1; i > 0; i--) {
-
-        const j = Math.floor(Math.random() * (i + 1));
-
-        [array[i], array[j]] =
-        [array[j], array[i]];
-
-    }
-
-}
-
-
-
-// 시험 시작
-document.getElementById("startBtn").onclick=function(){
-
-    document.getElementById("settingMenu")
-    .style.display="block";
-
-};
-
-
-
-
-
-document.getElementById("settingStartBtn")
-.onclick=async function(){
-
-
-    document.getElementById("mainMenu")
-    .style.display="none";
-
-
-    document.getElementById("quizScreen")
-    .style.display="block";
-
-
-
-    let period =
-    document.getElementById("periodSelect").value;
-
-
-    let category =
-    document.getElementById("categorySelect").value;
-
-
-    let level =
-    document.getElementById("levelSelect").value;
-
-
-
-    let count =
-    Number(
-        document.getElementById("countSelect").value
-    );
-
-    if (count == 10) {
-
-    examSeconds = 10 * 60;
-
-} else if (count == 20) {
-
-    examSeconds = 20 * 60;
-
-} else {
-
-    examSeconds = 50 * 60;
-
-}
-
-timeLeft = examSeconds;
-
-startTimer();
-
-
-    const allQuestions = await getAllQuestions();
-
-quizList = allQuestions.filter(function(q){
-
-    let result = true;
-
-    if(period !== "전체"){
-
-        result = result &&
-                 q.year === period;
-
-    }
-
-    if(category !== "전체"){
-
-        result = result &&
-                 q.category === category;
-
-    }
-
-    if(level !== "전체"){
-
-        result = result &&
-                 q.level === level;
-
-    }
-
-    return result;
-
-});
-
-
-
-    if(quizList.length===0){
-
-        alert(
-        "조건에 맞는 문제가 없습니다."
-        );
-
-        location.reload();
-
-        return;
-
-    }
-
-
-
-    shuffle(quizList);
-
-
-
-    quizList =
-    quizList.slice(
-        0,
-        Math.min(count, quizList.length)
+    console.log(
+        "AI 한국사 app.js 시작"
     );
 
 
 
-    currentQuestion=0;
+    initButtons();
 
-    score=0;
-
-    wrongAnswers=[];
-
-    userAnswers = new Array(quizList.length).fill(null);
-
-    showQuestion();
 
 
 };
-function createHistoryExam(allQuestions){
-
-
-let exam=[];
 
 
 
-Object.keys(examRule)
-.forEach(function(period){
 
+// =====================================
+// 버튼 연결
+// =====================================
 
-let list =
-allQuestions.filter(
-q=>q.period===period
-);
-
-
-shuffle(list);
-
-
-exam.push(
-...list.slice(
-0,
-examRule[period]
-)
-);
-
-
-});
+function initButtons(){
 
 
 
-if(exam.length < 50){
+    // -----------------------
+    // 시험 시작
+    // -----------------------
+
+    const startBtn =
+
+    document.getElementById(
+        "startBtn"
+    );
 
 
-let remain =
-allQuestions.filter(
-q=>!exam.includes(q)
-);
+    if(startBtn){
 
 
-shuffle(remain);
+        startBtn.onclick=function(){
 
 
-exam.push(
-...remain.slice(
-0,
-50-exam.length
-)
-);
+            const menu =
+
+            document.getElementById(
+                "settingMenu"
+            );
 
 
-}
+            if(menu){
 
+                menu.style.display="block";
 
+            }
 
-shuffle(exam);
-
-
-return exam;
-
-}
-function createQuestionNav(){
-
-    const nav =
-    document.getElementById("questionNav");
-
-
-    if(!nav) return;
-
-
-    nav.innerHTML="";
-
-
-    quizList.forEach(function(q,index){
-
-
-        const btn =
-        document.createElement("button");
-
-
-        btn.innerText =
-        index + 1;
-
-
-        btn.className="navBtn";
-
-
-        // 문제 이동
-        btn.onclick=function(){
-
-            currentQuestion = index;
-
-            showQuestion();
 
         };
 
 
-        // 기본색
-        btn.style.background="#eeeeee";
-
-
-        // 푼 문제 표시
-        if(userAnswers[index] !== null){
-
-            btn.style.background="#4CAF50";
-            btn.style.color="white";
-
-        }
-
-
-        // 현재 문제 표시
-        if(index === currentQuestion){
-
-            btn.style.background="#2196F3";
-            btn.style.color="white";
-
-        }
-
-
-        nav.appendChild(btn);
-
-
-    });
-
-
-}
-
-// 문제 표시
-function showQuestion(){
-    createQuestionNav();
-    const q = quizList[currentQuestion];
-    const img =
-document.getElementById("questionImage");
-
-if(q.image){
-
-    img.src = q.image;
-
-    img.style.display = "block";
-
-}else{
-
-    img.style.display = "none";
-
-}
-    q.count =
-(q.count || 0) + 1;
-    document.getElementById("progress").innerText =
-    `문제 ${currentQuestion + 1} / ${quizList.length}`;
-
-    document.getElementById("question").innerText =
-    q.question;
-
-    const choiceBox =
-    document.getElementById("choices");
-
-    choiceBox.innerHTML="";
-
-
-// 첫 문제에서는 이전 버튼 숨김
-if (currentQuestion === 0) {
-
-    document.getElementById("prevBtn").style.display = "none";
-
-} else {
-
-    document.getElementById("prevBtn").style.display = "inline-block";
-
-}
-
-    q.choices.forEach(function(choice,index){
-
-        const button =
-        document.createElement("button");
-
-        button.innerText =
-        `${index+1}. ${choice}`;
-
-        button.dataset.index = index;
-        if (userAnswers[currentQuestion] === index) {
-    button.style.background = "#2196F3";
-    button.style.color = "#fff";
-}
-       button.onclick = function () {
-
-    checkAnswer(index);
-
-};
-
-        choiceBox.appendChild(button);
-
-    });
-
-    document.getElementById("result").innerHTML="";
-
-    document.getElementById("nextBtn").style.display="none";
-    document.getElementById("submitBtn").style.display ="none";
-    let percent =
-    (currentQuestion / quizList.length) * 100;
-
-    document.getElementById("progressBar").style.width =
-    percent + "%";
-    document.querySelectorAll(".navBtn")
-.forEach(function(btn,index){
-
-
-    btn.style.background="#eee";
-
-
-    if(userAnswers[index] !== null){
-
-        btn.style.background="#4CAF50";
-        btn.style.color="#fff";
-
-    }
-
-
-    if(index === currentQuestion){
-
-        btn.style.background="#2196F3";
-        btn.style.color="#fff";
-
-    }
-
-
-});
-document.getElementById("bookmarkBtn").style.display = "inline-block";
-}
-
-function startTimer() {
-
-    clearInterval(timer);
-
-    updateTimer();
-
-    timer = setInterval(function () {
-
-        timeLeft--;
-
-        updateTimer();
-
-        if (timeLeft <= 0) {
-
-            clearInterval(timer);
-
-            alert("시험 시간이 종료되었습니다.");
-
-            saveResult();
-
-            showResult();
-
-        }
-
-    }, 1000);
-
-}
-
-function updateTimer() {
-
-    const min = String(Math.floor(timeLeft / 60)).padStart(2, "0");
-    const sec = String(timeLeft % 60).padStart(2, "0");
-
-    const timerElement =
-document.getElementById("timer");
-
-const timerBox =
-document.getElementById("timer");
-
-
-if(timerBox){
-
-    timerBox.innerText =
-}
-// 문제 이미지 표시
-
-const img =
-document.getElementById("questionImage");
-
-
-if(q.image && q.image !== ""){
-
-
-    img.src = q.image;
-
-    img.style.display="block";
-
-
-}else{
-
-
-    img.src="";
-
-    img.style.display="none";
-
-
-}
-
-
-// 정답 확인
-function checkAnswer(selected){
-
-    userAnswers[currentQuestion] = selected;
-
-
-    const q = quizList[currentQuestion];
-
-
-    if(selected === q.answer){
-
-
-        document.getElementById("result").innerHTML =
-
-        `
-        <p style="color:green;">
-        ⭕ 정답입니다!
-        </p>
-
-        <p>
-        ${q.explanation}
-        </p>
-        `;
-
-
-    }
-
-    else{
-
-
-        if (!wrongAnswers.some(item => item.question === q.question)) {
-
-            wrongAnswers.push(q);
-
-        }
-
-
-        document.getElementById("result").innerHTML =
-
-        `
-        <p style="color:red;">
-        ❌ 오답입니다.
-        </p>
-
-        <p>
-        정답 : ${q.choices[q.answer]}
-        </p>
-
-        <p>
-        ${q.explanation}
-        </p>
-        `;
-
-
     }
 
 
 
-    document.getElementById("nextBtn").style.display =
-    "block";
 
 
-    const buttons =
-    document.querySelectorAll("#choices button");
+    // -----------------------
+    // 설정 후 시험 시작
+    // -----------------------
 
+    const settingStartBtn =
 
-    buttons.forEach(function(btn){
-
-
-        const idx = Number(btn.dataset.index);
-
-
-        if(idx === q.answer){
-
-            btn.style.background = "#4CAF50";
-            btn.style.color = "#fff";
-
-        }
-
-
-        else if(idx === selected){
-
-            btn.style.background = "#E53935";
-            btn.style.color = "#fff";
-
-        }
-
-
-        else{
-
-            btn.style.opacity = "0.5";
-
-        }
-
-
-    });
-createQuestionNav();
-
-}
-
-// 다음 문제
-document.getElementById("nextBtn").onclick=function(){
-
-
-    currentQuestion++;
-
-if(currentQuestion < quizList.length){
-
-    showQuestion();
-
-}
-
-    else{
-
-    document.getElementById("submitBtn").style.display =
-    "block";
-
-}
-
-
-};
-
-
-
-// 결과 저장
-function saveResult(){
-
-
-    localStorage.setItem(
-
-        "wrongAnswers",
-
-        JSON.stringify(wrongAnswers)
-
-    );
-
-    // 취약 분야 분석 저장
-
-let weakCategory =
-JSON.parse(
-localStorage.getItem("weakCategory")
-)
-|| {};
-
-
-
-wrongAnswers.forEach(function(q){
-
-
-let c =
-q.category || "기타";
-
-
-if(!weakCategory[c]){
-
-weakCategory[c]=0;
-
-}
-
-
-weakCategory[c]++;
-
-
-});
-// Firebase 취약 분야 저장
-
-const user =
-auth.currentUser;
-
-
-if(user){
-
-
-let categoryData = {};
-
-
-quizList.forEach(function(q,index){
-
-
-let category =
-q.category || "기타";
-
-
-if(!categoryData[category]){
-
-categoryData[category]={
-
-total:0,
-
-correct:0
-
-};
-
-}
-
-
-categoryData[category].total++;
-
-
-if(userAnswers[index] === q.answer){
-
-categoryData[category].correct++;
-
-}
-
-
-});
-
-
-
-Object.keys(categoryData)
-.forEach(function(category){
-
-
-const data =
-categoryData[category];
-
-
-db.collection("users")
-.doc(user.uid)
-.collection("categoryStats")
-.doc(category)
-.set({
-
-category:category,
-
-total:data.total,
-
-correct:data.correct,
-
-updated:new Date()
-
-
-},{merge:true});
-
-
-});
-
-
-}
-
-
-localStorage.setItem(
-
-"weakCategory",
-
-JSON.stringify(weakCategory)
-
-);
-
-
-    const history =
-
-    JSON.parse(
-
-        localStorage.getItem("quizHistory")
-
-    ) || [];
-
-
-
-    history.push({
-
-date:
-new Date().toLocaleString(),
-
-score:
-score,
-
-total:
-quizList.length,
-
-percent:
-Math.round(
-score / quizList.length * 100
-),
-
-
-category:
-
-quizList.map(function(q){
-
-return q.category;
-
-})
-
-});
-
-// 로그인 사용자 확인 후 저장
-
-
-if(user){
-
-
-    // 시험 기록 저장
-
-    db.collection("users")
-    .doc(user.uid)
-    .collection("quizHistory")
-    .add({
-
-    date:
-    new Date().toLocaleString(),
-
-    score:
-    score,
-
-    total:
-    quizList.length,
-
-
-    percent:
-    Math.round(
-        score / quizList.length * 100
-    ),
-
-
-    wrongCount:
-    wrongAnswers.length
-
-})
-    .then(()=>{
-
-        console.log(
-        "사용자 시험 기록 저장 완료"
-        );
-
-    });
-
-
-
-    // 오답 저장
-
-    if(wrongAnswers.length > 0){
-
-
-        wrongAnswers.forEach(function(q){
-
-
-            db.collection("users")
-            .doc(user.uid)
-            .collection("wrongAnswers")
-            .add({
-
-    questionId:
-    q.id,
-
-    question:
-    q.question,
-
-    choices:
-    q.choices,
-
-    answer:
-    q.answer,
-
-    explanation:
-    q.explanation,
-
-    date:
-    new Date().toLocaleString()
-
-});
-
-
-        });
-
-
-    }
-
-
-}
-
-
-    localStorage.setItem(
-
-        "quizHistory",
-
-        JSON.stringify(history)
-
+    document.getElementById(
+        "settingStartBtn"
     );
 
 
-}
+    if(settingStartBtn){
+
+
+        settingStartBtn.onclick=function(){
+
+
+            startNormalQuiz();
+
+
+        };
+
+
+    }
 
 
 
-// 결과 화면
-function showResult(){
-
-    clearInterval(timer);
 
 
-    const percent =
-    Math.round(
-        score / quizList.length * 100
+    // -----------------------
+    // 시험 기록
+    // -----------------------
+
+    const historyBtn =
+
+    document.getElementById(
+        "historyBtn"
     );
 
 
-    const wrongCount =
-    quizList.length - score;
+    if(historyBtn){
 
+
+        historyBtn.onclick=function(){
+
+            loadHistory();
+
+        };
+
+
+    }
+
+
+
+
+
+    // -----------------------
+    // 나의 시험 기록
+    // -----------------------
+
+    const myHistoryBtn =
+
+    document.getElementById(
+        "myHistoryBtn"
+    );
+
+
+    if(myHistoryBtn){
+
+
+        myHistoryBtn.onclick=function(){
+
+            loadHistory();
+
+        };
+
+
+    }
+
+
+
+
+
+    // -----------------------
+    // 오답노트
+    // -----------------------
+
+    const wrongBtn =
+
+    document.getElementById(
+        "wrongNoteBtn"
+    );
+
+
+    if(wrongBtn){
+
+
+        wrongBtn.onclick=function(){
+
+            loadWrongNote();
+
+        };
+
+
+    }
+
+
+
+
+
+    // -----------------------
+    // 오답 다시 풀기
+    // -----------------------
+
+    const wrongQuizBtn =
+
+    document.getElementById(
+        "wrongQuizBtn"
+    );
+
+
+    if(wrongQuizBtn){
+
+
+        wrongQuizBtn.onclick=function(){
+
+
+            retryAllWrong();
+
+
+        };
+
+
+    }
+
+
+
+
+
+    // -----------------------
+    // 즐겨찾기 목록
+    // -----------------------
+
+    const bookmarkListBtn =
+
+    document.getElementById(
+        "bookmarkListBtn"
+    );
+
+
+    if(bookmarkListBtn){
+
+
+        bookmarkListBtn.onclick=function(){
+
+
+            loadBookmarks();
+
+
+        };
+
+
+    }
+    // -----------------------
+    // AI 추천 시험
+    // -----------------------
+
+    const aiBtn =
+
+    document.getElementById(
+        "aiRecommendBtn"
+    );
+
+
+    if(aiBtn){
+
+
+        aiBtn.onclick=function(){
+
+
+            startAIRecommend();
+
+
+        };
+
+
+    }
+
+
+
+
+
+    // -----------------------
+    // 학습 리포트
+    // -----------------------
+
+    const reportBtn =
+
+    document.getElementById(
+        "reportBtn"
+    );
+
+
+    if(reportBtn){
+
+
+        reportBtn.onclick=function(){
+
+
+            loadReport();
+
+
+        };
+
+
+    }
+
+
+
+
+
+    // -----------------------
     // 취약 분야 분석
+    // -----------------------
 
-let weakCategory = {};
+    const weakBtn =
+
+    document.getElementById(
+        "weakBtn"
+    );
 
 
-wrongAnswers.forEach(function(q){
-
-    const category =
-    q.category || "기타";
+    if(weakBtn){
 
 
-    if(!weakCategory[category]){
+        weakBtn.onclick=function(){
 
-        weakCategory[category] = 0;
+
+            showWeakAnalysis();
+
+
+        };
+
 
     }
 
 
-    weakCategory[category]++;
-
-});
 
 
 
-let weakText = "";
+    // -----------------------
+    // 즐겨찾기 버튼
+    // 퀴즈 화면
+    // -----------------------
+
+    initBookmark();
 
 
-Object.keys(weakCategory)
-.sort(function(a,b){
-
-    return weakCategory[b] - weakCategory[a];
-
-})
-.slice(0,3)
-.forEach(function(category,index){
 
 
-    weakText += `
 
-    <p>
+    // -----------------------
+    // 관리자 페이지
+    // -----------------------
 
-    ${index+1}위 :
-    ${category}
+    const adminBtn =
 
-    (${weakCategory[category]}문제 오답)
+    document.getElementById(
+        "adminBtn"
+    );
 
-    </p>
+
+    if(adminBtn){
+
+
+        adminBtn.onclick=function(){
+
+
+            location.href =
+            "admin/admin.html";
+
+
+        };
+
+
+    }
+
+
+}
+
+// =====================================
+// 취약 분야 표시
+// =====================================
+
+function showWeakAnalysis(){
+
+
+    const area =
+
+    document.getElementById(
+        "weakAnalysis"
+    );
+
+
+    if(!area) return;
+
+
+
+    if(typeof getWeakArea !== "function"){
+
+
+        area.innerHTML =
+
+        "분석 데이터가 없습니다.";
+
+
+        return;
+
+    }
+
+
+
+    const weak =
+    getWeakArea();
+
+
+
+    let html =
+
+    `
+
+    <h3>
+    📈 취약 분야 분석
+    </h3>
 
     `;
 
 
-});
 
+    weak.forEach(function(item,index){
 
-    const usedTime =
-    examSeconds - timeLeft;
 
+        html +=
 
-    const min =
-    Math.floor(usedTime / 60);
 
+        `
 
-    const sec =
-    usedTime % 60;
+        <p>
 
+        ${index+1}위
 
+        ${item.name}
 
-    let resultText =
-    percent >= 80
-    ? "합격"
-    : "불합격";
+        :
 
+        ${item.score}%
 
-    let color =
-    percent >= 80
-    ? "#4CAF50"
-    : "#E53935";
+        </p>
 
+        `;
 
-
-    document.querySelector(".container").innerHTML =
-
-
-`
-<div style="
-text-align:center;
-padding:30px;
-">
-
-
-<h1>
-시험 종료
-</h1>
-
-
-<h2 style="
-color:${color};
-font-size:40px;
-">
-
-${resultText}
-
-</h2>
-
-
-
-<div style="
-font-size:25px;
-margin:20px;
-">
-
-${score} / ${quizList.length}
-
-</div>
-
-
-
-<div style="
-background:#ddd;
-height:30px;
-border-radius:15px;
-overflow:hidden;
-margin:20px;
-">
-
-
-<div style="
-width:${percent}%;
-height:100%;
-background:${color};
-">
-
-</div>
-
-
-</div>
-
-
-
-<p>
-정답률 : ${percent}%
-</p>
-
-
-<p>
-⭕ 맞은 문제 : ${score}개
-</p>
-
-
-<p>
-❌ 틀린 문제 : ${wrongCount}개
-</p>
-
-
-<p>
-시험시간 :
-${min}분 ${sec}초
-</p>
-<hr>
-
-<h3>
-취약 분야 분석
-</h3>
-
-
-<div style="
-background:#f5f5f5;
-padding:15px;
-border-radius:10px;
-">
-
-
-${
-weakText
-||
-"전체 분야를 고르게 잘 풀었습니다."
-}
-
-
-</div>
-
-
-<button onclick="location.reload()">
-
-다시 시험
-
-</button>
-
-
-
-<button onclick="retryWrongQuestions()">
-
-오답 다시 풀기
-
-</button>
-
-
-<button onclick="
-document.getElementById('wrongNoteBtn').click();
-">
-
-오답노트 보기
-
-</button>
-
-</div>
-
-`;
-
-}
-
-// 시험 기록
-document.getElementById("historyBtn").onclick=function(){
-
-
-    const history =
-
-    JSON.parse(
-
-        localStorage.getItem("quizHistory")
-
-    ) || [];
-
-
-
-    if(history.length===0){
-
-        alert("시험 기록이 없습니다.");
-
-        return;
-
-    }
-
-
-
-    let text="시험 기록\n\n";
-
-
-
-    history.forEach(function(item,index){
-
-
-        text +=
-
-        `${index+1}회 : ${item.score}/${item.total}\n`;
-
-        text +=
-
-        `${item.date}\n\n`;
 
     });
 
 
 
-    alert(text);
+    area.innerHTML=html;
 
 
-};
-document.getElementById("weakBtn").onclick = async function(){
+}
 
-    const user = auth.currentUser;
-    loadWeakAnalysis();
+// =====================================
+// 일반 시험 시작
+// =====================================
 
-    if(!user){
+async function startNormalQuiz(){
 
-        alert(
-        "로그인이 필요합니다."
-        );
 
-        return;
-
-    }
+    let allQuestions = [];
 
 
     try{
 
 
-        const snapshot = await db.collection("users")
-        .doc(user.uid)
-        .collection("categoryStats")
+        const snapshot =
+
+        await db
+
+        .collection("questions")
+
         .get();
-
-
-
-        if(snapshot.empty){
-
-            alert(
-            "아직 학습 데이터가 없습니다."
-            );
-
-            return;
-
-        }
-
-
-
-        let text =
-        "📈 나의 한국사 학습 분석\n\n";
-
-
-        let weakField = "";
-        let lowestRate = 101;
 
 
 
         snapshot.forEach(function(doc){
 
 
-            const data =
+            const q =
             doc.data();
 
 
-
-            const accuracy =
-            Math.round(
-                data.correct /
-                data.total *
-                100
-            );
+            q.id =
+            doc.id;
 
 
-
-            let star;
-
-
-            if(accuracy >= 90){
-
-                star="★★★★★";
-
-            }
-            else if(accuracy >=70){
-
-                star="★★★★☆";
-
-            }
-            else if(accuracy >=50){
-
-                star="★★★☆☆";
-
-            }
-            else if(accuracy >=30){
-
-                star="★★☆☆☆";
-
-            }
-            else{
-
-                star="★☆☆☆☆";
-
-            }
-
-
-
-            text +=
-
-            data.category +
-            "\n" +
-
-            "응시 : " +
-            data.total +
-            "문제\n" +
-
-            "정답률 : " +
-            accuracy +
-            "%\n" +
-
-            "학습상태 : " +
-            star +
-            "\n\n";
-
-
-
-            if(accuracy < lowestRate){
-
-                lowestRate = accuracy;
-
-                weakField =
-                data.category;
-
-            }
+            allQuestions.push(q);
 
 
         });
 
 
 
-        text +=
-        "----------------\n";
-
-
-        text +=
-        "집중 학습 추천 : " +
-        weakField;
-
-
-
-        alert(text);
-
-
-
-    }
-    catch(error){
-
-
-        console.error(error);
-
-        alert(
-        "분석 데이터를 불러오지 못했습니다."
-        );
-
-
     }
 
-
-};
-
-// 분야별 문제(다음 버전)
-// 분야별 메뉴 열기
-
-document.getElementById("categoryBtn").onclick=function(){
-
-    document.getElementById("categoryMenu").style.display="block";
-
-};
+    catch(e){
 
 
-
-
-// 분야별 시험 시작
-
-document.querySelectorAll(".category")
-.forEach(function(button){
-
-
-    button.onclick = async function(){
-
-
-        const category =
-        this.dataset.category;
-
-
-
-        document.getElementById("mainMenu").style.display="none";
-
-        document.getElementById("quizScreen").style.display="block";
-
-
-
-        const all =
-await getAllQuestions();
-
-
-
-quizList =
-createHistoryExam(all);
-
-quizList = allQuestions.filter(function(q){
-    return q.category === category;
-});
-
-
-
-        shuffle(quizList);
-
-
-
-        quizList =
-        quizList.slice(
-            0,
-            Math.min(MAX_QUESTIONS, quizList.length)
-        );
-
-
-
-        currentQuestion=0;
-
-        score=0;
-
-        wrongAnswers=[];
-        userAnswers = new Array(quizList.length).fill(null);
-
-
-        if(quizList.length===0){
-
-            alert(
-            "해당 분야 문제가 없습니다."
-            );
-
-            location.reload();
-
-            return;
-
-        }
-
-
-
-        showQuestion();
-
-
-    };
-
-
-});
-
-function shareQuiz(){
-
-
-    if(navigator.share){
-
-
-        navigator.share({
-
-            title:
-            "AI 한국사 심화 퀴즈",
-
-            text:
-            "한국사 모의시험 결과 확인하기",
-
-            url:
-            location.href
-
-        });
-
-
-    }
-
-    else{
+        console.error(e);
 
 
         alert(
-        "공유 기능을 지원하지 않는 브라우저입니다."
+            "문제를 불러오지 못했습니다."
         );
 
-
-    }
-
-}
-
-// 회원가입
-
-document.getElementById("signupBtn")
-.onclick=function(){
-
-
-const email =
-document.getElementById("email").value;
-
-
-const password =
-document.getElementById("password").value;
-
-
-
-auth.createUserWithEmailAndPassword(
-    email,
-    password
-)
-
-.then(function(){
-
-    alert(
-    "회원가입 완료"
-    );
-
-})
-
-.catch(function(error){
-
-    alert(
-    error.message
-    );
-
-});
-
-
-};
-
-
-
-
-
-// 로그인
-
-document.getElementById("loginBtn")
-.onclick=function(){
-
-
-const email =
-document.getElementById("email").value;
-
-
-const password =
-document.getElementById("password").value;
-
-
-
-auth.signInWithEmailAndPassword(
-    email,
-    password
-)
-
-.then(function(userCredential){
-
-
-    alert(
-    "로그인 성공"
-    );
-
-
-
-    const user =
-    userCredential.user;
-
-
-
-    if(
-    user.email === "admin@historyquiz.com"
-    ){
-
-        document.getElementById("adminBtn")
-        .style.display="block";
-
-
-        console.log(
-        "관리자 로그인"
-        );
-
-    }
-
-
-})
-
-.catch(function(error){
-
-    alert(
-    error.message
-    );
-
-});
-
-
-};
-document.getElementById("myHistoryBtn")
-.onclick = function(){
-
-
-const user = auth.currentUser;
-
-
-if(!user){
-
-    alert(
-    "로그인이 필요합니다."
-    );
-
-    return;
-
-}
-
-
-
-db.collection("users")
-.doc(user.uid)
-.collection("quizHistory")
-.orderBy("date","desc")
-.get()
-
-.then(function(snapshot){
-
-
-let html =
-"<h2>나의 시험 기록</h2>";
-
-
-
-if(snapshot.empty){
-
-html +=
-"<p>시험 기록이 없습니다.</p>";
-
-}
-
-
-snapshot.forEach(function(doc){
-
-
-const data = doc.data();
-
-
-html += `
-
-<div>
-
-<p>
-날짜 : ${data.date}
-</p>
-
-
-<p>
-점수 :
-${data.score}/${data.total}
-</p>
-
-
-<p>
-오답 :
-${data.wrongCount}개
-</p>
-
-<hr>
-
-</div>
-
-`;
-
-
-});
-
-
-
-document.getElementById(
-"myHistory"
-).innerHTML = html;
-
-
-});
-
-
-};
-
-document.getElementById("wrongNoteBtn")
-.onclick=function(){
-
-
-const user = auth.currentUser;
-
-
-if(!user){
-
-alert(
-"로그인이 필요합니다."
-);
-
-return;
-
-}
-
-
-
-db.collection("users")
-.doc(user.uid)
-.collection("wrongAnswers")
-.get()
-
-.then(function(snapshot){
-
-
-let html =
-"<h2>오답노트</h2>";
-
-
-
-if(snapshot.empty){
-
-html +=
-"<p>오답 기록이 없습니다.</p>";
-
-}
-
-
-
-snapshot.forEach(function(doc){
-
-
-const q =
-doc.data();
-
-
-
-html += `
-
-<div>
-
-<h3>
-${q.question}
-</h3>
-
-
-<p>
-정답 :
-${q.choices[q.answer]}
-</p>
-
-
-<p>
-해설 :
-${q.explanation}
-</p>
-
-
-<hr>
-
-</div>
-
-`;
-
-
-
-});
-
-
-
-document.getElementById(
-"wrongNote"
-).innerHTML = html;
-
-
-
-});
-
-
-};
-
-document.getElementById("wrongQuizBtn")
-.onclick = function(){
-
-
-const user = auth.currentUser;
-
-
-if(!user){
-
-alert(
-"로그인이 필요합니다."
-);
-
-return;
-
-}
-
-
-
-db.collection("users")
-.doc(user.uid)
-.collection("wrongAnswers")
-.get()
-
-.then(function(snapshot){
-
-
-let wrongList = [];
-
-
-
-snapshot.forEach(function(doc){
-
-
-const q = doc.data();
-q.id = doc.id;
-
-
-wrongList.push({
-
-question:
-q.question,
-
-
-choices:
-q.choices,
-
-
-answer:
-q.answer,
-
-
-explanation:
-q.explanation
-
-
-});
-
-
-});
-
-
-
-if(wrongList.length === 0){
-
-alert(
-"오답 문제가 없습니다."
-);
-
-return;
-
-}
-
-
-
-// 기존 문제 목록 교체
-
-quizList = wrongList;
-
-
-currentQuestion = 0;
-
-score = 0;
-
-wrongAnswers = [];
-
-
-
-mainMenu.style.display="none";
-
-quizScreen.style.display="block";
-
-
-
-showQuestion();
-
-
-});
-
-
-};
-document.getElementById("prevBtn").onclick = function () {
-
-    if (currentQuestion > 0) {
-
-        currentQuestion--;
-
-        showQuestion();
-
-    }
-
-};
-document.getElementById("submitBtn").onclick = function(){
-
-    let unanswered = [];
-
-    userAnswers.forEach(function(answer,index){
-
-        if(answer === null){
-
-            unanswered.push(index + 1);
-
-        }
-
-    });
-
-
-    if(unanswered.length > 0){
-
-        let check =
-        confirm(
-        "풀지 않은 문제가 있습니다.\n\n" +
-        "문제 번호 : " +
-        unanswered.join(", ") +
-        "\n\n제출하시겠습니까?"
-        );
-
-
-        if(!check){
-
-            return;
-
-        }
-
-    }
-
-
-    score = 0;
-
-    wrongAnswers = [];
-
-
-   quizList.forEach(function(q,index){
-
-
-    const isCorrect =
-    userAnswers[index] === q.answer;
-
-
-    const correct =
-userAnswers[index] === q.answer;
-
-
-if(selected === q.answer){
-
-
-    score++;
-
-
-}else{
-
-
-    wrongAnswers.push(q);
-
-
-
-    saveWrongAnswer(q);
-
-
-}
-
-
-// 분야별 통계 저장
-
-saveCategoryStats(
-    q,
-    correct
-);
-
-
-    saveQuestionStats(
-        q,
-        isCorrect
-    );
-
-
-});
-
-
-    saveResult();
-
-    showResult();
-
-
-};
-
-// AI 추천 시험
-
-document.getElementById("aiRecommendBtn")
-.onclick=function(){
-
-
-const user = auth.currentUser;
-
-
-if(!user){
-
-    alert("로그인이 필요합니다.");
-    return;
-
-}
-
-
-
-db.collection("users")
-.doc(user.uid)
-.collection("wrongAnswers")
-.get()
-
-.then(function(snapshot){
-
-
-let recommendList=[];
-
-
-
-snapshot.forEach(function(doc){
-
-
-const q=doc.data();
-
-
-recommendList.push({
-
-question:q.question,
-
-choices:q.choices,
-
-answer:q.answer,
-
-category:q.category,
-
-period:q.period,
-
-level:q.level,
-
-explanation:q.explanation
-
-});
-quizList = recommendList;
-
-
-currentQuestion = 0;
-
-score = 0;
-
-wrongAnswers = [];
-
-userAnswers =
-Array(quizList.length).fill(null);
-
-
-document.getElementById("mainMenu")
-.style.display="none";
-
-
-document.getElementById("quizScreen")
-.style.display="block";
-
-
-showQuestion();
-
-});
-
-
-
-if(recommendList.length===0){
-
-
-alert(
-"분석할 오답 데이터가 없습니다.\n먼저 시험을 응시해주세요."
-);
-
-
-return;
-
-}
-
-
-
-// 오답 기반 시험 생성
-
-
-shuffle(recommendList);
-
-
-quizList =
-recommendList.slice(0,10);
-
-
-
-currentQuestion=0;
-
-score=0;
-
-wrongAnswers=[];
-
-userAnswers =
-new Array(quizList.length).fill(null);
-
-
-
-mainMenu.style.display="none";
-
-quizScreen.style.display="block";
-
-
-showQuestion();
-
-
-
-});
-
-
-};
-
-// 학습 리포트
-
-document.getElementById("reportBtn")
-.onclick=function(){
-
-loadReport();
-const history =
-
-JSON.parse(
-localStorage.getItem("quizHistory")
-)
-|| [];
-
-
-
-const weakCategory =
-
-JSON.parse(
-localStorage.getItem("weakCategory")
-)
-|| {};
-
-
-
-if(history.length === 0){
-
-alert(
-"아직 시험 기록이 없습니다."
-);
-
-return;
-
-}
-
-
-
-// 총 응시 횟수
-
-let totalExam =
-history.length;
-
-
-
-// 평균 점수
-
-let avg =
-0;
-
-
-history.forEach(function(item){
-
-avg += item.percent || 0;
-
-});
-
-
-avg =
-Math.round(avg / totalExam);
-
-
-
-// 최고 점수
-
-let maxScore =
-Math.max.apply(null,
-
-history.map(function(item){
-
-return item.percent || 0;
-
-})
-
-);
-
-
-
-// 합격 횟수
-
-let passCount =
-
-history.filter(function(item){
-
-return (item.percent || 0) >= 80;
-
-}).length;
-
-
-
-let passRate =
-
-Math.round(
-(passCount / totalExam) * 100
-);
-
-
-
-// 취약 분야 정렬
-
-
-let weakList =
-
-Object.keys(weakCategory);
-
-
-
-weakList.sort(function(a,b){
-
-return weakCategory[b]-weakCategory[a];
-
-});
-
-
-
-let weakText =
-
-weakList
-.slice(0,3)
-.map(function(item,index){
-
-return (
-
-(index+1)
-+". "
-+
-item
-+
-" (오답 "
-+
-weakCategory[item]
-+
-"개)"
-
-);
-
-})
-.join("<br>");
-
-
-
-if(weakText===""){
-
-weakText="분석 데이터 없음";
-
-}
-
-
-
-// 결과 출력
-
-
-document.getElementById("reportBox")
-.innerHTML =
-
-
-`
-
-<div style="
-background:#f5f5f5;
-padding:20px;
-margin-top:20px;
-border-radius:10px;
-">
-
-
-<h2>
-📊 나의 학습 리포트
-</h2>
-
-
-<p>
-총 응시 횟수 :
-<b>${totalExam}회</b>
-</p>
-
-
-<p>
-평균 정답률 :
-<b>${avg}%</b>
-</p>
-
-
-<p>
-최고 기록 :
-<b>${maxScore}%</b>
-</p>
-
-
-<p>
-합격률 :
-<b>${passRate}%</b>
-</p>
-
-
-
-<hr>
-
-
-<h3>
-취약 분야 TOP 3
-</h3>
-
-
-<p>
-${weakText}
-</p>
-
-
-
-<hr>
-
-
-<h3>
-추천 학습 방향
-</h3>
-
-
-<p>
-
-${avg >= 80 ?
-
-"현재 수준이 안정적입니다. 고난도 문제 풀이를 추천합니다."
-
-:
-
-"취약 분야 반복 학습 후 모의시험을 다시 진행하세요."
-
-}
-
-</p>
-
-
-</div>
-
-`;
-
-
-
-};
-// 관리자 메뉴 열기
-
-document.getElementById("adminBtn")
-.onclick=function(){
-
-let password =
-prompt("관리자 비밀번호 입력");
-
-
-if(password === "1234"){
-
-document.getElementById("adminMenu")
-.style.display="block";
-
-
-loadAdminQuestions();
-
-
-}
-
-else{
-
-alert("관리자 권한 없음");
-
-}
-
-};
-
-// 문제 저장
-
-document.getElementById("saveQuestionBtn")
-.onclick=function(){
-
-
-const newQuestion = {
-
-    question:
-    document.getElementById("adminQuestion").value,
-
-
-    choices:[
-
-        document.getElementById("choice1").value,
-
-        document.getElementById("choice2").value,
-
-        document.getElementById("choice3").value,
-
-        document.getElementById("choice4").value
-
-    ],
-
-
-    answer:
-    Number(
-        document.getElementById("adminAnswer").value
-    ),
-
-
-    explanation:
-    document.getElementById("adminExplain").value,
-
-
-    category:
-    document.getElementById("adminCategory").value,
-
-
-    period:
-    document.getElementById("adminPeriod").value,
-
-
-    level:
-    document.getElementById("adminLevel").value,
-
-
-    image:
-    document.getElementById("adminImage").value,
-
-
-    createdAt:
-    new Date().toISOString()
-
-};
-
-
-// 브라우저 저장
-
-let list =
-JSON.parse(
-localStorage.getItem("questions")
-) || [];
-
-
-list.push(newQuestion);
-
-
-localStorage.setItem(
-"questions",
-JSON.stringify(list)
-);
-
-
-// Firebase 저장
-
-db.collection("questions")
-.then(function(){
-
-    alert("문제 저장 완료");
-
-    loadAdminQuestions();
-
-})
-
-.catch(function(error){
-
-    console.error(
-        "Firebase 저장 오류",
-        error
-    );
-
-});
-
-
-};
-
-// 등록 문제 보기
-
-async function loadAdminQuestions(){
-
-    const list =
-    document.getElementById("questionList");
-
-
-    if(!list) return;
-
-
-    list.innerHTML="";
-
-
-    const snapshot =
-    await db.collection("questions").get();
-
-
-
-    snapshot.forEach(function(doc){
-
-
-        const q = doc.data();
-
-
-        const div =
-        document.createElement("div");
-
-
-        div.className="questionBox";
-
-
-        div.innerHTML = `
-
-        <b>${q.question}</b>
-        <br>
-
-        분야 : ${q.category}
-        /
-        시대 : ${q.period}
-        /
-        난이도 : ${q.level}
-
-        <br><br>
-
-
-        <button onclick="
-        editQuestion('${doc.id}')
-        ">
-        수정
-        </button>
-
-
-        <button onclick="
-        deleteQuestion('${doc.id}')
-        ">
-        삭제
-        </button>
-
-
-        `;
-
-
-        list.appendChild(div);
-
-
-    });
-
-
-}
-
-
-function deleteQuestion(id){
-
-
-if(!confirm("삭제하시겠습니까?")){
-    return;
-}
-
-
-db.collection("questions")
-.doc(id)
-.delete()
-
-.then(function(){
-
-    alert("삭제 완료");
-
-    loadAdminQuestions();
-
-})
-
-.catch(function(error){
-
-    console.error(
-        "삭제 오류",
-        error
-    );
-
-});
-
-
-}
-
-function startBookmarkQuiz(index){
-
-    const bookmarks =
-    JSON.parse(localStorage.getItem("bookmarks")) || [];
-
-    quizList = [ bookmarks[index] ];
-
-    currentQuestion = 0;
-
-    score = 0;
-
-    wrongAnswers = [];
-
-    userAnswers = [null];
-
-    mainMenu.style.display = "none";
-
-    quizScreen.style.display = "block";
-
-    showQuestion();
-}
-
-function editQuestion(id){
-
-    db.collection("questions")
-    .doc(id)
-    .get()
-    .then(function(doc){
-
-        const q = doc.data();
-        q.id = doc.id;
-
-        document.getElementById("adminQuestion").value = q.question;
-
-document.getElementById("choice1").value = q.choices[0];
-document.getElementById("choice2").value = q.choices[1];
-document.getElementById("choice3").value = q.choices[2];
-document.getElementById("choice4").value = q.choices[3];
-
-document.getElementById("adminAnswer").value = q.answer;
-
-document.getElementById("adminCategory").value = q.category;
-
-document.getElementById("adminLevel").value = q.level;
-
-document.getElementById("adminExplain").value = q.explanation || "";
-
-document.getElementById("adminImage").value = q.image || "";
-
-        window.editDocId = id;
-
-    });
-
-}
-
-function saveQuestionStats(q,isCorrect){
-
-
-    if(!q.id){
 
         return;
 
     }
 
 
-    db.collection("users")
-.doc(user.uid)
-.collection("stats")
-    .set({
-
-        question:
-        q.question,
-
-        category:
-        q.category || "기타",
-
-        total:
-        firebase.firestore.FieldValue.increment(1),
 
 
-        correct:
-        firebase.firestore.FieldValue.increment(
-            isCorrect ? 1 : 0
-        ),
 
+    // 선택값
 
-        wrong:
-        firebase.firestore.FieldValue.increment(
-            isCorrect ? 0 : 1
-        )
+    const period =
 
-    },
-    {
-        merge:true
-    });
+    document.getElementById(
+        "periodSelect"
+    ).value;
 
-
-}
-
-function saveCategoryStats(q, correct){
-
-
-    const user =
-    auth.currentUser;
-
-
-    if(!user){
-
-        return;
-
-    }
 
 
     const category =
-    q.category || "기타";
 
-
-    const ref =
-
-    db.collection("users")
-    .doc(user.uid)
-    .collection("categoryStats")
-    .doc(category);
+    document.getElementById(
+        "categorySelect"
+    ).value;
 
 
 
-    ref.set({
+    const level =
 
-        category:
-
-        category,
-
-
-        total:
-
-        firebase.firestore.FieldValue.increment(1),
+    document.getElementById(
+        "levelSelect"
+    ).value;
 
 
-        correct:
 
-        firebase.firestore.FieldValue.increment(
-            correct ? 1 : 0
-        ),
+    const count =
 
+    Number(
 
-        wrong:
+    document.getElementById(
+        "countSelect"
+    ).value
 
-        firebase.firestore.FieldValue.increment(
-            correct ? 0 : 1
-        )
+    );
 
 
-    },
-    {
-        merge:true
+
+
+
+    // 필터 적용
+
+    let filtered =
+
+    allQuestions.filter(function(q){
+
+
+
+        let ok=true;
+
+
+
+        if(
+            period !== "전체" &&
+            q.period !== period
+        ){
+
+            ok=false;
+
+        }
+
+
+
+        if(
+            category !== "전체" &&
+            q.category !== category
+        ){
+
+            ok=false;
+
+        }
+
+
+
+        if(
+            level !== "전체" &&
+            q.level !== level
+        ){
+
+            ok=false;
+
+        }
+
+
+
+        return ok;
+
+
     });
 
 
-}
 
-async function editQuestion(id){
 
 
-    const doc =
-    await db.collection("questions")
-    .doc(id)
-    .get();
+    // 문제 부족하면 전체 사용
 
+    if(filtered.length < count){
 
-    const q = doc.data();
 
-
-
-    document.getElementById("adminQuestion").value =
-    q.question;
-
-
-    document.getElementById("choice1").value =
-    q.choices[0];
-
-
-    document.getElementById("choice2").value =
-    q.choices[1];
-
-
-    document.getElementById("choice3").value =
-    q.choices[2];
-
-
-    document.getElementById("choice4").value =
-    q.choices[3];
-
-
-    document.getElementById("adminAnswer").value =
-    q.answer;
-
-
-    document.getElementById("adminCategory").value =
-    q.category;
-
-
-    document.getElementById("adminPeriod").value =
-    q.period;
-
-
-    document.getElementById("adminLevel").value =
-    q.level;
-
-
-    document.getElementById("adminExplain").value =
-    q.explanation || "";
-
-
-    document.getElementById("adminImage").value =
-    q.image || "";
-
-
-
-    window.editDocId=id;
-
-
-}
-
-async function deleteQuestion(id){
-
-
-    const check =
-    confirm(
-    "문제를 삭제하시겠습니까?"
-    );
-
-
-    if(!check) return;
-
-
-
-    await db.collection("questions")
-    .doc(id)
-    .delete();
-
-
-
-    alert(
-    "삭제 완료"
-    );
-
-
-    loadAdminQuestions();
-
-
-}
-
-// 로그인 상태 확인 및 관리자 버튼 표시
-
-auth.onAuthStateChanged(function(user){
-
-
-    const adminBtn =
-    document.getElementById("adminBtn");
-
-
-    if(!adminBtn) return;
-
-
-
-    if(user){
-
-
-        console.log(
-            "로그인 사용자:",
-            user.email
-        );
-
-
-
-        // 관리자 이메일 확인
-
-        if(
-        user.email === "admin@historyquiz.com"
-        ){
-
-            adminBtn.style.display="block";
-
-
-            console.log(
-                "관리자 권한 활성화"
-            );
-
-        }
-
-
-    }
-    else{
-
-
-        adminBtn.style.display="none";
+        filtered =
+        allQuestions;
 
 
     }
 
 
-});
 
-auth.onAuthStateChanged(async function(user){
 
-    const btn =
-    document.getElementById("adminBtn");
+    shuffleArray(filtered);
 
 
-    if(!btn) return;
 
+    quizList =
 
-    if(user){
-
-
-        const doc =
-        await db.collection("users")
-        .doc(user.uid)
-        .get();
-
-
-
-        if(
-            doc.exists &&
-            doc.data().role==="admin"
-        ){
-
-            btn.style.display="block";
-
-        }
-
-    }
-
-
-});
-
-document.getElementById("submitBtn")
-.onclick=function(){
-
-
-let correct=0;
-
-
-quizList.forEach(function(q,index){
-
-
-if(
-userAnswers[index]
-===
-q.answer
-){
-
-correct++;
-
-}
-
-
-});
-
-
-let score =
-Math.round(
-correct /
-quizList.length *
-100
-);
-
-
-
-alert(
-
-"시험 종료\n\n"+
-"점수 : "+
-score+
-"점\n"+
-"정답 : "+
-correct+
-"개"
-
-);
-
-
-
-saveExamResult(
-score,
-correct
-);
-
-
-};
-
-function getGrade(score){
-
-
-if(score>=90)
-return "1급";
-
-if(score>=80)
-return "2급";
-
-if(score>=70)
-return "3급";
-
-return "불합격";
-
-
-}
-
-async function saveExamResult(
-score,
-correct
-){
-
-
-const user =
-auth.currentUser;
-
-
-if(!user){
-
-console.log(
-"로그인 사용자 아님"
-);
-
-return;
-
-}
-
-
-
-const weak =
-analyzeWeakArea();
-
-
-
-await db.collection("users")
-.doc(user.uid)
-.collection("quizHistory")
-.add({
-
-score:score,
-
-correct:correct,
-
-total:quizList.length,
-
-
-grade:getGrade(score),
-
-
-weakCategory:
-weak.category,
-
-
-weakPeriod:
-weak.period,
-
-
-date:
-new Date()
-
-
-});
-
-
-console.log(
-"시험 결과 저장 완료"
-);
-
-
-}
-
-function analyzeWeakArea(){
-
-
-let category={};
-
-let period={};
-
-
-
-quizList.forEach(function(q,index){
-
-
-if(
-userAnswers[index]
-!==q.answer
-){
-
-
-category[q.category]
-=
-(category[q.category]||0)+1;
-
-
-period[q.period]
-=
-(period[q.period]||0)+1;
-
-
-}
-
-
-});
-
-
-
-return {
-
-
-category:
-Object.keys(category)
-.sort(
-(a,b)=>category[b]-category[a]
-)
-.slice(0,3),
-
-
-period:
-Object.keys(period)
-.sort(
-(a,b)=>period[b]-period[a]
-)
-.slice(0,3)
-
-
-
-};
-
-
-}
-
-async function loadMyHistory(){
-
-
-const user =
-auth.currentUser;
-
-
-if(!user){
-
-alert(
-"로그인이 필요합니다."
-);
-
-return;
-
-}
-
-
-
-const snapshot =
-await db.collection("users")
-.doc(user.uid)
-.collection("quizHistory")
-.orderBy(
-"date",
-"desc"
-)
-.get();
-
-
-
-let html =
-"<h2>시험 기록</h2>";
-
-
-
-snapshot.forEach(function(doc){
-
-
-const q =
-doc.data();
-
-
-
-html += `
-
-<div class="questionBox">
-
-
-<h3>
-${q.score}점
-(${q.grade})
-</h3>
-
-
-<p>
-정답 :
-${q.correct}/${q.total}
-</p>
-
-
-<p>
-취약 분야 :
-${q.weakCategory.join(",")}
-</p>
-
-
-<p>
-취약 시대 :
-${q.weakPeriod.join(",")}
-</p>
-
-
-</div>
-
-`;
-
-
-
-});
-
-
-document.getElementById(
-"myHistory"
-)
-.innerHTML=html;
-
-
-}
-
-function saveWrongAnswer(q){
-
-
-const user = auth.currentUser;
-
-
-if(!user){
-
-    console.log(
-    "로그인 사용자 아님"
+    filtered.slice(
+        0,
+        count
     );
 
-    return;
-
-}
 
 
-
-db.collection("users")
-.doc(user.uid)
-.collection("wrongAnswers")
-.add({
+    currentQuestion=0;
 
 
-question:
-q.question,
+    score=0;
 
 
-choices:
-q.choices,
+    wrongAnswers=[];
 
 
-answer:
-q.answer,
 
 
-explanation:
-q.explanation || "",
+
+    // 화면 이동
+
+    document
+
+    .getElementById(
+        "mainMenu"
+    )
+
+    .style.display="none";
 
 
-category:
-q.category || "",
+
+    document
+
+    .getElementById(
+        "quizScreen"
+    )
+
+    .style.display="block";
 
 
-period:
-q.period || "",
 
-
-level:
-q.level || "",
-
-
-date:
-new Date()
-
-
-})
-
-.then(function(){
-
-
-console.log(
-"오답 저장 완료"
-);
-
-
-})
-
-.catch(function(error){
-
-
-console.error(
-"오답 저장 오류",
-error
-);
-
-
-});
+    showQuestion();
 
 
 }
 
-async function loadWeakAnalysis(){
-
-
-const user =
-auth.currentUser;
-
-
-if(!user){
-
-alert(
-"로그인이 필요합니다."
-);
-
-return;
-
-}
-
-
-
-const snapshot =
-await db.collection("users")
-.doc(user.uid)
-.collection("quizHistory")
-.get();
-
-
-
-let category={};
-
-let period={};
-
-
-
-snapshot.forEach(function(doc){
-
-
-const data =
-doc.data();
-
-
-
-(data.weakCategory || [])
-.forEach(function(c){
-
-category[c]
-=
-(category[c]||0)+1;
-
-});
-
-
-
-(data.weakPeriod || [])
-.forEach(function(p){
-
-period[p]
-=
-(period[p]||0)+1;
-
-});
-
-
-});
-
-
-
-let html = `
-
-<h2>
-📈 취약 분야 분석
-</h2>
-
-<h3>
-분야별 약점
-</h3>
-
-`;
-
-
-
-Object.keys(category)
-.sort(
-(a,b)=>category[b]-category[a]
-)
-.forEach(function(c,index){
-
-
-html += `
-
-<p>
-${index+1}위.
-${c}
-:
-${category[c]}회 오답
-</p>
-
-`;
-
-});
-
-
-
-html += `
-
-<h3>
-시대별 약점
-</h3>
-
-`;
-
-
-
-Object.keys(period)
-.sort(
-(a,b)=>period[b]-period[a]
-)
-.forEach(function(p,index){
-
-
-html += `
-
-<p>
-${index+1}위.
-${p}
-:
-${period[p]}회 오답
-</p>
-
-`;
-
-});
-
-
-
-document.getElementById(
-"weakAnalysis"
-)
-.innerHTML=html;
-
-
-}
-
-async function loadReport(){
-
-
-const user =
-auth.currentUser;
-
-
-if(!user){
-
-alert(
-"로그인이 필요합니다."
-);
-
-return;
-
-}
-
-
-
-const snapshot =
-await db.collection("users")
-.doc(user.uid)
-.collection("quizHistory")
-.orderBy("date")
-.get();
-
-
-
-let labels=[];
-
-let scores=[];
-
-
-
-snapshot.forEach(function(doc){
-
-
-const data =
-doc.data();
-
-
-labels.push(
-new Date(
-data.date.seconds*1000
-)
-.toLocaleDateString()
-);
-
-
-scores.push(
-data.score
-);
-
-
-});
-
-
-
-document.getElementById(
-"reportChart"
-)
-.innerHTML=`
-
-<h2>
-점수 변화
-</h2>
-
-<canvas id="scoreChart"></canvas>
-
-`;
-
-
-
-new Chart(
-
-document.getElementById(
-"scoreChart"
-),
-
-{
-
-type:"line",
-
-
-data:{
-
-
-labels:labels,
-
-
-datasets:[{
-
-label:"시험 점수",
-
-data:scores,
-
-
-borderColor:"#2196F3",
-
-backgroundColor:
-"rgba(33,150,243,0.2)",
-
-
-tension:0.3
-
-}]
-
-},
-
-
-options:{
-
-
-responsive:true,
-
-
-scales:{
-
-
-y:{
-
-beginAtZero:true,
-
-max:100
-
-}
-
-
-}
-
-
-}
-
-}
-
-
-);
-
-
-
-}

@@ -1,57 +1,56 @@
 <!DOCTYPE html>
+
 <html lang="ko">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>AI 한국사 심화 퀴즈</title>
+<meta charset="UTF-8">
 
-    <link rel="stylesheet" href="frontend/style.css">
-
-    <meta name="description"
-content="한국사능력검정시험 심화 대비 랜덤 모의고사">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-<meta property="og:title"
-content="AI 한국사 심화 퀴즈">
+<title>
+AI 한국사 심화 퀴즈
+</title>
 
 
-<meta property="og:description"
-content="한국사 문제은행 기반 온라인 모의시험">
+<link rel="stylesheet" href="frontend/style.css">
 
 
-<meta property="og:type"
-content="website">
+<meta name="description"
+content="한국사능력검정시험 심화 대비 AI 문제은행">
+
 
 </head>
 
+
 <body>
+
+
 <div class="container">
 
-    <button id="myHistoryBtn">
-    나의 시험 기록
-    </button>
 
-<div id="myHistory"></div>
 
-    
-    <div id="mainMenu">
+<!-- =================================
+로그인 영역
+================================= -->
 
-        <div id="loginBox">
+<div id="loginBox">
+
 
 <h3>
-로그인
+🔐 로그인
 </h3>
 
 
 <input 
 id="email"
+type="email"
 placeholder="이메일"
 >
 
 
-<input 
+<input
 id="password"
 type="password"
 placeholder="비밀번호"
@@ -59,12 +58,16 @@ placeholder="비밀번호"
 
 
 <button id="signupBtn">
+
 회원가입
+
 </button>
 
 
 <button id="loginBtn">
+
 로그인
+
 </button>
 
 
@@ -74,262 +77,665 @@ placeholder="비밀번호"
 </div>
 
 
-        <h1>AI 한국사 심화 퀴즈</h1>
-
-        <p>
-            한국사능력검정시험 심화 대비
-        </p>
-
-        <button id="startBtn">
-            📝 랜덤 모의고사
-        </button>
-
-                <div id="settingMenu" style="display:none;">
-
-            <h3>시험 설정</h3>
-
-
-            <p>시대 선택</p>
-
-            <select id="periodSelect">
-
-                <option value="전체">
-                    전체
-                </option>
-
-                <option value="고대">
-                    고대
-                </option>
-
-                <option value="고려">
-                    고려
-                </option>
-
-                <option value="조선">
-                    조선
-                </option>
-
-                <option value="근현대">
-                    근현대
-                </option>
-
-            </select>
 
 
 
-            <p>분야 선택</p>
+<!-- =================================
+메인 화면
+================================= -->
 
-            <select id="categorySelect">
 
-                <option value="전체">
-                    전체
-                </option>
-
-                <option value="정치">
-                    정치
-                </option>
-
-                <option value="경제">
-                    경제
-                </option>
-
-                <option value="사회">
-                    사회
-                </option>
-
-                <option value="문화">
-                    문화
-                </option>
-
-            </select>
+<div id="mainMenu">
 
 
 
-            <p>난이도</p>
-
-            <select id="levelSelect">
-
-                <option value="전체">
-                    전체
-                </option>
-
-                <option value="중">
-                    중
-                </option>
-
-                <option value="상">
-                    상
-                </option>
-
-            </select>
+<h1>
+AI 한국사 심화 퀴즈
+</h1>
 
 
 
-            <p>문제 수</p>
-
-            <select id="countSelect">
-
-                <option value="10">
-                    10문제
-                </option>
-
-                <option value="20">
-                    20문제
-                </option>
-
-                <option value="50">
-                    50문제
-                </option>
-
-            </select>
+<p>
+한국사능력검정시험 심화 대비
+</p>
 
 
-            <button id="settingStartBtn">
-                시험 시작
-            </button>
 
 
-        </div>
 
-        <button id="wrongNoteBtn">
-오답노트
+<!-- 랜덤 시험 -->
+
+<button id="startBtn">
+
+📝 랜덤 모의고사
+
 </button>
 
 
-<div id="wrongNote"></div>
-<button id="wrongQuizBtn">
-오답 다시 풀기
+
+
+
+
+<!-- =================================
+시험 설정
+================================= -->
+
+
+<div id="settingMenu"
+style="display:none;">
+
+
+
+<h3>
+시험 설정
+</h3>
+
+
+
+
+<p>
+시대 선택
+</p>
+
+
+<select id="periodSelect">
+
+
+<option value="전체">
+
+전체
+
+</option>
+
+
+<option value="고대">
+
+고대
+
+</option>
+
+
+<option value="고려">
+
+고려
+
+</option>
+
+
+<option value="조선">
+
+조선
+
+</option>
+
+
+<option value="근현대">
+
+근현대
+
+</option>
+
+
+</select>
+
+
+
+
+
+<p>
+분야 선택
+</p>
+
+
+<select id="categorySelect">
+
+
+<option value="전체">
+
+전체
+
+</option>
+
+
+<option value="정치">
+
+정치
+
+</option>
+
+
+<option value="경제">
+
+경제
+
+</option>
+
+
+<option value="사회">
+
+사회
+
+</option>
+
+
+<option value="문화">
+
+문화
+
+</option>
+
+
+</select>
+
+
+
+
+
+<p>
+난이도
+</p>
+
+
+<select id="levelSelect">
+
+
+<option value="전체">
+
+전체
+
+</option>
+
+
+<option value="중">
+
+중
+
+</option>
+
+
+<option value="상">
+
+상
+
+</option>
+
+
+</select>
+
+
+
+
+
+<p>
+문제 수
+</p>
+
+
+<select id="countSelect">
+
+
+<option value="10">
+
+10문제
+
+</option>
+
+
+<option value="20">
+
+20문제
+
+</option>
+
+
+<option value="50">
+
+50문제
+
+</option>
+
+
+</select>
+
+
+
+
+<button id="settingStartBtn">
+
+시험 시작
+
 </button>
 
 
-        <button id="categoryBtn">
-            📖 분야별 문제
-        </button>
-            <div id="categoryMenu" style="display:none;">
 
-                <h3>분야 선택</h3>
+</div>
 
-                <button class="category" data-category="고대">
-                    고대사
-                </button>
 
-                <button class="category" data-category="고려">
-                    고려사
-                </button>
 
-                <button class="category" data-category="조선">
-                    조선사
-                </button>
 
-                <button class="category" data-category="근현대">
-                    근현대사
-                </button>
 
-                <button class="category" data-category="문화">
-                    문화사
-                </button>
 
-            </div>
+<hr>
 
-        <button id="aiRecommendBtn">
 
-AI 추천 시험
 
-</button>    
+
+
+<!-- =================================
+학습 메뉴
+================================= -->
+
+
+
+<button id="aiRecommendBtn">
+
+🤖 AI 추천 시험
+
+</button>
+
+
 
 <button id="historyBtn">
+
 📊 시험 기록
+
 </button>
+
+
+
+<button id="myHistoryBtn">
+
+📋 나의 시험 기록
+
+</button>
+
+
+
+<button id="reportBtn">
+
+📈 학습 리포트
+
+</button>
+
+
 
 <button id="weakBtn">
-📈 취약 분야 분석
+
+🎯 취약 분야 분석
+
 </button>
+
+
+
 <div id="weakAnalysis"></div>
 
+
+
+
+
+<!-- 분야별 -->
+
+<button id="categoryBtn">
+
+📖 분야별 문제
+
+</button>
+
+
+<div id="categoryMenu"
+style="display:none;">
+
+
+<h3>
+분야 선택
+</h3>
+
+
+<button class="category"
+data-category="고대">
+
+고대사
+
+</button>
+
+
+<button class="category"
+data-category="고려">
+
+고려사
+
+</button>
+
+
+<button class="category"
+data-category="조선">
+
+조선사
+
+</button>
+
+
+<button class="category"
+data-category="근현대">
+
+근현대사
+
+</button>
+
+
+<button class="category"
+data-category="문화">
+
+문화사
+
+</button>
+
+
+</div>
+
+<!-- =================================
+즐겨찾기
+================================= -->
+
+
 <button id="bookmarkListBtn">
+
 ⭐ 즐겨찾기
+
 </button>
 
-<div id="bookmarkList"></div>
-       <button id="reportBtn">
 
-학습 리포트
+<div id="bookmarkList">
 
-</button> 
-<div id="reportChart"></div>
-<hr>
 </div>
-<button id="adminBtn" style="display:none;">
+
+
+
+
+
+
+<!-- =================================
+오답노트
+================================= -->
+
+
+<button id="wrongNoteBtn">
+
+📒 오답노트
+
+</button>
+
+
+
+<div id="wrongNote">
+
+</div>
+
+
+
+<button id="wrongQuizBtn">
+
+🔄 오답 다시 풀기
+
+</button>
+
+
+
+
+
+
+
+<!-- =================================
+리포트
+================================= -->
+
+
+<div id="reportBox">
+
+</div>
+
+
+
+<div id="reportCharts">
+
+
+<h3>
+📊 학습 분석 그래프
+</h3>
+
+
+
+<canvas id="reportScoreChart">
+
+</canvas>
+
+
+
+<br>
+
+
+
+<canvas id="periodReportChart">
+
+</canvas>
+
+
+
+<br>
+
+
+
+<canvas id="categoryReportChart">
+
+</canvas>
+
+
+
+</div>
+
+
+
+
+
+
+<!-- 관리자 -->
+
+<button id="adminBtn"
+style="display:none;">
+
 관리자 문제 관리
+
 </button>
 
 
-<div id="reportBox"></div>
 
 
-    </div>
+</div>
+<!-- mainMenu 종료 -->
 
 
-    <!-- 퀴즈 화면 -->
-    <div id="quizScreen" style="display:none;">
-
-        <div id="progress">
-            <div id="timer">
-    ⏰ 남은시간 : 00:00
-</div>    
-            문제 1 / 10
-        </div>
-        <div id="questionNav"></div>
-
-        <!-- 진행률 -->
-        <div class="progress-box">
-
-            <div id="progressBar"></div>
-
-        </div>
 
 
-        <!-- 문제 -->
-        <h2 id="question"></h2>
-       
-
-        <!-- 문제 이미지 -->
-         <img
-id="questionImage"
-style="
-display:none;
-max-width:100%;
-margin:15px 0;
-border-radius:10px;
-">
 
 
-        <!-- 보기 -->
-        <div id="choices"></div>
+
+<!-- =================================
+퀴즈 화면
+================================= -->
 
 
-        <!-- 정답 결과 -->
-        <div id="result"></div>
-       <button id="bookmarkBtn" style="display:none;">
-⭐ 즐겨찾기
-</button>
+<div id="quizScreen"
+style="display:none;">
 
-     <button id="prevBtn" style="display:none;">
-    이전 문제
-</button>
 
-<button id="nextBtn" style="display:none;">
-    다음 문제
-</button>
-<button id="submitBtn" style="display:none;">
-시험 제출
-</button>
 
-    
+<div id="progress">
+
+
+<div id="timer">
+
+⏰ 남은시간 : 00:00
 
 </div>
 
 
+
+문제 진행
+
+</div>
+
+
+
+
+
+<!-- 문제 번호 -->
+
+<div id="questionNav">
+
+</div>
+
+
+
+
+
+<!-- 진행률 -->
+
+<div class="progress-box">
+
+
+<div id="progressBar">
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<!-- 문제 -->
+
+<h2 id="question">
+
+</h2>
+
+
+
+
+
+
+
+<!-- 이미지 -->
+
+<img
+
+id="questionImage"
+
+style="
+
+display:none;
+
+max-width:100%;
+
+margin:15px 0;
+
+border-radius:10px;
+
+"
+
+>
+
+
+
+
+
+
+
+<!-- 보기 -->
+
+<div id="choices">
+
+</div>
+
+
+
+
+
+
+
+
+<!-- 결과 -->
+
+<div id="result">
+
+</div>
+
+
+
+
+
+
+
+<!-- 즐겨찾기 -->
+
+<button id="bookmarkBtn"
+style="display:none;">
+
+⭐ 즐겨찾기
+
+</button>
+
+
+
+
+
+
+<!-- 이전 -->
+
+<button id="prevBtn"
+style="display:none;">
+
+이전 문제
+
+</button>
+
+
+
+
+
+
+
+<!-- 다음 -->
+
+<button id="nextBtn"
+style="display:none;">
+
+다음 문제
+
+</button>
+
+
+
+
+
+
+
+<!-- 제출 -->
+
+<button id="submitBtn"
+style="display:none;">
+
+시험 제출
+
+</button>
+
+
+
+</div>
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -339,20 +745,38 @@ border-radius:10px;
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
 
+<!-- Firebase 설정 -->
 <script src="frontend/firebase-config.js"></script>
 
+
+<!-- 문제 데이터 -->
 <script src="questions/questions.js"></script>
+
+
+<!-- Chart -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<!-- 기능 파일 -->
+<script src="frontend/utils.js"></script>
+
+<script src="frontend/auth.js"></script>
+
+<script src="frontend/quiz.js"></script>
+
+<script src="frontend/history.js"></script>
+
+<script src="frontend/bookmark.js"></script>
+
+<script src="frontend/wrongnote.js"></script>
+
+<script src="frontend/report.js"></script>
+
+<script src="frontend/ai.js"></script>
+
+
+<!-- 메인 -->
 <script src="frontend/app.js"></script>
-
-
-<script>
-
-document.getElementById("adminBtn").onclick=function(){
-
-    location.href="admin/admin.html";
-};
-</script>
 
 
 </body>
