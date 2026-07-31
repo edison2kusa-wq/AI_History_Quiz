@@ -381,7 +381,7 @@ function nextQuestion(){
 // 정답 확인
 // ===========================================
 
-function checkAnswer(selected){
+async function checkAnswer(selected){
 
     if(answered) return;
 
@@ -401,39 +401,40 @@ function checkAnswer(selected){
     });
 
     // 정답 표시
-    buttons[q.answer].style.background = "#4CAF50";
-    buttons[q.answer].style.color = "#ffffff";
+buttons[q.answer].style.background = "#4CAF50";
+buttons[q.answer].style.color = "#ffffff";
 
-    // 오답 표시
-    if(selected === q.answer){
+// 오답 표시
+if(selected !== q.answer){
+
+    buttons[selected].style.background = "#F44336";
+    buttons[selected].style.color = "#ffffff";
+
+}
+
+if(selected === q.answer){
 
     score++;
 
-}
-else{
+}else{
 
     wrongAnswers.push(q);
 
 }
 
-    `
-    <h3>
+$("result").innerHTML = `
+<h3>
+${selected === q.answer ? "✅ 정답입니다." : "❌ 오답입니다."}
+</h3>
 
-    ${selected === q.answer ? "✅ 정답입니다." : "❌ 오답입니다."}
+<p>
+${q.explanation || ""}
+</p>
+`;
 
-    </h3>
+await saveQuestionResult(q, selected);
 
-    <p>
-
-    ${q.explanation || ""}
-
-    </p>
-    `;
-
-    // 통계 저장
-    saveQuestionResult(q, selected);
-
-    if(selected !== q.answer){
+if(selected !== q.answer){
 
     saveWrongAnswer(q, selected);
 
