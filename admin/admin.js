@@ -758,51 +758,213 @@ document.getElementById(
 
     }
 
-    async function loadDashboard() {
+    async function loadDashboard(){
 
-        // 문제 수
-        const questionSnap =
-            await db.collection("questions").get();
+    // 문제 수
+    const questionSnap =
+    await db.collection("questions").get();
 
-        document.getElementById("totalQuestion").innerText =
-            questionSnap.size;
 
-        // 회원 수
-        const userSnap =
-            await db.collection("users").get();
+    document.getElementById("totalQuestion").innerText =
+    questionSnap.size;
 
-        document.getElementById("totalUser").innerText =
-            userSnap.size;
 
-        let examCount = 0;
-        let wrongCount = 0;
 
-        for (const user of userSnap.docs) {
+    // 회원 수
+    const userSnap =
+    await db.collection("users").get();
 
-            const quizSnap =
-                await db.collection("users")
-                    .doc(user.id)
-                    .collection("quizHistory")
-                    .get();
 
-            examCount += quizSnap.size;
+    document.getElementById("totalUser").innerText =
+    userSnap.size;
 
-            quizSnap.forEach(function (doc) {
 
-                wrongCount +=
-                    doc.data().wrongCount || 0;
 
-            });
+    let examCount = 0;
 
-        }
+    let wrongCount = 0;
 
-        document.getElementById("totalExam").innerText =
-            examCount;
+    let totalPercent = 0;
 
-        document.getElementById("totalWrong").innerText =
-            wrongCount;
+    let percentCount = 0;
+
+
+
+    for(const user of userSnap.docs){
+
+
+        const quizSnap =
+        await db.collection("users")
+        .doc(user.id)
+        .collection("quizHistory")
+        .get();
+
+
+
+        examCount += quizSnap.size;
+
+
+
+        quizSnap.forEach(function(doc){
+
+
+            const data =
+            doc.data();
+
+
+
+            wrongCount +=
+            data.wrongCount || 0;
+
+
+
+            if(data.percent !== undefined){
+
+                totalPercent += data.percent;
+
+                percentCount++;
+
+            }
+
+
+        });
+
 
     }
+
+
+
+    document.getElementById("totalExam").innerText =
+    examCount;
+
+
+
+    document.getElementById("totalWrong").innerText =
+    wrongCount;
+
+
+
+    const avg =
+
+    percentCount > 0
+    ?
+    Math.round(totalPercent / percentCount)
+    :
+    0;
+
+
+
+    const avgBox =
+    document.getElementById("avgScore");
+
+
+    if(avgBox){
+
+        avgBox.innerText =
+        avg + "%";
+
+    }
+
+
+
+    // 문제 통계 분석
+
+    const statSnap =
+    await db.collection("questionStats").get();
+
+
+
+    let popular=[];
+
+    let difficult=[];
+
+
+
+    statSnap.forEach(function(doc){
+
+
+        const q =
+        doc.data();
+
+
+
+        const total =
+        q.total || 0;
+
+
+
+        const wrong =
+        q.wrong || 0;
+
+
+
+        const rate =
+        total > 0
+        ?
+        Math.round(
+            wrong / total * 100
+        )
+        :
+        0;
+
+
+
+        popular.push({
+
+            question:
+            q.question,
+
+            count:
+            total
+
+        });
+
+
+
+        difficult.push({
+
+            question:
+            q.question,
+
+            rate:
+            rate
+
+        });
+
+
+    });
+
+
+
+    popular.sort(function(a,b){
+
+        return b.count-a.count;
+
+    });
+
+
+
+    difficult.sort(function(a,b){
+
+        return b.rate-a.rate;
+
+    });
+
+
+
+    console.log(
+        "인기 문제 TOP5",
+        popular.slice(0,5)
+    );
+
+
+    console.log(
+        "난이도 TOP5",
+        difficult.slice(0,5)
+    );
+
+
+}
 
     async function uploadImage() {
 
@@ -1002,82 +1164,250 @@ document.getElementById(
 
     async function loadPeriodAnalysis() {
 
-        const snapshot =
-            await db.collection("questionStats").get();
 
-
-        const result = {};
-
-
-        snapshot.forEach(function (doc) {
-
-            const q = doc.data();
-
-            const period =
-                q.period || "기타";
-
-
-            if (!result[period]) {
-
-                result[period] = {
-                    total: 0,
-                    wrong: 0
-                };
-
-            }
-
-
-            result[period].total += q.total || 0;
-
-            result[period].wrong += q.wrong || 0;
-
-
-        });
+    const snapshot =
+    await db.collection("questionStats").get();
 
 
 
-        let html = "<h3>시대별 오답률</h3>";
+    const result = {};
 
 
-        Object.keys(result).forEach(function (key) {
+
+    snapshot.forEach(function(doc){
 
 
-            const rate =
-
-                result[key].total > 0
-
-                    ?
-
-                    Math.round(
-                        result[key].wrong /
-                        result[key].total *
-                        100
-                    )
-
-                    :
-
-                    0;
+        const q =
+        doc.data();
 
 
-            html += `
+
+        const period =
+        q.period || "기타";
+
+
+
+        if(!result[period]){
+
+
+            result[period]={
+
+                total:0,
+
+                correct:0,
+
+                wrong:0
+
+            };
+
+
+        }
+
+
+
+        result[period].total +=
+        q.total || 0;
+
+
+
+        result[period].correct +=
+        q.correct || 0;
+
+
+
+        result[period].wrong +=
+        q.wrong || 0;
+
+
+
+    });
+
+
+
+    let html =
+
+    `
+
+    <h3>
+    📊 시대별 학습 분석
+    </h3>
+
+    `;
+
+
+
+    let weakPeriod = "";
+
+    let maxWrong = 0;
+
+
+
+    Object.keys(result).forEach(function(key){
+
+
+
+        const data =
+        result[key];
+
+
+
+        const wrongRate =
+
+        data.total > 0
+
+        ?
+
+        Math.round(
+            data.wrong /
+            data.total *
+            100
+        )
+
+        :
+
+        0;
+
+
+
+        const correctRate =
+
+        data.total > 0
+
+        ?
+
+        Math.round(
+            data.correct /
+            data.total *
+            100
+        )
+
+        :
+
+        0;
+
+
+
+        if(wrongRate > maxWrong){
+
+            maxWrong =
+            wrongRate;
+
+            weakPeriod =
+            key;
+
+        }
+
+
+
+        let status = "";
+
+
+        if(wrongRate >= 60){
+
+            status =
+            "⚠ 집중 학습 필요";
+
+        }
+
+        else if(wrongRate >=40){
+
+            status =
+            "△ 보완 필요";
+
+        }
+
+        else{
+
+            status =
+            "○ 양호";
+
+        }
+
+
+
+        html +=
+
+
+        `
+
+        <div class="questionBox">
+
+
+        <h4>
+        ${key}
+        </h4>
+
 
         <p>
-        ${key} :
-        ${rate}%
+        총 풀이 :
+        ${data.total}회
         </p>
+
+
+        <p>
+        정답률 :
+        ${correctRate}%
+        </p>
+
+
+        <p>
+        오답률 :
+        ${wrongRate}%
+        </p>
+
+
+        <p>
+        상태 :
+        ${status}
+        </p>
+
+
+        </div>
+
 
         `;
 
 
-        });
+    });
 
 
-        document.getElementById(
-            "analysisResult"
-        ).innerHTML += html;
 
+    html +=
+
+
+    `
+
+    <h3>
+    🎯 최우선 학습 시대
+    </h3>
+
+
+    <p>
+
+    ${weakPeriod || "데이터 부족"}
+
+    </p>
+
+    `;
+
+
+
+    const area =
+    document.getElementById(
+        "analysisResult"
+    );
+
+
+
+    if(area){
+
+        area.innerHTML =
+        html;
 
     }
+
+
+}
 
 /*
 auth.onAuthStateChanged(async function(user){
@@ -1130,3 +1460,296 @@ window.editQuestion = editQuestion;
 window.deleteQuestion = deleteQuestion;
 window.loadQuestionAnalysis = loadQuestionAnalysis;
 window.loadPeriodAnalysis = loadPeriodAnalysis;
+
+// =====================================
+// 문제 난이도 자동 분석
+// =====================================
+
+async function loadDifficultyAnalysis(){
+
+
+    const snapshot =
+    await db.collection("questionStats").get();
+
+
+
+    let list = [];
+
+
+
+    snapshot.forEach(function(doc){
+
+
+        const q =
+        doc.data();
+
+
+
+        const total =
+        q.total || 0;
+
+
+        const wrong =
+        q.wrong || 0;
+
+
+
+        if(total === 0){
+
+            return;
+
+        }
+
+
+
+        const wrongRate =
+
+        Math.round(
+            wrong /
+            total *
+            100
+        );
+
+
+
+        let level = "";
+
+
+
+        if(wrongRate >= 80){
+
+            level = "최상";
+
+        }
+
+        else if(wrongRate >= 60){
+
+            level = "상";
+
+        }
+
+        else if(wrongRate >= 40){
+
+            level = "중";
+
+        }
+
+        else{
+
+            level = "하";
+
+        }
+
+
+
+        list.push({
+
+            question:
+            q.question,
+
+
+            category:
+            q.category || "",
+
+
+            period:
+            q.period || "",
+
+
+            wrongRate:
+            wrongRate,
+
+
+            level:
+            level
+
+        });
+
+
+    });
+
+
+
+    // 어려운 문제 순 정렬
+
+    list.sort(function(a,b){
+
+        return b.wrongRate - a.wrongRate;
+
+    });
+
+
+
+    let html =
+
+    `
+
+    <h3>
+    📌 문제 난이도 분석
+    </h3>
+
+    `;
+
+
+
+    list.slice(0,10)
+
+    .forEach(function(q,index){
+
+
+        html +=
+
+
+        `
+
+        <div class="questionBox">
+
+        <h4>
+        ${index+1}. ${q.level} 난이도
+        </h4>
+
+
+        <p>
+        ${q.question}
+        </p>
+
+
+        <p>
+        시대 :
+        ${q.period}
+        </p>
+
+
+        <p>
+        분야 :
+        ${q.category}
+        </p>
+
+
+        <p>
+        오답률 :
+        ${q.wrongRate}%
+        </p>
+
+
+        </div>
+
+
+        `;
+
+
+    });
+
+
+
+    const area =
+
+    document.getElementById(
+        "difficultyResult"
+    );
+
+
+
+    if(area){
+
+        area.innerHTML =
+        html;
+
+    }
+
+
+}
+
+// =====================================
+// 문제 품질 분석
+// =====================================
+
+async function loadQualityAnalysis(){
+
+    const list = questionCache;
+
+
+    let imageMissing = 0;
+    let explanationMissing = 0;
+    let unused = 0;
+    let highWrong = 0;
+
+
+    let gradeA = 0;
+    let gradeB = 0;
+    let gradeC = 0;
+
+
+    for(const q of list){
+
+
+        // 이미지 없는 문제
+        if(!q.image || q.image===""){
+            imageMissing++;
+        }
+
+
+        // 해설 없는 문제
+        if(!q.explanation || q.explanation===""){
+            explanationMissing++;
+        }
+
+
+        let score = 0;
+
+
+        // 이미지 있음
+        if(q.image){
+            score += 20;
+        }
+
+
+        // 해설 있음
+        if(q.explanation){
+            score += 30;
+        }
+
+
+        // 키워드 있음
+        if(
+            q.keywords &&
+            q.keywords.length>0
+        ){
+            score += 20;
+        }
+
+
+        // 통계 확인
+        const stat =
+        await db.collection("questionStats")
+        .doc(q.id)
+        .get();
+
+
+        if(stat.exists){
+
+            const data =
+            stat.data();
+
+
+            if(data.total){
+
+                score += 30;
+
+
+                const rate =
+                data.wrong /
+                data.total *
+                100;
+
+
+                if(rate>=70){
+
+                    highWrong++;
+
+                }
+
+            }
+
+
+        }

@@ -436,7 +436,7 @@ await saveQuestionResult(q, selected);
 
 if(selected !== q.answer){
 
-    saveWrongAnswer(q, selected);
+    await saveWrongAnswer(q, selected);
 
 }
 
@@ -923,62 +923,52 @@ function(){
 
 async function saveWrongAnswer(q, selected){
 
-
     const user = auth.currentUser;
-
 
     if(!user) return;
 
 
-    await db.collection("users")
-
+    const ref = db.collection("users")
     .doc(user.uid)
-
-    .collection("wrongAnswers")
-
-    .add({
-
-        questionId:
-        q.id,
+    .collection("wrongAnswers");
 
 
-        question:
-        q.question,
+    const old =
+    await ref
+    .where("questionId","==",q.id)
+    .get();
 
 
-        choices:
-        q.choices,
+    if(!old.empty){
+
+        return;
+
+    }
 
 
-        answer:
-        q.answer,
+    await ref.add({
 
+        questionId:q.id,
 
-        selected:
-        selected,
+        question:q.question,
 
+        choices:q.choices,
 
-        category:
-        q.category || "",
+        answer:q.answer,
 
+        selected:selected,
 
-        period:
-        q.period || "",
+        category:q.category || "",
 
+        period:q.period || "",
 
-        level:
-        q.level || "",
+        level:q.level || "",
 
-
-        explanation:
-        q.explanation || "",
-
+        explanation:q.explanation || "",
 
         created:
         firebase.firestore.FieldValue.serverTimestamp()
 
-
     });
-
 
 }

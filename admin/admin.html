@@ -422,7 +422,13 @@ CSV 다운로드
 <div id="analysisResult">
 
 </div>
+<div id="qualityAnalysis">
 
+</div>
+
+<div id="difficultyResult">
+
+</div>
 <div id="pageArea">
 
 <button id="prevPageBtn">
@@ -440,7 +446,22 @@ CSV 다운로드
 </div>
 
 </div>
+<div class="card">
 
+<h3 id="avgScore">
+0%
+</h3>
+
+<p>
+평균 정답률
+</p>
+
+</div>
+<button onclick="loadQualityAnalysis()">
+
+📚 문제 품질 분석
+
+</button>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
