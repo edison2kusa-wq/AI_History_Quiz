@@ -605,6 +605,7 @@ async function submitExam() {
     await saveQuizHistory();
 
     showReport();
+    
 
 }
 
