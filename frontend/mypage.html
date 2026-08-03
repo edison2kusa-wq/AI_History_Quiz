@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>
+AI 한국사 마이페이지
+</title>
+
+
+<link rel="stylesheet" href="style.css">
+
+
+</head>
+
+
+<body>
+
+
+<h1>
+📊 나의 한국사 학습 대시보드
+</h1>
+
+
+<div class="dashboard">
+
+
+<div class="card">
+
+<p>
+총 응시 횟수
+</p>
+
+<h2 id="totalExam">
+0
+</h2>
+
+</div>
+
+
+
+<div class="card">
+
+<p>
+평균 점수
+</p>
+
+<h2 id="avgScore">
+0%
+</h2>
+
+</div>
+
+
+
+<div class="card">
+
+<p>
+오답 개수
+</p>
+
+<h2 id="wrongCount">
+0
+</h2>
+
+</div>
+
+
+
+<div class="card">
+
+<p>
+즐겨찾기
+</p>
+
+<h2 id="bookmarkCount">
+0
+</h2>
+
+</div>
+
+
+</div>
+
+
+
+<hr>
+
+
+<h2>
+📈 점수 변화
+</h2>
+
+
+<canvas id="scoreChart"></canvas>
+
+
+
+<hr>
+
+
+<h2>
+⚠ 취약 시대 분석
+</h2>
+
+
+<div id="weakArea">
+
+</div>
+
+
+
+<hr>
+
+
+<h2>
+🤖 AI 학습 추천
+</h2>
+
+
+<div id="recommendArea">
+
+</div>
+<hr>
+
+<h2>
+🎯 AI 추천 문제
+</h2>
+
+
+<div id="recommendQuestions">
+
+</div>
+<div class="card">
+
+<p>
+나의 등급
+</p>
+
+<h2 id="userLevel">
+
+Lv.1
+
+</h2>
+
+</div>
+
+
+<div class="card">
+
+<p>
+학습 포인트
+</p>
+
+<h2 id="userPoint">
+
+0
+
+</h2>
+
+</div>
+
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+
+<script src="firebase-config.js"></script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script src="mypage.js"></script>
+
+
+</body>
+
+</html>

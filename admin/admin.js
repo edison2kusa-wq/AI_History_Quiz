@@ -227,7 +227,18 @@ loadAIQuestionAnalysis;
     checkLogin();
 
 
+const aiBtn =
+document.getElementById(
+"aiGenerateBtn"
+);
 
+
+if(aiBtn){
+
+aiBtn.onclick =
+generateAIQuestion;
+
+}
 }
 
 
@@ -582,7 +593,9 @@ catch(e){
 
 async function saveQuestion(){
 
+    qualityScore:0,
 
+approved:false
     const data = {
 
 
@@ -628,6 +641,20 @@ async function saveQuestion(){
         source:
         getValue("source"),
 
+        sourceType:
+
+        getValue("sourceType"),
+
+
+        sourceYear:
+
+        getValue("sourceYear"),
+
+
+        reference:
+
+        getValue("reference"),
+
 
         keywords:
 
@@ -654,7 +681,25 @@ async function saveQuestion(){
     };
 
 
+    const duplicate =
 
+await checkDuplicateQuestion(
+data.question
+);
+
+
+if(duplicate){
+
+
+alert(
+"이미 등록된 문제입니다."
+);
+
+
+return;
+
+
+}
 
     try{
 
@@ -725,7 +770,16 @@ async function saveQuestion(){
 
 
     }
+concept:
+getValue("concept"),
 
+
+wrongPoint:
+getValue("wrongPoint"),
+
+
+memory:
+getValue("memory"),
 
 }
 
@@ -811,9 +865,30 @@ async function loadQuestions(){
 
 
 function renderQuestionList(list){
+<p>
 
+출처 :
 
+${q.sourceType || ""}
 
+${q.sourceYear || ""}
+
+</p>
+    <p>
+
+상태 :
+
+${q.approved ?
+
+"✅ 승인"
+
+:
+
+"⚠ 검토"
+
+}
+
+</p>
     let html="";
 
 
@@ -870,7 +945,11 @@ ${q.type || ""}
 삭제
 
 </button>
+<button onclick="approveQuestion('${q.id}')">
 
+승인
+
+</button>
 
 </div>
 
@@ -2651,6 +2730,260 @@ function showPage(id){
         "block";
 
     }
+
+
+}
+
+// ===========================================
+// AI 문제 생성
+// ===========================================
+
+
+async function generateAIQuestion(){
+
+
+const keyword =
+
+getValue(
+"aiKeyword"
+);
+
+
+
+const level =
+
+getValue(
+"aiLevel"
+);
+
+
+
+if(!keyword){
+
+alert(
+"키워드를 입력하세요."
+);
+
+return;
+
+}
+
+
+
+const result = {
+
+
+question:
+
+keyword+
+"에 대한 설명으로 옳은 것은?",
+
+
+
+choices:[
+
+"정답 보기 예시",
+
+"오답 보기 1",
+
+"오답 보기 2",
+
+"오답 보기 3"
+
+],
+
+
+answer:0,
+
+
+period:"조선",
+
+
+category:"문화",
+
+
+level:level,
+
+
+type:"AI생성",
+
+
+explanation:
+
+keyword+
+"와 관련된 역사적 사실을 이해하는 것이 중요합니다.",
+
+
+keywords:[keyword]
+
+
+};
+
+
+
+document.getElementById(
+"aiResult"
+)
+.innerHTML=
+
+`
+
+<h3>
+AI 생성 결과
+</h3>
+
+
+<p>
+${result.question}
+</p>
+
+
+<p>
+① ${result.choices[0]}
+</p>
+
+
+<p>
+② ${result.choices[1]}
+</p>
+
+
+<p>
+③ ${result.choices[2]}
+</p>
+
+
+<p>
+④ ${result.choices[3]}
+</p>
+
+
+<button onclick='saveAIQuestion(${JSON.stringify(result)})'>
+
+문제은행 저장
+
+</button>
+
+
+`;
+
+
+
+}
+
+async function saveAIQuestion(q){
+
+
+await db.collection(
+"questions"
+)
+.add({
+
+...q,
+
+created:
+
+firebase.firestore.FieldValue.serverTimestamp()
+
+});
+
+
+alert(
+"문제은행 저장 완료"
+);
+
+
+
+loadQuestions();
+
+
+}
+// ===========================================
+// 문제 중복 검사
+// ===========================================
+
+async function checkDuplicateQuestion(question){
+
+
+const snapshot =
+
+await db.collection(
+"questions"
+)
+.where(
+"question",
+"==",
+question
+)
+.get();
+
+
+
+return !snapshot.empty;
+
+
+}
+async function approveQuestion(id){
+
+
+await db.collection(
+"questions"
+)
+.doc(id)
+.update({
+
+approved:true,
+
+qualityScore:100
+
+
+});
+
+
+alert(
+"문제가 승인되었습니다."
+);
+
+
+loadQuestions();
+
+
+}
+async function analyzeSource(){
+
+
+const snap =
+
+await db.collection(
+"questions"
+)
+.get();
+
+
+let result={};
+
+
+
+snap.forEach(function(doc){
+
+
+const q =
+doc.data();
+
+
+const s =
+q.sourceType || "없음";
+
+
+result[s]=
+(result[s]||0)+1;
+
+
+});
+
+
+
+console.log(result);
 
 
 }

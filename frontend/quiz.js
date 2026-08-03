@@ -20,6 +20,25 @@ let timer = null;
 let timeLeft = 0;
 let examSeconds = 600;
 
+
+const MOCK_PATTERN = {
+
+    "선사":5,
+
+    "고대":10,
+
+    "고려":8,
+
+    "조선":15,
+
+    "개항기":5,
+
+    "일제강점기":5,
+
+    "현대":2
+
+};
+
 // ----------------------------
 // 초기화
 // ----------------------------
@@ -438,7 +457,7 @@ ${selected === q.answer ? "✅ 정답입니다." : "❌ 오답입니다."}
 ${q.explanation || ""}
 </p>
 `;
-
+showAIExplanation(q, selected);
 await saveQuestionResult(q, selected);
 
 if(selected !== q.answer){
@@ -449,12 +468,6 @@ if(selected !== q.answer){
 
     // 즐겨찾기 버튼
     show("bookmarkBtn");
-
-    $("bookmarkBtn").onclick = function(){
-
-        addBookmark(q);
-
-    };
 
     // 마지막 문제
     if(currentQuestion == quizList.length-1){
@@ -468,6 +481,13 @@ if(selected !== q.answer){
     }
 
     updateQuestionNav();
+    initBookmark();
+
+if(q.id){
+
+    checkBookmarkStatus(q.id);
+
+}
 
 }
 
@@ -513,6 +533,9 @@ async function saveQuestionResult(q, selected){
     },
     {
         merge:true
+        difficulty:
+
+q.level || "중",
     });
 
 
@@ -604,6 +627,8 @@ async function submitExam() {
 
     const percent =
         Math.round(score / quizList.length * 100);
+        const grade =
+calculateGrade(score);
 
     alert(
         `시험 종료\n\n점수 : ${score}/${quizList.length}\n정답률 : ${percent}%`
@@ -622,6 +647,7 @@ async function submitExam() {
 
 async function saveQuizHistory() {
 
+    await updateUserLevel();
     const user = auth.currentUser;
 
     if (!user) return;
@@ -671,6 +697,15 @@ correctCount:0,
 updated:
 firebase.firestore.FieldValue.serverTimestamp()
 
+examType:
+
+"모의고사",
+
+
+grade:
+
+calculateGrade(score),
+
 });
 
 }
@@ -687,6 +722,8 @@ function showReport() {
 
     const percent =
         Math.round(score / quizList.length * 100);
+        const grade =
+calculateGrade(score);
 
     $("reportBox").innerHTML =
        `
@@ -701,6 +738,17 @@ ${quizList.length}
 <p>
 정답률 :
 <b>${percent}%</b>
+</p>
+<p>
+
+예상 등급 :
+
+<b>
+
+${calculateGrade(score)}
+
+</b>
+
 </p>
 
 <p>
@@ -984,6 +1032,8 @@ function(user){
 
         loadWrongQuizMode();
 
+        loadRecommendMode();
+
     }
 
 });
@@ -1197,6 +1247,539 @@ function loadWrongQuizMode(){
 
 
     showQuestion();
+
+
+}
+
+async function loadRecommendMode(){
+
+
+const params =
+
+new URLSearchParams(
+location.search
+);
+
+
+const id =
+params.get(
+"recommend"
+);
+
+
+
+if(!id)return;
+
+
+
+const doc =
+
+await db.collection(
+"questions"
+)
+
+.doc(id)
+
+.get();
+
+
+
+if(!doc.exists)return;
+
+
+
+quizList=[doc.data()];
+
+
+currentQuestion=0;
+
+
+score=0;
+
+
+wrongAnswers=[];
+
+
+userAnswers=[null];
+
+
+hide("mainMenu");
+
+show("quizScreen");
+
+
+showQuestion();
+
+
+}
+// ===========================================
+// 모의고사 모드
+// ===========================================
+
+
+async function startMockExam(){
+
+
+quizList =
+await createMockExam();
+
+
+
+if(
+quizList.length < 50
+){
+
+alert(
+"문제가 부족합니다."
+);
+
+return;
+
+}
+
+
+
+currentQuestion=0;
+
+score=0;
+
+wrongAnswers=[];
+
+
+userAnswers =
+
+new Array(
+quizList.length
+)
+.fill(null);
+
+
+
+examSeconds =
+
+80 * 60;
+
+
+timeLeft =
+examSeconds;
+
+
+
+hide(
+"mainMenu"
+);
+
+
+show(
+"quizScreen"
+);
+
+
+
+buildQuestionNav();
+
+
+startTimer();
+
+
+showQuestion();
+
+
+
+}
+// ===========================================
+// 한능검 등급 계산
+// ===========================================
+
+
+function calculateGrade(score){
+
+
+if(score>=45){
+
+return "1급";
+
+}
+
+
+if(score>=40){
+
+return "2급";
+
+}
+
+
+if(score>=35){
+
+return "3급";
+
+}
+
+
+if(score>=25){
+
+return "4급";
+
+}
+
+
+if(score>=20){
+
+return "5급";
+
+}
+
+
+return "불합격";
+
+
+}
+// ===========================================
+// 한능검 스타일 시험 생성
+// ===========================================
+
+
+async function createMockExam(){
+
+
+let exam=[];
+
+
+
+for(
+const period in MOCK_PATTERN
+){
+
+
+const count =
+MOCK_PATTERN[period];
+
+
+
+const snapshot =
+
+await db.collection(
+"questions"
+)
+
+.where(
+"period",
+"==",
+period
+)
+
+.get();
+
+
+
+let list=[];
+
+
+
+snapshot.forEach(function(doc){
+
+
+let q =
+doc.data();
+
+
+q.id =
+doc.id;
+
+
+list.push(q);
+
+
+});
+
+
+
+// 랜덤
+
+list.sort(
+()=>Math.random()-0.5
+);
+
+
+
+// 필요한 수만 추가
+
+exam.push(
+...
+list.slice(0,count)
+);
+
+
+
+}
+
+
+
+// 배열 합치기
+
+exam =
+exam.flat();
+
+
+
+// 전체 랜덤
+
+exam.sort(
+()=>Math.random()-0.5
+);
+
+
+
+return exam;
+
+
+}
+// ===========================================
+// AI 한국사 선생님 해설
+// ===========================================
+
+
+function showAIExplanation(q,selected){
+
+
+const area =
+document.getElementById(
+"aiExplainBox"
+);
+
+
+
+if(!area)return;
+
+
+
+let result="";
+
+
+
+if(selected===q.answer){
+
+
+result=
+
+`
+
+<h3>
+🤖 AI 선생님
+</h3>
+
+
+<p>
+정답입니다.
+
+이 문제의 핵심 개념을 잘 이해했습니다.
+
+</p>
+
+
+<p>
+
+📌 핵심 키워드 :
+
+${q.keywords || ""}
+
+</p>
+
+`;
+
+
+
+}
+
+else{
+
+
+result=
+
+`
+
+<h3>
+🤖 AI 선생님 오답 분석
+</h3>
+
+
+<p>
+
+선택한 답 :
+
+${selected+1}번
+
+</p>
+
+
+<p>
+
+정답 :
+
+${q.answer+1}번
+
+</p>
+
+
+<p>
+
+틀린 이유 :
+
+보기의 핵심 개념을 다시 확인하세요.
+
+</p>
+
+
+<p>
+
+📚 학습 포인트 :
+
+${q.explanation || ""}
+
+</p>
+
+
+`;
+
+}
+
+
+area.innerHTML=result;
+
+
+}
+// ===========================================
+// 학습 포인트 계산
+// ===========================================
+
+
+async function updateUserLevel(){
+
+
+const user =
+auth.currentUser;
+
+
+if(!user)return;
+
+
+
+const ref =
+
+db.collection("users")
+
+.doc(user.uid);
+
+
+
+const snap =
+await ref.get();
+
+
+
+let point = 0;
+
+
+
+if(snap.exists &&
+snap.data().point){
+
+
+point =
+snap.data().point;
+
+
+}
+
+
+
+point += score * 10;
+
+
+
+let level =
+calculateUserLevel(point);
+
+
+
+await ref.set({
+
+point:point,
+
+
+level:level,
+
+
+lastStudy:
+
+firebase.firestore.FieldValue
+.serverTimestamp()
+
+
+},
+
+{
+
+merge:true
+
+});
+
+
+}
+function calculateUserLevel(point){
+
+
+if(point>=5000){
+
+return "Lv.5 한국사 전문가";
+
+}
+
+
+if(point>=3000){
+
+return "Lv.4 한능검 준비생";
+
+}
+
+
+if(point>=1500){
+
+return "Lv.3 한국사 도전자";
+
+}
+
+
+if(point>=500){
+
+return "Lv.2 한국사 학습자";
+
+}
+
+
+return "Lv.1 역사 입문자";
+
+
+}
+if(
+"serviceWorker" in navigator
+){
+
+
+navigator.serviceWorker.register(
+
+"service-worker.js"
+
+)
+
+.then(function(){
+
+console.log(
+"PWA 설치 준비 완료"
+);
+
+
+});
 
 
 }

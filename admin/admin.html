@@ -363,7 +363,43 @@ class="page">
 <section id="questionPage"
 class="page"
 style="display:none;">
+<hr>
 
+<h2>
+🤖 AI 문제 생성
+</h2>
+
+
+<input 
+id="aiKeyword"
+placeholder="예: 세종대왕 훈민정음">
+
+
+<select id="aiLevel">
+
+<option value="중">
+중급
+</option>
+
+<option value="상">
+상급
+</option>
+
+</select>
+
+
+
+<button id="aiGenerateBtn">
+
+AI 문제 생성
+
+</button>
+
+
+
+<div id="aiResult">
+
+</div>
 
 <h2>
 📝 문제 등록 관리
@@ -529,6 +565,36 @@ placeholder="보기 4">
 id="source"
 placeholder="출처">
 
+
+<select id="sourceType">
+
+<option value="기출">
+한국사능력검정 기출
+</option>
+
+<option value="교과서">
+한국사 교과서
+</option>
+
+<option value="자료">
+역사 자료
+</option>
+
+<option value="AI생성">
+AI 생성
+</option>
+
+</select>
+
+
+<input
+id="sourceYear"
+placeholder="출제년도">
+
+
+<input
+id="reference"
+placeholder="참고자료">
 
 <input
 id="keywords"
@@ -789,7 +855,19 @@ CSV 다운로드
 
 
 </section>
+<input
+id="concept"
+placeholder="핵심 개념">
 
+
+<input
+id="wrongPoint"
+placeholder="오답 포인트">
+
+
+<input
+id="memory"
+placeholder="암기법">
 
 <!-- ===================== -->
 <!-- 통계 페이지 -->
