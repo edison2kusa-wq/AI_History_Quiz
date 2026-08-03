@@ -746,7 +746,6 @@ async function loadQuestions(){
 
 
         const snapshot =
-
         await db.collection(
             "questions"
         )
