@@ -681,26 +681,24 @@ async function saveQuestion(){
         else{
 
 
-            data.created =
-            firebase.firestore
-            .FieldValue
-            .serverTimestamp();
+    data.created =
+    new Date();
 
 
 
-            await db.collection(
-                "questions"
-            )
-            .add(data);
+    await db.collection(
+        "questions"
+    )
+    .add(data);
 
 
 
-            alert(
-                "문제가 등록되었습니다."
-            );
+    alert(
+        "문제가 등록되었습니다."
+    );
 
 
-        }
+}
 
 
 
