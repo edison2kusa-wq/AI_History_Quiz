@@ -1678,9 +1678,7 @@ async function uploadCSV(){
 
                     created:
 
-                    firebase.firestore
-                    .FieldValue
-                    .serverTimestamp()
+                    new Date()
 
 
                 });
