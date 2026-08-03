@@ -925,3 +925,160 @@ function(){
 
 
 });
+
+// =====================================
+// AI 학습 코칭 리포트
+// =====================================
+
+function createAICoachingReport(){
+
+
+    const total =
+    quizList.length;
+
+
+    if(total===0){
+
+        return null;
+
+    }
+
+
+    const accuracy =
+
+    Math.round(
+
+        score /
+        total *
+        100
+
+    );
+
+
+
+    let level = "";
+
+    let message = "";
+
+
+
+    if(accuracy >= 90){
+
+        level = "최상급";
+
+        message =
+        "고난도 사료 분석과 기출 심화 학습을 추천합니다.";
+
+    }
+
+    else if(accuracy >= 75){
+
+        level = "상급";
+
+        message =
+        "기본 개념은 안정적이며 취약 시대 반복이 필요합니다.";
+
+    }
+
+    else if(accuracy >= 60){
+
+        level = "중급";
+
+        message =
+        "시대별 핵심 개념 정리가 필요합니다.";
+
+    }
+
+    else{
+
+        level = "기초";
+
+        message =
+        "기본 용어와 흐름 학습부터 권장합니다.";
+
+    }
+
+
+
+    const category = {};
+
+
+
+    quizList.forEach(function(q,index){
+
+
+        const c =
+        q.category || "기타";
+
+
+        if(!category[c]){
+
+            category[c]={
+                total:0,
+                correct:0
+            };
+
+        }
+
+
+        category[c].total++;
+
+
+        if(userAnswers[index]===q.answer){
+
+            category[c].correct++;
+
+        }
+
+
+    });
+
+
+
+    let weak = null;
+
+    let weakRate = 100;
+
+
+
+    Object.keys(category)
+    .forEach(function(key){
+
+
+        const rate =
+
+        category[key].correct /
+        category[key].total *
+        100;
+
+
+        if(rate < weakRate){
+
+            weakRate = rate;
+
+            weak = key;
+
+        }
+
+
+    });
+
+
+
+    return {
+
+        level:level,
+
+        accuracy:accuracy,
+
+        message:message,
+
+        weak:weak,
+
+        weakRate:
+        Math.round(weakRate)
+
+    };
+
+
+}

@@ -511,72 +511,141 @@ async function analyzeUserLevel(){
 // AI 추천 점수 계산
 // =====================================
 
-function calculateAIWeight(q, weakCategory, level){
+function calculateAIWeight(
+    q,
+    weakCategory,
+    level
+){
 
     let weight = 0;
 
 
     // 1. 개인 취약 분야
-    if(q.category === weakCategory){
-
-        weight += 50;
-
-    }
-
-
-    // 2. 사용자 수준 맞춤
-    if(q.level === level){
+    if(
+        q.category === weakCategory
+    ){
 
         weight += 30;
 
     }
 
 
-    // 3. 내가 틀린 문제
+
+    // 2. 난이도 맞춤
+
     if(
-        wrongAnswers.some(function(w){
-
-            return w.id === q.id;
-
-        })
+        q.level === level
     ){
 
-        weight += 100;
+        weight += 10;
 
     }
 
 
-    // 4. 전체 사용자 오답률 반영
-    if(q.wrongCount){
 
-        weight += q.wrongCount * 5;
+    // 3. 전체 오답률
 
-    }
+    if(
+        q.solveCount > 0
+    ){
+
+        const wrongRate =
+
+        (
+            q.wrongCount /
+            q.solveCount
+        )
+        *100;
 
 
-    // 5. 많이 출제된 문제 우선
-    if(q.solveCount){
 
         weight += Math.min(
-            q.solveCount,
+            wrongRate,
             20
         );
 
     }
 
 
-    // 6. 오래 안 푼 문제 보정
-    if(q.updated){
+
+    // 4. 많이 틀린 개인 문제
+
+    if(
+        wrongAnswers &&
+        wrongAnswers.length
+    ){
+
+
+        const exist =
+
+        wrongAnswers.some(
+            function(w){
+
+                return w.id === q.id;
+
+            }
+        );
+
+
+        if(exist){
+
+            weight += 30;
+
+        }
+
+    }
+
+
+
+    // 5. 중요 문제
+
+    if(
+        q.type === "기출"
+    ){
+
+        weight += 10;
+
+    }
+
+
+    if(
+        q.type === "예상"
+    ){
 
         weight += 5;
 
     }
 
 
-    return weight;
+
+    // 6. 오래된 미학습 문제
+
+    if(q.updated){
+
+        const days =
+
+        (
+            Date.now()
+            -
+            q.updated.toDate()
+        )
+        /
+        86400000;
+
+
+        if(days>30){
+
+            weight += 10;
+
+        }
+
+    }
+
+
+
+    return Math.round(weight);
 
 }
-
 // =====================================
 // 추천 결과 메시지
 // =====================================
@@ -925,50 +994,116 @@ function(){
 
 function getQuestionAIReason(q){
 
-    let reason=[];
+    let reason = [];
 
 
-    if(q.wrongCount){
+    // 개인 오답
+    if(
+        wrongAnswers &&
+        wrongAnswers.some(function(w){
+
+            return w.id === q.id;
+
+        })
+    ){
 
         reason.push(
-        "전체 오답률 높은 문제"
+            "❌ 내가 이전에 틀린 문제"
         );
 
     }
 
 
-    if(q.solveCount){
+
+    // 취약 분야
+
+    if(
+        q.category
+    ){
+
+        reason.push(
+            "📚 "
+            +
+            q.category
+            +
+            " 분야 학습"
+        );
+
+    }
+
+
+
+    // 전체 오답률
+
+    if(
+        q.solveCount > 0
+    ){
 
         const rate =
+
         Math.round(
+
             q.wrongCount /
             q.solveCount *
             100
+
         );
 
 
-        reason.push(
-        "전체 오답률 "
-        + rate
-        + "%"
-        );
+        if(rate>=50){
+
+            reason.push(
+
+            "⚠ 전체 오답률 "
+            +
+            rate
+            +
+            "%"
+
+            );
+
+        }
 
     }
 
 
-    if(q.category){
 
-        reason.push(
-        q.category+" 분야 학습"
-        );
-
-    }
-
+    // 난이도
 
     if(q.level){
 
         reason.push(
-        "난이도 : "+q.level
+
+        "🎯 난이도 : "
+        +
+        q.level
+
+        );
+
+    }
+
+
+
+    // 출제 유형
+
+    if(q.type){
+
+        reason.push(
+
+        "📝 유형 : "
+        +
+        q.type
+
+        );
+
+    }
+
+
+
+    if(reason.length===0){
+
+        reason.push(
+            "AI 학습 균형 문제"
         );
 
     }

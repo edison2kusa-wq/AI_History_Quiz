@@ -1753,3 +1753,529 @@ async function loadQualityAnalysis(){
 
 
         }
+
+        // =====================================
+// 문제 중복 검사
+// =====================================
+
+function checkDuplicateQuestions(){
+
+
+    const list = questionCache;
+
+
+    let duplicate = [];
+
+
+    for(let i=0;i<list.length;i++){
+
+
+        for(let j=i+1;j<list.length;j++){
+
+
+            const a =
+            list[i].question
+            .replace(/\s/g,"")
+            .toLowerCase();
+
+
+            const b =
+            list[j].question
+            .replace(/\s/g,"")
+            .toLowerCase();
+
+
+
+            // 완전 동일
+
+            if(a === b){
+
+
+                duplicate.push({
+
+                    q1:list[i],
+
+                    q2:list[j],
+
+                    type:"동일 문제"
+
+                });
+
+
+                continue;
+
+            }
+
+
+
+            // 80% 이상 유사
+
+            const similarity =
+            textSimilarity(a,b);
+
+
+
+            if(similarity >= 0.8){
+
+
+                duplicate.push({
+
+                    q1:list[i],
+
+                    q2:list[j],
+
+                    type:"유사 문제"
+
+                });
+
+
+            }
+
+
+        }
+
+    }
+
+
+    renderDuplicateResult(
+        duplicate
+    );
+
+
+}
+
+
+
+// =====================================
+// 문장 유사도
+// =====================================
+
+function textSimilarity(a,b){
+
+
+    let same = 0;
+
+
+    const length =
+    Math.min(
+        a.length,
+        b.length
+    );
+
+
+    for(let i=0;i<length;i++){
+
+
+        if(a[i]===b[i]){
+
+            same++;
+
+        }
+
+    }
+
+
+    return same /
+    Math.max(
+        a.length,
+        b.length
+    );
+
+}
+
+
+
+// =====================================
+// 중복 결과 표시
+// =====================================
+
+function renderDuplicateResult(list){
+
+
+    const box =
+    document.getElementById(
+        "duplicateAnalysis"
+    );
+
+
+    if(!box) return;
+
+
+
+    if(list.length===0){
+
+
+        box.innerHTML =
+
+        `
+        <div class="questionBox">
+
+        <h3>
+        ✅ 중복 문제 없음
+        </h3>
+
+        </div>
+        `;
+
+
+        return;
+
+    }
+
+
+
+    let html =
+
+    `
+
+    <div class="questionBox">
+
+    <h3>
+    🔁 중복 의심 문제
+    </h3>
+
+
+    <p>
+    ${list.length}건 발견
+    </p>
+
+    `;
+
+
+
+    list.forEach(function(item,index){
+
+
+        html +=
+
+
+        `
+
+        <hr>
+
+        <b>
+        ${index+1}.
+        ${item.type}
+        </b>
+
+
+        <p>
+        문제1 :
+        ${item.q1.question}
+        </p>
+
+
+        <p>
+        문제2 :
+        ${item.q2.question}
+        </p>
+
+
+        `;
+
+
+    });
+
+
+
+    html += "</div>";
+
+
+    box.innerHTML = html;
+
+
+}
+
+// =====================================
+// AI 출제 분석
+// =====================================
+
+async function loadAIQuestionAnalysis(){
+
+
+    const snapshot =
+    await db.collection("questionStats")
+    .get();
+
+
+
+    let list=[];
+
+
+    snapshot.forEach(function(doc){
+
+        const q = doc.data();
+
+        q.id = doc.id;
+
+        list.push(q);
+
+    });
+
+
+
+    // 오답률 계산
+
+    list.forEach(function(q){
+
+
+        q.wrongRate =
+
+        q.total > 0
+
+        ?
+
+        Math.round(
+
+            q.wrong /
+            q.total *
+            100
+
+        )
+
+        :
+
+        0;
+
+
+    });
+
+
+
+    // 많이 틀린 문제
+
+    const topWrong =
+
+    list
+
+    .slice()
+
+    .sort(function(a,b){
+
+        return b.wrongRate -
+        a.wrongRate;
+
+    })
+
+    .slice(0,10);
+
+
+
+    // 쉬운 문제
+
+    const easy =
+
+    list
+
+    .slice()
+
+    .sort(function(a,b){
+
+        return a.wrongRate -
+        b.wrongRate;
+
+    })
+
+    .slice(0,10);
+
+
+
+    let html =
+
+    `
+
+<div class="questionBox">
+
+<h3>
+🤖 AI 출제 분석
+</h3>
+
+
+<h4>
+🔥 가장 어려운 문제 TOP10
+</h4>
+
+`;
+
+
+
+topWrong.forEach(function(q,index){
+
+
+html +=
+
+`
+
+<p>
+
+${index+1}.
+${q.question}
+
+<br>
+
+오답률 :
+<b>${q.wrongRate}%</b>
+
+</p>
+
+`;
+
+});
+
+
+
+html +=
+
+`
+
+<hr>
+
+<h4>
+😊 가장 쉬운 문제 TOP10
+</h4>
+
+`;
+
+
+
+easy.forEach(function(q,index){
+
+
+html +=
+
+`
+
+<p>
+
+${index+1}.
+${q.question}
+
+<br>
+
+오답률 :
+<b>${q.wrongRate}%</b>
+
+</p>
+
+`;
+
+});
+
+
+
+html +=
+
+`
+
+</div>
+
+`;
+
+
+
+document.getElementById(
+"aiQuestionAnalysis"
+).innerHTML = html;
+
+
+
+}
+
+// =====================================
+// AI 문제 개선 추천
+// =====================================
+
+async function loadImprovementSuggestions(){
+
+    const questionSnap =
+    await db.collection("questions").get();
+
+    const statSnap =
+    await db.collection("questionStats").get();
+
+    const stats = {};
+
+    statSnap.forEach(function(doc){
+
+        stats[doc.id] = doc.data();
+
+    });
+
+    let html = `
+    <div class="questionBox">
+    <h3>🤖 AI 문제 개선 추천</h3>
+    `;
+
+    questionSnap.forEach(function(doc){
+
+        const q = doc.data();
+
+        const stat = stats[doc.id];
+
+        let reasons = [];
+
+        if(!q.explanation){
+
+            reasons.push("📝 해설 추가 필요");
+
+        }
+
+        if(!q.image){
+
+            reasons.push("🖼 이미지 추가 권장");
+
+        }
+
+        if(stat){
+
+            const rate =
+            stat.total > 0
+            ?
+            Math.round(stat.wrong/stat.total*100)
+            :
+            0;
+
+            if(rate>=80){
+
+                reasons.push("⚠ 오답률 매우 높음");
+
+            }
+
+            if(stat.total===0){
+
+                reasons.push("📊 아직 출제되지 않음");
+
+            }
+
+        }
+        else{
+
+            reasons.push("📊 출제 통계 없음");
+
+        }
+
+        if(reasons.length>0){
+
+            html += `
+            <hr>
+
+            <h4>${q.question}</h4>
+
+            <ul>
+            ${reasons.map(function(r){
+                return `<li>${r}</li>`;
+            }).join("")}
+            </ul>
+            `;
+
+        }
+
+    });
+
+    html += "</div>";
+
+    document.getElementById(
+        "improvementResult"
+    ).innerHTML = html;
+
+}

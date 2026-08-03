@@ -702,7 +702,58 @@ ${wrongAnswers.length}문제
 </p>
 
 `;
+const coaching =
+createAICoachingReport();
 
+
+if(coaching){
+
+
+$("reportBox").innerHTML +=
+
+
+`
+
+<div class="questionBox">
+
+<h3>
+🤖 AI 학습 코칭
+</h3>
+
+
+<p>
+현재 수준 :
+<b>
+${coaching.level}
+</b>
+</p>
+
+
+<p>
+정답률 :
+${coaching.accuracy}%
+</p>
+
+
+<p>
+추천 학습 :
+${coaching.message}
+</p>
+
+
+<p>
+취약 분야 :
+${coaching.weak || "분석중"}
+(${coaching.weakRate}%)
+</p>
+
+
+</div>
+
+`;
+
+
+}
     drawChart();
 
 
