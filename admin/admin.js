@@ -2586,3 +2586,40 @@ function(){
 
 
 });
+
+// ================================
+// 페이지 전환
+// ================================
+
+function showPage(id){
+
+
+    const pages =
+    document.querySelectorAll(
+        ".page"
+    );
+
+
+    pages.forEach(function(page){
+
+        page.style.display =
+        "none";
+
+    });
+
+
+
+    const target =
+    document.getElementById(id);
+
+
+
+    if(target){
+
+        target.style.display =
+        "block";
+
+    }
+
+
+}
