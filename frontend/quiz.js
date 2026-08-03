@@ -971,7 +971,23 @@ function(){
 
     console.log("quiz 초기화");
 
+
     initQuiz();
+
+
+    auth.onAuthStateChanged(
+function(user){
+
+    if(user){
+
+        loadWrongMode();
+
+        loadWrongQuizMode();
+
+    }
+
+});
+
 
 });
 
@@ -1028,5 +1044,159 @@ async function saveWrongAnswer(q, selected){
         firebase.firestore.FieldValue.serverTimestamp()
 
     });
+
+}
+// ===========================================
+// 오답노트 문제 불러오기
+// ===========================================
+
+async function loadWrongMode(){
+
+
+    const params =
+    new URLSearchParams(
+        location.search
+    );
+
+
+    const wrongId =
+    params.get("wrong");
+
+
+
+    if(!wrongId)return;
+
+
+
+    const user =
+    auth.currentUser;
+
+
+
+    if(!user)return;
+
+
+
+    const doc =
+
+    await db.collection("users")
+
+    .doc(user.uid)
+
+    .collection("wrongAnswers")
+
+    .doc(wrongId)
+
+    .get();
+
+
+
+    if(!doc.exists)return;
+
+
+
+    quizList=[doc.data()];
+
+
+    currentQuestion=0;
+
+
+    score=0;
+
+
+    wrongAnswers=[];
+
+
+    userAnswers=[null];
+
+
+
+    hide("mainMenu");
+
+    show("quizScreen");
+
+
+    buildQuestionNav();
+
+
+    showQuestion();
+
+
+}
+// ===========================================
+// 오답모드 시작
+// ===========================================
+
+function loadWrongQuizMode(){
+
+
+    const params =
+    new URLSearchParams(
+        location.search
+    );
+
+
+    if(
+        params.get("mode")
+        !==
+        "wrong"
+    ){
+
+        return;
+
+    }
+
+
+
+    const data =
+
+    sessionStorage.getItem(
+        "wrongQuiz"
+    );
+
+
+
+    if(!data)return;
+
+
+
+    quizList =
+    JSON.parse(data);
+
+
+
+    currentQuestion=0;
+
+    score=0;
+
+    wrongAnswers=[];
+
+
+    userAnswers =
+
+    new Array(
+        quizList.length
+    )
+    .fill(null);
+
+
+
+    hide("mainMenu");
+
+    show("quizScreen");
+
+
+    buildQuestionNav();
+
+
+    timeLeft =
+    quizList.length * 60;
+
+
+    startTimer();
+
+
+    showQuestion();
+
 
 }
