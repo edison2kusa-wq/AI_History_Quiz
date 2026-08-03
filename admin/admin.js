@@ -57,7 +57,43 @@ function(){
 function initAdmin(){
 
 
+    const qualityBtn =
+document.getElementById(
+"qualityBtn"
+);
 
+if(qualityBtn){
+
+qualityBtn.onclick =
+loadQualityAnalysis;
+
+}
+
+
+const improveBtn =
+document.getElementById(
+"improveBtn"
+);
+
+if(improveBtn){
+
+improveBtn.onclick =
+loadImprovementSuggestions;
+
+}
+
+
+const aiBtn =
+document.getElementById(
+"aiAnalysisBtn"
+);
+
+if(aiBtn){
+
+aiBtn.onclick =
+loadAIQuestionAnalysis;
+
+}
     const loginBtn =
     document.getElementById(
         "adminLoginBtn"
