@@ -1,782 +1,408 @@
-// ===============================
-// AI 한국사 관리자
-// admin.js
-// ===============================
-console.log("ADMIN JS TEST");
+// ========================================
+// AI 한국사 관리자 V2 FINAL
+// admin.js Part 1/4
+// ========================================
+
+
+// ================================
 // 전역 변수
-let currentPage = 1;
-const pageSize = 20;
+// ================================
 
 let questionCache = [];
-let editDocId = null;
 
-// 페이지가 열리면 실행
-window.onload = function () {
+let currentPage = 1;
 
-    console.log("admin.js 로드 완료");
-    console.log("현재 페이지:", location.href);
-console.log("db 확인:", typeof db);
+let pageSize = 10;
 
+let editingId = null;
 
-    if (document.getElementById("periodAnalysisBtn"))
-        document.getElementById("periodAnalysisBtn").onclick = loadPeriodAnalysis;
 
+// Chart 변수
 
-    if (document.getElementById("adminLoginBtn"))
-        document.getElementById("adminLoginBtn").onclick = adminLogin;
+let periodChart = null;
 
+let categoryChart = null;
 
-    if (document.getElementById("saveBtn"))
-        document.getElementById("saveBtn").onclick = saveQuestion;
 
 
-    if (document.getElementById("searchBtn"))
-        document.getElementById("searchBtn").onclick = searchQuestions;
-
-
-    if (document.getElementById("resetBtn"))
-        document.getElementById("resetBtn").onclick = resetSearch;
-
-
-    if (document.getElementById("uploadCsvBtn"))
-        document.getElementById("uploadCsvBtn").onclick = uploadCSV;
-
-
-    if (document.getElementById("downloadCsvBtn"))
-        document.getElementById("downloadCsvBtn").onclick = downloadCSV;
-
-    if(document.getElementById("analysisBtn")){
-
-document.getElementById("analysisBtn")
-.onclick = loadQuestionAnalysis;
-
-}
-
-    if (document.getElementById("prevPageBtn"))
-        document.getElementById("prevPageBtn").onclick=function(){
-
-            if(currentPage>1){
-
-                currentPage--;
-
-                renderPage();
-
-            }
-
-        };
-
-
-    if (document.getElementById("nextPageBtn"))
-        document.getElementById("nextPageBtn").onclick=function(){
-
-            const totalPage =
-            Math.ceil(questionCache.length/pageSize);
-
-
-            if(currentPage<totalPage){
-
-                currentPage++;
-
-                renderPage();
-
-            }
-
-        };
-
-
-};
-
-    async function adminLogin() {
-
-        const email =
-            document.getElementById("adminEmail").value.trim();
-
-        const password =
-            document.getElementById("adminPassword").value;
-
-        if (email === "" || password === "") {
-
-            alert("이메일과 비밀번호를 입력하세요.");
-
-            return;
-        }
-
-        try {
-
-            await auth.signInWithEmailAndPassword(
-                email,
-                password
-            );
-
-            document.getElementById("loginArea").style.display = "none";
-            document.getElementById("adminArea").style.display = "block";
-
-            await loadQuestions();
-            await loadDashboard();
-            await loadStatistics();
-
-            alert("관리자 로그인 성공");
-
-        } catch (e) {
-
-            console.error(e);
-
-            alert("로그인 실패\n\n" + e.message);
-
-        }
-
-    }
-
-    async function loadQuestions() {
-
-        const snapshot = await db.collection("questions").get();
-
-        questionCache = [];
-
-        snapshot.forEach(function (doc) {
-
-            const q = doc.data();
-
-            q.id = doc.id;
-
-            questionCache.push(q);
-
-        });
-
-        renderPage();
-
-    }
-
-    function renderPage() {
-
-        const start = (currentPage - 1) * pageSize;
-        const end = start + pageSize;
-
-        const pageItems = questionCache.slice(start, end);
-
-        let html = "";
-
-        pageItems.forEach(function (q) {
-
-            html += `
-        <div class="questionBox">
-
-            <h3>${q.question}</h3>
-
-            <p>
-시대 : ${q.period || ""}
-</p>
-
-<p>
-분야 : ${q.category}
-</p>
-
-<p>
-난이도 : ${q.level}
-</p>
-
-<p>
-유형 : ${q.type || ""}
-</p>
-
-            <button onclick="editQuestion('${q.id}')">수정</button>
-
-            <button onclick="deleteQuestion('${q.id}')">삭제</button>
-
-        </div>
-        `;
-
-        });
-
-        document.getElementById("questionList").innerHTML = html;
-
-        const totalPage = Math.max(
-            1,
-            Math.ceil(questionCache.length / pageSize)
-        );
-
-        document.getElementById("pageInfo").innerText =
-            `${currentPage} / ${totalPage}`;
-
-    }
-
-    function clearForm() {
-
-        document.getElementById("question").value = "";
-        document.getElementById("choice1").value = "";
-        document.getElementById("choice2").value = "";
-        document.getElementById("choice3").value = "";
-        document.getElementById("choice4").value = "";
-
-        document.getElementById("answer").selectedIndex = 0;
-        document.getElementById("category").selectedIndex = 0;
-        document.getElementById("level").selectedIndex = 0;
-
-        document.getElementById("explanation").value = "";
-        document.getElementById("image").value = "";
-        document.getElementById("source").value = "";
-
-        document.getElementById("keywords").value = "";
-
-    }
-
-    async function saveQuestion() {
-
-        const imageUrl = await uploadImage();
-
-        const data = {
-
-            question:
-                document.getElementById("question").value,
-
-
-            choices: [
-
-                document.getElementById("choice1").value,
-                document.getElementById("choice2").value,
-                document.getElementById("choice3").value,
-                document.getElementById("choice4").value
-
-            ],
-
-
-            answer:
-                Number(document.getElementById("answer").value),
-
-
-            period:
-                document.getElementById("period").value,
-
-
-            category:
-                document.getElementById("category").value,
-
-
-            level:
-                document.getElementById("level").value,
-
-
-            type:
-                document.getElementById("type").value,
-
-
-            source:
-                document.getElementById("source").value,
-
-
-            keywords:
-                document.getElementById("keywords").value
-                    .split(",")
-                    .map(k => k.trim()),
-
-
-            explanation:
-                document.getElementById("explanation").value,
-
-
-            image:
-                imageUrl,
-
-
-            // AI 분석용 데이터
-            difficultyScore: 70,
-
-            viewCount: 0,
-
-            solveCount: 0,
-
-            correctCount: 0,
-
-            wrongCount: 0,
-
-
-            createdBy:
-                auth.currentUser.uid,
-
-
-            created:
-                firebase.firestore.FieldValue.serverTimestamp(),
-
-
-            updated:
-                firebase.firestore.FieldValue.serverTimestamp()
-
-        };
-
-
-        try {
-
-
-            if (editDocId) {
-
-                await db.collection("questions")
-                    .doc(editDocId)
-                    .update(data);
-
-
-                alert("문제가 수정되었습니다.");
-
-                editDocId = null;
-
-
-            } else {
-
-
-                await db.collection("questions")
-                    .add(data);
-
-
-                alert("문제가 등록되었습니다.");
-
-            }
-
-
-            clearForm();
-
-            await loadQuestions();
-
-
-        }
-        catch (e) {
-
-            console.error(e);
-
-            alert(
-                "저장 오류 : " + e.message
-            );
-
-        }
-
-    }
-
-    async function editQuestion(id) {
-
-        const doc = await db.collection("questions")
-            .doc(id)
-            .get();
-
-        const q = doc.data();
-
-        document.getElementById("question").value = q.question;
-
-        document.getElementById("choice1").value = q.choices[0];
-        document.getElementById("choice2").value = q.choices[1];
-        document.getElementById("choice3").value = q.choices[2];
-        document.getElementById("choice4").value = q.choices[3];
-
-        document.getElementById("answer").value = q.answer;
-        document.getElementById("category").value = q.category;
-        document.getElementById("level").value = q.level;
-        document.getElementById("period").value =
-            q.period || "고대";
-
-
-        document.getElementById("type").value =
-            q.type || "기출";
-
-
-        document.getElementById("source").value =
-            q.source || "";
-
-
-        document.getElementById("keywords").value =
-            (q.keywords || []).join(",");
-        document.getElementById("explanation").value = q.explanation || "";
-        document.getElementById("image").value = q.image || "";
-
-        editDocId = id;
-
-    }
-
-    async function deleteQuestion(id) {
-
-        const result = confirm("정말 삭제하시겠습니까?");
-
-        if (!result) return;
-
-        try {
-
-            await db.collection("questions")
-                .doc(id)
-                .delete();
-
-            alert("삭제되었습니다.");
-
-            loadQuestions();
-            loadDashboard();
-
-        } catch (e) {
-
-            alert(e.message);
-
-        }
-
-    }
-
-    function searchQuestions() {
-
-        const keyword =
-            document.getElementById("searchQuestion")
-                .value
-                .trim()
-                .toLowerCase();
-
-        const category =
-            document.getElementById("filterCategory").value;
-
-        const level =
-            document.getElementById("filterLevel").value;
-
-        const result = questionCache.filter(function (q) {
-
-            const matchKeyword =
-                keyword === "" ||
-                q.question.toLowerCase().includes(keyword);
-
-            const matchCategory =
-                category === "전체" ||
-                q.category === category;
-
-            const matchLevel =
-                level === "전체" ||
-                q.level === level;
-
-            return (
-                matchKeyword &&
-                matchCategory &&
-                matchLevel
-            );
-
-        });
-
-        renderSearchResult(result);
-
-    }
-
-    function renderSearchResult(list) {
-
-        let html = "";
-
-        list.forEach(function (q) {
-
-            html += `
-        <div class="questionBox">
-
-            <h3>${q.question}</h3>
-
-            <p>
-시대 : ${q.period || ""}
-</p>
-
-<p>
-분야 : ${q.category}
-</p>
-
-<p>
-난이도 : ${q.level}
-</p>
-
-<p>
-유형 : ${q.type || ""}
-</p>
-
-            <button onclick="editQuestion('${q.id}')">
-            수정
-            </button>
-
-            <button onclick="deleteQuestion('${q.id}')">
-            삭제
-            </button>
-
-        </div>
-        `;
-
-        });
-
-        document.getElementById("questionList").innerHTML = html;
-
-        document.getElementById("pageInfo").innerText =
-            `${list.length}건 검색`;
-
-    }
-
-    function resetSearch() {
-
-        document.getElementById("searchQuestion").value = "";
-
-        document.getElementById("filterCategory").value = "전체";
-
-        document.getElementById("filterLevel").value = "전체";
-
-        currentPage = 1;
-
-        renderPage();
-
-    }
-
-    function uploadCSV() {
-
-    const file =
-        document.getElementById("csvFile").files[0];
-
-
-    if (!file) {
-
-        alert("CSV 파일을 선택하세요.");
-
-        return;
-
-    }
-
-
-    Papa.parse(file, {
-
-        header:true,
-
-        skipEmptyLines:true,
-
-
-        complete: async function(result){
-
-
-            const rows = result.data;
-            document.getElementById(
-"uploadProgress"
-).style.display="block";
-
-
-const total =
-rows.length;
-
-
-let current = 0;    
-
-            // 기존 문제 확인
-
-            const snapshot =
-                await db.collection("questions").get();
-
-
-            let existing = new Set();
-
-
-            snapshot.forEach(function(doc){
-
-                existing.add(
-                    doc.data().question
-                );
-
-            });
-
-
-
-            let success = 0;
-
-            let duplicate = 0;
-
-
-
-            for(const row of rows){
-            current++;       
-
-                // 중복 검사
-
-                if(
-                    existing.has(row.question)
-                ){
-
-                    duplicate++;
-
-                    continue;
-
-                }
-
-
-
-                await db.collection("questions")
-                .add({
-
-                    question:
-                    row.question,
-
-
-                    choices:[
-
-                        row.choice1,
-                        row.choice2,
-                        row.choice3,
-                        row.choice4
-
-                    ],
-
-
-                    answer:
-                    Number(row.answer)-1,
-
-
-                    period:
-                    row.period || "전체",
-
-
-                    category:
-                    row.category || "기타",
-
-
-                    level:
-                    row.level || "중",
-
-
-                    type:
-                    row.type || "예상",
-
-
-                    explanation:
-                    row.explanation || "",
-
-
-                    image:
-                    row.image || "",
-
-
-                    keywords:
-
-                    row.keywords
-                    ?
-                    row.keywords
-                    .split(",")
-                    :
-                    [],
-
-
-                    created:
-
-                    firebase.firestore.FieldValue.serverTimestamp()
-
-                });
-
-
-
-                existing.add(row.question);
-
-
-                success++;
-                const percent =
-Math.round(
-(current / total) * 100
+console.log(
+    "AI 한국사 관리자 FINAL 시작"
 );
 
 
-document.getElementById(
-"uploadBar"
-).value =
-percent;
+
+// ================================
+// DOM 시작
+// ================================
 
 
-document.getElementById(
-"uploadText"
-).innerText =
-
-`등록 중...
-${current}/${total} 문제
-(${percent}%)`;
-
-            }
+document.addEventListener(
+"DOMContentLoaded",
+function(){
 
 
-
-            alert(
-
-`업로드 완료
-
-신규 등록 : ${success}개
-
-중복 제외 : ${duplicate}개`
-
-            );
-            document.getElementById(
-"uploadText"
-).innerText =
-"업로드 완료";
+    initAdmin();
 
 
-document.getElementById(
-"uploadBar"
-).value=100;
+});
 
 
-            loadQuestions();
 
+
+// ================================
+// 관리자 초기화
+// ================================
+
+
+function initAdmin(){
+
+
+
+    const loginBtn =
+    document.getElementById(
+        "adminLoginBtn"
+    );
+
+
+    if(loginBtn){
+
+        loginBtn.onclick =
+        adminLogin;
+
+    }
+
+
+
+
+    const saveBtn =
+    document.getElementById(
+        "saveBtn"
+    );
+
+
+    if(saveBtn){
+
+        saveBtn.onclick =
+        saveQuestion;
+
+    }
+
+
+
+
+    const searchBtn =
+    document.getElementById(
+        "searchBtn"
+    );
+
+
+    if(searchBtn){
+
+        searchBtn.onclick =
+        searchQuestions;
+
+    }
+
+
+
+
+
+    const resetBtn =
+    document.getElementById(
+        "resetBtn"
+    );
+
+
+    if(resetBtn){
+
+        resetBtn.onclick =
+        loadQuestions;
+
+    }
+
+
+
+
+    const periodBtn =
+    document.getElementById(
+        "periodAnalysisBtn"
+    );
+
+
+    if(periodBtn){
+
+        periodBtn.onclick =
+        loadPeriodAnalysis;
+
+    }
+
+
+
+
+
+    const analysisBtn =
+    document.getElementById(
+        "analysisBtn"
+    );
+
+
+    if(analysisBtn){
+
+        analysisBtn.onclick =
+        loadQualityAnalysis;
+
+    }
+
+
+
+
+    const uploadBtn =
+    document.getElementById(
+        "uploadCsvBtn"
+    );
+
+
+    if(uploadBtn){
+
+        uploadBtn.onclick =
+        uploadCSV;
+
+    }
+
+
+
+
+    const downloadBtn =
+    document.getElementById(
+        "downloadCsvBtn"
+    );
+
+
+    if(downloadBtn){
+
+        downloadBtn.onclick =
+        downloadCSV;
+
+    }
+
+
+
+
+    checkLogin();
+
+
+
+}
+
+
+
+
+
+// ================================
+// 로그인 상태 확인
+// ================================
+
+
+function checkLogin(){
+
+
+    auth.onAuthStateChanged(
+
+    function(user){
+
+
+        if(user){
+
+            showAdmin();
 
         }
+
 
     });
 
 
 }
 
-    async function downloadCSV() {
 
-        const snapshot =
-            await db.collection("questions").get();
 
-        let csv =
-            "question,choice1,choice2,choice3,choice4,answer,category,level,explanation,image\n";
 
-        snapshot.forEach(function (doc) {
 
-            const q = doc.data();
+// ================================
+// 관리자 로그인
+// ================================
 
-            csv +=
 
-                `"${q.question}","${q.choices[0]}","${q.choices[1]}","${q.choices[2]}","${q.choices[3]}",${q.answer + 1},"${q.category}","${q.level}","${q.explanation || ""}","${q.image || ""}"\n`;
+async function adminLogin(){
 
-        });
 
-        const blob = new Blob(
+    const email =
+    getValue(
+        "adminEmail"
+    );
 
-            ["\uFEFF" + csv],
 
-            {
+    const password =
+    getValue(
+        "adminPassword"
+    );
 
-                type: "text/csv;charset=utf-8;"
 
-            }
+
+    try{
+
+
+        await auth
+        .signInWithEmailAndPassword(
+
+            email,
+
+            password
 
         );
 
-        const url = URL.createObjectURL(blob);
 
-        const a = document.createElement("a");
 
-        a.href = url;
+        showAdmin();
 
-        a.download = "questions.csv";
-
-        a.click();
-
-        URL.revokeObjectURL(url);
 
     }
 
-    async function loadDashboard(){
 
-    // 문제 수
+    catch(e){
+
+
+        alert(
+            "로그인 실패 : "
+            +
+            e.message
+        );
+
+
+    }
+
+
+}
+
+
+
+
+
+// ================================
+// 관리자 화면 표시
+// ================================
+
+
+function showAdmin(){
+
+
+
+    const loginArea =
+    document.getElementById(
+        "loginArea"
+    );
+
+
+    const adminArea =
+    document.getElementById(
+        "adminArea"
+    );
+
+
+
+    if(loginArea){
+
+        loginArea.style.display =
+        "none";
+
+    }
+
+
+
+    if(adminArea){
+
+        adminArea.style.display =
+        "block";
+
+    }
+
+
+
+
+    loadDashboard();
+
+
+    loadQuestions();
+
+
+}
+
+
+
+
+
+
+// ================================
+// 로그아웃
+// ================================
+
+
+function logout(){
+
+
+    auth.signOut();
+
+
+    location.reload();
+
+
+}
+
+
+
+
+
+
+// ================================
+// Dashboard
+// ================================
+
+
+async function loadDashboard(){
+
+
+try{
+
+
     const questionSnap =
-    await db.collection("questions").get();
+    await db.collection(
+        "questions"
+    )
+    .get();
 
 
-    document.getElementById("totalQuestion").innerText =
-    questionSnap.size;
+
+    setText(
+        "totalQuestion",
+        questionSnap.size
+    );
 
 
 
-    // 회원 수
+
     const userSnap =
-    await db.collection("users").get();
+    await db.collection(
+        "users"
+    )
+    .get();
 
 
-    document.getElementById("totalUser").innerText =
-    userSnap.size;
+
+
+    setText(
+        "totalUser",
+        userSnap.size
+    );
+
 
 
 
@@ -784,28 +410,36 @@ document.getElementById(
 
     let wrongCount = 0;
 
-    let totalPercent = 0;
+    let totalScore = 0;
 
-    let percentCount = 0;
-
-
-
-    for(const user of userSnap.docs){
+    let totalExam = 0;
 
 
-        const quizSnap =
-        await db.collection("users")
-        .doc(user.id)
-        .collection("quizHistory")
+
+
+    for(
+        const user
+        of userSnap.docs
+    ){
+
+
+        const historySnap =
+
+        await db.collection(
+            "users"
+        )
+        .doc(
+            user.id
+        )
+        .collection(
+            "quizHistory"
+        )
         .get();
 
 
 
-        examCount += quizSnap.size;
 
-
-
-        quizSnap.forEach(function(doc){
+        historySnap.forEach(function(doc){
 
 
             const data =
@@ -813,18 +447,591 @@ document.getElementById(
 
 
 
+            examCount++;
+
+
             wrongCount +=
             data.wrongCount || 0;
 
 
 
-            if(data.percent !== undefined){
+            totalScore +=
+            data.percent || 0;
 
-                totalPercent += data.percent;
 
-                percentCount++;
 
-            }
+            totalExam++;
+
+
+
+        });
+
+
+
+    }
+
+
+
+
+    setText(
+        "totalExam",
+        examCount
+    );
+
+
+
+    setText(
+        "totalWrong",
+        wrongCount
+    );
+
+
+
+    const avg =
+
+    totalExam > 0
+
+    ?
+
+    Math.round(
+        totalScore /
+        totalExam
+    )
+
+    :
+
+    0;
+
+
+
+    setText(
+        "avgScore",
+        avg+"%"
+    );
+
+
+
+    loadDashboardCharts();
+
+
+
+}
+
+
+catch(e){
+
+
+    console.error(
+        "Dashboard 오류",
+        e
+    );
+
+
+}
+
+
+}
+
+// ========================================
+// AI 한국사 관리자 V2 FINAL
+// admin.js Part 2/4
+// 문제 CRUD
+// ========================================
+
+
+// ================================
+// 문제 저장
+// ================================
+
+
+async function saveQuestion(){
+
+
+    const data = {
+
+
+        question:
+        getValue("question"),
+
+
+        choices:[
+
+            getValue("choice1"),
+
+            getValue("choice2"),
+
+            getValue("choice3"),
+
+            getValue("choice4")
+
+        ],
+
+
+        answer:
+        Number(
+            getValue("answer")
+        ),
+
+
+        period:
+        getValue("period"),
+
+
+        category:
+        getValue("category"),
+
+
+        level:
+        getValue("level"),
+
+
+        type:
+        getValue("type"),
+
+
+        source:
+        getValue("source"),
+
+
+        keywords:
+
+        getValue("keywords")
+
+        ?
+
+        getValue("keywords")
+        .split(",")
+
+        :
+
+        [],
+
+
+
+        explanation:
+        getValue("explanation"),
+
+
+        image:
+        getValue("image")
+
+    };
+
+
+
+
+    try{
+
+
+        if(editingId){
+
+
+            await db.collection(
+                "questions"
+            )
+            .doc(editingId)
+            .update(data);
+
+
+
+            alert(
+                "문제가 수정되었습니다."
+            );
+
+
+        }
+
+
+        else{
+
+
+            data.created =
+            firebase.firestore
+            .FieldValue
+            .serverTimestamp();
+
+
+
+            await db.collection(
+                "questions"
+            )
+            .add(data);
+
+
+
+            alert(
+                "문제가 등록되었습니다."
+            );
+
+
+        }
+
+
+
+
+        clearForm();
+
+
+        loadQuestions();
+
+
+    }
+
+
+    catch(e){
+
+
+        console.error(e);
+
+
+        alert(
+            "저장 오류 : "
+            + e.message
+        );
+
+
+    }
+
+
+}
+
+
+
+
+
+
+// ================================
+// 문제 불러오기
+// ================================
+
+
+async function loadQuestions(){
+
+
+    try{
+
+
+        const snapshot =
+
+        await db.collection(
+            "questions"
+        )
+        .get();
+
+
+
+        questionCache=[];
+
+
+
+        snapshot.forEach(function(doc){
+
+
+            const q =
+            doc.data();
+
+
+
+            q.id =
+            doc.id;
+
+
+
+            questionCache.push(q);
+
+
+
+        });
+
+
+
+        renderQuestionList(
+            questionCache
+        );
+
+
+
+    }
+
+
+    catch(e){
+
+
+        console.error(
+            e
+        );
+
+
+    }
+
+
+}
+
+
+
+
+
+
+// ================================
+// 문제 목록 출력
+// ================================
+
+
+function renderQuestionList(list){
+
+
+
+    let html="";
+
+
+
+    list.forEach(function(q){
+
+
+
+        html += `
+
+<div class="questionBox">
+
+
+<h3>
+${q.question}
+</h3>
+
+
+<p>
+시대 :
+${q.period || ""}
+</p>
+
+
+<p>
+분야 :
+${q.category || ""}
+</p>
+
+
+<p>
+난이도 :
+${q.level || ""}
+</p>
+
+
+<p>
+유형 :
+${q.type || ""}
+</p>
+
+
+
+<button onclick="editQuestion('${q.id}')">
+
+수정
+
+</button>
+
+
+
+<button onclick="deleteQuestion('${q.id}')">
+
+삭제
+
+</button>
+
+
+</div>
+
+`;
+
+
+
+    });
+
+
+
+
+    const area =
+    document.getElementById(
+        "questionList"
+    );
+
+
+
+    if(area){
+
+        area.innerHTML =
+        html;
+
+    }
+
+
+}
+
+
+
+
+
+
+// ================================
+// 검색
+// ================================
+
+
+function searchQuestions(){
+
+
+
+    const keyword =
+
+    getValue(
+        "searchQuestion"
+    )
+    .toLowerCase();
+
+
+
+    const category =
+
+    document.getElementById(
+        "filterCategory"
+    )
+    ?.value || "전체";
+
+
+
+    const level =
+
+    document.getElementById(
+        "filterLevel"
+    )
+    ?.value || "전체";
+
+
+
+
+
+    const result =
+
+    questionCache.filter(function(q){
+
+
+
+        const matchKeyword =
+
+
+        keyword === ""
+
+        ||
+
+        q.question
+        .toLowerCase()
+        .includes(keyword);
+
+
+
+        const matchCategory =
+
+
+        category === "전체"
+
+        ||
+
+        q.category === category;
+
+
+
+        const matchLevel =
+
+
+        level === "전체"
+
+        ||
+
+        q.level === level;
+
+
+
+        return (
+
+            matchKeyword
+
+            &&
+
+            matchCategory
+
+            &&
+
+            matchLevel
+
+        );
+
+
+    });
+
+
+
+
+    renderQuestionList(
+        result
+    );
+
+
+}
+
+
+
+
+
+
+// ================================
+// 문제 수정
+// ================================
+
+
+function editQuestion(id){
+
+
+
+    const q =
+
+    questionCache.find(function(item){
+
+
+        return item.id === id;
+
+
+    });
+
+
+
+
+    if(!q)return;
+
+
+
+
+    editingId=id;
+
+
+
+    setValue(
+        "question",
+        q.question
+    );
+
+
+
+    if(q.choices){
+
+
+        q.choices.forEach(
+        function(c,i){
+
+
+            setValue(
+                "choice"+(i+1),
+                c
+            );
 
 
         });
@@ -834,53 +1041,188 @@ document.getElementById(
 
 
 
-    document.getElementById("totalExam").innerText =
-    examCount;
+    setValue(
+        "answer",
+        q.answer
+    );
+
+
+    setValue(
+        "period",
+        q.period
+    );
+
+
+    setValue(
+        "category",
+        q.category
+    );
+
+
+    setValue(
+        "level",
+        q.level
+    );
+
+
+    setValue(
+        "type",
+        q.type
+    );
+
+
+    setValue(
+        "source",
+        q.source
+    );
+
+
+    setValue(
+        "keywords",
+        q.keywords
+        ?
+        q.keywords.join(",")
+        :
+        ""
+    );
+
+
+    setValue(
+        "explanation",
+        q.explanation
+    );
+
+
+    setValue(
+        "image",
+        q.image
+    );
 
 
 
-    document.getElementById("totalWrong").innerText =
-    wrongCount;
+    window.scrollTo(
+        {
+            top:0,
+            behavior:"smooth"
+        }
+    );
+
+
+}
 
 
 
-    const avg =
-
-    percentCount > 0
-    ?
-    Math.round(totalPercent / percentCount)
-    :
-    0;
 
 
 
-    const avgBox =
-    document.getElementById("avgScore");
+// ================================
+// 문제 삭제
+// ================================
 
 
-    if(avgBox){
+async function deleteQuestion(id){
 
-        avgBox.innerText =
-        avg + "%";
+
+    if(
+        !confirm(
+        "삭제하시겠습니까?"
+        )
+    ){
+
+        return;
 
     }
 
 
 
-    // 문제 통계 분석
-
-    const statSnap =
-    await db.collection("questionStats").get();
-
-
-
-    let popular=[];
-
-    let difficult=[];
+    await db.collection(
+        "questions"
+    )
+    .doc(id)
+    .delete();
 
 
 
-    statSnap.forEach(function(doc){
+    alert(
+        "삭제되었습니다."
+    );
+
+
+    loadQuestions();
+
+
+}
+
+
+
+
+
+
+// ================================
+// 입력 초기화
+// ================================
+
+
+function clearForm(){
+
+
+
+    editingId=null;
+
+
+
+    document.querySelectorAll(
+        "input,textarea"
+    )
+    .forEach(function(el){
+
+
+        if(
+        el.id !== "searchQuestion"
+        ){
+
+            el.value="";
+
+        }
+
+
+    });
+
+
+
+}
+
+// ========================================
+// AI 한국사 관리자 V2 FINAL
+// admin.js Part 3/4
+// 통계 / CSV / 분석
+// ========================================
+
+
+// ================================
+// Dashboard Chart
+// ================================
+
+
+async function loadDashboardCharts(){
+
+
+    const snapshot =
+
+    await db.collection(
+        "questions"
+    )
+    .get();
+
+
+
+    const period={};
+
+    const category={};
+
+
+
+    snapshot.forEach(function(doc){
 
 
         const q =
@@ -888,293 +1230,658 @@ document.getElementById(
 
 
 
-        const total =
-        q.total || 0;
+        const p =
+        q.period || "기타";
 
 
 
-        const wrong =
-        q.wrong || 0;
+        const c =
+        q.category || "기타";
 
 
 
-        const rate =
-        total > 0
-        ?
-        Math.round(
-            wrong / total * 100
-        )
-        :
-        0;
+        period[p] =
+        (period[p] || 0)+1;
 
 
 
-        popular.push({
+        category[c] =
+        (category[c] || 0)+1;
 
-            question:
-            q.question,
-
-            count:
-            total
-
-        });
-
-
-
-        difficult.push({
-
-            question:
-            q.question,
-
-            rate:
-            rate
-
-        });
 
 
     });
 
 
 
-    popular.sort(function(a,b){
-
-        return b.count-a.count;
-
-    });
-
-
-
-    difficult.sort(function(a,b){
-
-        return b.rate-a.rate;
-
-    });
-
-
-
-    console.log(
-        "인기 문제 TOP5",
-        popular.slice(0,5)
+    drawPeriodChart(
+        period
     );
 
 
-    console.log(
-        "난이도 TOP5",
-        difficult.slice(0,5)
+    drawCategoryChart(
+        category
     );
 
 
 }
 
-    async function uploadImage() {
 
-    const image =
-        document.getElementById("image");
 
-    if (!image) {
 
-        return "";
+
+// ================================
+// 시대별 차트
+// ================================
+
+
+function drawPeriodChart(data){
+
+
+    const canvas =
+    document.getElementById(
+        "periodChart"
+    );
+
+
+
+    if(!canvas)return;
+
+
+
+    if(periodChart){
+
+        periodChart.destroy();
 
     }
 
-    return image.value.trim();
 
-}
 
-    async function loadStatistics() {
 
-        const userSnap =
-            await db.collection("users").get();
+    periodChart =
 
-        let exam = 0;
+    new Chart(
 
-        let wrong = 0;
+        canvas,
 
-        for (const user of userSnap.docs) {
+        {
 
-            const quizSnap =
-                await db.collection("users")
-                    .doc(user.id)
-                    .collection("quizHistory")
-                    .get();
+        type:"pie",
 
-            exam += quizSnap.size;
 
-            quizSnap.forEach(function (doc) {
+        data:{
 
-                wrong +=
-                    doc.data().wrongCount || 0;
 
-            });
+            labels:
+            Object.keys(data),
+
+
+
+            datasets:[{
+
+                data:
+                Object.values(data),
+
+
+                backgroundColor:[
+
+                    "#2563eb",
+                    "#16a34a",
+                    "#f59e0b",
+                    "#dc2626",
+                    "#9333ea",
+                    "#0891b2"
+
+                ]
+
+            }]
+
 
         }
 
-        document.getElementById("statistics").innerHTML = `
 
-        <p>회원 수 : ${userSnap.size}명</p>
+        }
 
-        <p>누적 시험 : ${exam}회</p>
+    );
 
-        <p>누적 오답 : ${wrong}문제</p>
 
-        <p>평균 응시 :
-        ${userSnap.size > 0 ? (exam / userSnap.size).toFixed(1) : 0}회
-        </p>
+}
 
-    `;
+
+
+
+
+
+// ================================
+// 분야별 차트
+// ================================
+
+
+function drawCategoryChart(data){
+
+
+
+    const canvas =
+    document.getElementById(
+        "categoryChart"
+    );
+
+
+
+    if(!canvas)return;
+
+
+
+    if(categoryChart){
+
+        categoryChart.destroy();
 
     }
 
-    // 문제 분석
-
-    async function loadQuestionAnalysis() {
-
-
-        const snapshot =
-            await db.collection("questionStats")
-                .get();
 
 
 
-        let list = [];
+    categoryChart =
+
+    new Chart(
+
+        canvas,
+
+        {
+
+
+        type:"bar",
+
+
+        data:{
+
+
+            labels:
+            Object.keys(data),
+
+
+            datasets:[{
+
+
+                label:
+                "문제 수",
+
+
+                data:
+                Object.values(data),
+
+
+                backgroundColor:
+                "#2563eb"
+
+
+            }]
+
+
+        },
+
+
+        options:{
+
+
+            responsive:true
+
+
+        }
+
+
+        }
+
+    );
+
+
+}
 
 
 
-        snapshot.forEach(function (doc) {
-
-
-            const q = doc.data();
 
 
 
-            const wrongRate =
+// ========================================
+// CSV 업로드
+// ========================================
 
-                q.total > 0
+
+async function uploadCSV(){
+
+
+
+    const file =
+
+    document.getElementById(
+        "csvFile"
+    )
+    ?.files[0];
+
+
+
+    if(!file){
+
+
+        alert(
+            "CSV 파일을 선택하세요."
+        );
+
+
+        return;
+
+    }
+
+
+
+    Papa.parse(
+
+        file,
+
+        {
+
+
+        header:true,
+
+
+        skipEmptyLines:true,
+
+
+
+        complete:
+        async function(result){
+
+
+
+            const rows =
+            result.data;
+
+
+
+            let success=0;
+
+            let duplicate=0;
+
+
+
+            const snapshot =
+            await db.collection(
+                "questions"
+            )
+            .get();
+
+
+
+            const existing =
+            new Set();
+
+
+
+            snapshot.forEach(function(doc){
+
+
+                existing.add(
+                    doc.data().question
+                );
+
+
+            });
+
+
+
+
+
+            for(
+                const row
+                of rows
+            ){
+
+
+
+                if(
+                    existing.has(
+                    row.question
+                    )
+                ){
+
+
+                    duplicate++;
+
+                    continue;
+
+
+                }
+
+
+
+
+                await db.collection(
+                    "questions"
+                )
+                .add({
+
+
+
+                    question:
+                    row.question,
+
+
+
+                    choices:[
+
+                        row.choice1,
+
+                        row.choice2,
+
+                        row.choice3,
+
+                        row.choice4
+
+                    ],
+
+
+
+                    answer:
+
+                    Number(
+                        row.answer
+                    )-1,
+
+
+
+                    period:
+                    row.period || "기타",
+
+
+
+                    category:
+                    row.category || "기타",
+
+
+
+                    level:
+                    row.level || "중",
+
+
+
+                    type:
+                    row.type || "예상",
+
+
+
+
+                    source:
+                    row.source || "",
+
+
+
+                    keywords:
+
+                    row.keywords
 
                     ?
 
-                    Math.round(
-                        q.wrong / q.total * 100
-                    )
+                    row.keywords.split(",")
 
                     :
 
-                    0;
+                    [],
 
 
 
-            list.push({
 
-                question:
-                    q.question,
-
-
-                category:
-                    q.category,
-
-
-                total:
-                    q.total,
-
-
-                wrong:
-                    q.wrong,
-
-
-                wrongRate:
-                    wrongRate
-
-            });
+                    explanation:
+                    row.explanation || "",
 
 
 
-        });
+                    image:
+                    row.image || "",
 
 
 
-        list.sort(function (a, b) {
+                    created:
 
-            return b.wrongRate - a.wrongRate;
+                    firebase.firestore
+                    .FieldValue
+                    .serverTimestamp()
 
-        });
 
-
-
-        let html = `
-
-    <h3>
-    오답률 TOP 10
-    </h3>
-
-    `;
+                });
 
 
 
-        list.slice(0, 10)
-            .forEach(function (q, index) {
+
+                existing.add(
+                    row.question
+                );
 
 
-                html += `
-
-        <div class="questionBox">
-
-
-        <h4>
-        ${index + 1}위.
-        ${q.question}
-        </h4>
-
-
-        <p>
-        분야 : ${q.category}
-        </p>
-
-
-        <p>
-        응시 :
-        ${q.total}회
-        </p>
-
-
-        <p style="color:red">
-
-        오답률 :
-        ${q.wrongRate}%
-
-        </p>
-
-
-        </div>
-
-        `;
-
-
-            });
+                success++;
 
 
 
-        document.getElementById(
-            "analysisResult"
-        )
-            .innerHTML = html;
+            }
 
 
-    };
 
 
-    async function loadPeriodAnalysis() {
+            alert(
+
+`
+CSV 업로드 완료
+
+신규 등록 : ${success}
+
+중복 제외 : ${duplicate}
+`
+
+            );
+
+
+
+            loadQuestions();
+
+
+
+        }
+
+
+        }
+
+    );
+
+
+}
+
+
+
+
+
+
+// ========================================
+// CSV 다운로드
+// ========================================
+
+
+async function downloadCSV(){
+
 
 
     const snapshot =
-    await db.collection("questionStats").get();
+
+    await db.collection(
+        "questions"
+    )
+    .get();
 
 
 
-    const result = {};
+    let data=[];
 
 
 
     snapshot.forEach(function(doc){
+
+
+        const q =
+        doc.data();
+
+
+
+        data.push({
+
+
+            question:
+            q.question,
+
+
+            choice1:
+            q.choices?.[0] || "",
+
+
+            choice2:
+            q.choices?.[1] || "",
+
+
+            choice3:
+            q.choices?.[2] || "",
+
+
+            choice4:
+            q.choices?.[3] || "",
+
+
+
+            answer:
+            (q.answer || 0)+1,
+
+
+
+            period:
+            q.period || "",
+
+
+
+            category:
+            q.category || "",
+
+
+
+            level:
+            q.level || "",
+
+
+
+            type:
+            q.type || "",
+
+
+
+            source:
+            q.source || "",
+
+
+
+            keywords:
+            q.keywords
+            ?
+            q.keywords.join(",")
+            :
+            "",
+
+
+
+            explanation:
+            q.explanation || ""
+
+
+        });
+
+
+
+    });
+
+
+
+
+
+    const csv =
+    Papa.unparse(data);
+
+
+
+
+    const blob =
+    new Blob(
+
+        [csv],
+
+        {
+            type:
+            "text/csv;charset=utf-8;"
+        }
+
+    );
+
+
+
+    const url =
+    URL.createObjectURL(blob);
+
+
+
+    const a =
+    document.createElement(
+        "a"
+    );
+
+
+
+    a.href=url;
+
+
+    a.download =
+    "AI한국사_문제은행.csv";
+
+
+
+    a.click();
+
+
+}
+
+
+
+
+
+
+// ========================================
+// 시대별 오답 분석
+// ========================================
+
+
+async function loadPeriodAnalysis(){
+
+
+
+    const snapshot =
+
+    await db.collection(
+        "questionStats"
+    )
+    .get();
+
+
+
+
+    let result={};
+
+
+
+
+    snapshot.forEach(function(doc){
+
 
 
         const q =
@@ -1187,14 +1894,13 @@ document.getElementById(
 
 
 
+
         if(!result[period]){
 
 
             result[period]={
 
                 total:0,
-
-                correct:0,
 
                 wrong:0
 
@@ -1205,13 +1911,9 @@ document.getElementById(
 
 
 
+
         result[period].total +=
         q.total || 0;
-
-
-
-        result[period].correct +=
-        q.correct || 0;
 
 
 
@@ -1220,175 +1922,68 @@ document.getElementById(
 
 
 
+
     });
+
+
 
 
 
     let html =
 
-    `
-
-    <h3>
-    📊 시대별 학습 분석
-    </h3>
-
-    `;
+    "<h3>시대별 오답률</h3>";
 
 
 
-    let weakPeriod = "";
-
-    let maxWrong = 0;
 
 
-
-    Object.keys(result).forEach(function(key){
+    Object.keys(result)
+    .forEach(function(key){
 
 
 
-        const data =
-        result[key];
+        const rate =
 
-
-
-        const wrongRate =
-
-        data.total > 0
+        result[key].total > 0
 
         ?
 
         Math.round(
-            data.wrong /
-            data.total *
+
+            result[key].wrong /
+
+            result[key].total *
+
             100
+
         )
 
         :
 
         0;
 
-
-
-        const correctRate =
-
-        data.total > 0
-
-        ?
-
-        Math.round(
-            data.correct /
-            data.total *
-            100
-        )
-
-        :
-
-        0;
-
-
-
-        if(wrongRate > maxWrong){
-
-            maxWrong =
-            wrongRate;
-
-            weakPeriod =
-            key;
-
-        }
-
-
-
-        let status = "";
-
-
-        if(wrongRate >= 60){
-
-            status =
-            "⚠ 집중 학습 필요";
-
-        }
-
-        else if(wrongRate >=40){
-
-            status =
-            "△ 보완 필요";
-
-        }
-
-        else{
-
-            status =
-            "○ 양호";
-
-        }
 
 
 
         html +=
 
-
         `
 
-        <div class="questionBox">
-
-
-        <h4>
-        ${key}
-        </h4>
-
-
         <p>
-        총 풀이 :
-        ${data.total}회
+
+        ${key} :
+
+        ${rate}%
+
         </p>
-
-
-        <p>
-        정답률 :
-        ${correctRate}%
-        </p>
-
-
-        <p>
-        오답률 :
-        ${wrongRate}%
-        </p>
-
-
-        <p>
-        상태 :
-        ${status}
-        </p>
-
-
-        </div>
-
 
         `;
+
 
 
     });
 
 
-
-    html +=
-
-
-    `
-
-    <h3>
-    🎯 최우선 학습 시대
-    </h3>
-
-
-    <p>
-
-    ${weakPeriod || "데이터 부족"}
-
-    </p>
-
-    `;
 
 
 
@@ -1409,71 +2004,37 @@ document.getElementById(
 
 }
 
-/*
-auth.onAuthStateChanged(async function(user){
+// ========================================
+// AI 한국사 관리자 V2 FINAL
+// admin.js Part 4/4
+// 분석 / AI / 공통함수
+// ========================================
 
 
-    if(!user){
 
-        alert(
-        "관리자 로그인이 필요합니다."
-        );
-
-        location.href="../index.html";
-
-        return;
-
-    }
+// ================================
+// 문제 품질 분석
+// ================================
 
 
-    const adminDoc =
-    await db.collection("users")
-    .doc(user.uid)
+async function loadQualityAnalysis(){
+
+
+    const snapshot =
+
+    await db.collection(
+        "questionStats"
+    )
     .get();
 
 
 
-    if(
-        !adminDoc.exists ||
-        adminDoc.data().role !== "admin"
-    ){
-
-        alert(
-        "관리자 권한이 없습니다."
-        );
-
-        location.href="../index.html";
-
-        return;
-
-    }
-
-
-    console.log(
-        "관리자 인증 완료"
-    );
-
-
-});
-*/
-window.editQuestion = editQuestion;
-window.deleteQuestion = deleteQuestion;
-window.loadQuestionAnalysis = loadQuestionAnalysis;
-window.loadPeriodAnalysis = loadPeriodAnalysis;
-
-// =====================================
-// 문제 난이도 자동 분석
-// =====================================
-
-async function loadDifficultyAnalysis(){
-
-
-    const snapshot =
-    await db.collection("questionStats").get();
+    let html =
+    "<h3>문제 품질 분석</h3>";
 
 
 
-    let list = [];
+    let count=0;
 
 
 
@@ -1485,167 +2046,94 @@ async function loadDifficultyAnalysis(){
 
 
 
-        const total =
-        q.total || 0;
-
-
-        const wrong =
-        q.wrong || 0;
-
-
-
-        if(total === 0){
-
-            return;
-
-        }
-
-
-
         const wrongRate =
 
+        q.total > 0
+
+        ?
+
         Math.round(
-            wrong /
-            total *
+
+            q.wrong /
+
+            q.total *
+
             100
-        );
+
+        )
+
+        :
+
+        0;
 
 
 
-        let level = "";
+
+        if(wrongRate >= 70){
 
 
 
-        if(wrongRate >= 80){
+            count++;
 
-            level = "최상";
+
+
+            html += `
+
+
+<div class="questionBox">
+
+
+<h3>
+⚠️ ${q.question || "문제"}
+</h3>
+
+
+<p>
+오답률 :
+${wrongRate}%
+</p>
+
+
+<p>
+분야 :
+${q.category || ""}
+</p>
+
+
+</div>
+
+
+`;
+
+
 
         }
 
-        else if(wrongRate >= 60){
-
-            level = "상";
-
-        }
-
-        else if(wrongRate >= 40){
-
-            level = "중";
-
-        }
-
-        else{
-
-            level = "하";
-
-        }
-
-
-
-        list.push({
-
-            question:
-            q.question,
-
-
-            category:
-            q.category || "",
-
-
-            period:
-            q.period || "",
-
-
-            wrongRate:
-            wrongRate,
-
-
-            level:
-            level
-
-        });
 
 
     });
 
 
 
-    // 어려운 문제 순 정렬
-
-    list.sort(function(a,b){
-
-        return b.wrongRate - a.wrongRate;
-
-    });
 
 
-
-    let html =
-
-    `
-
-    <h3>
-    📌 문제 난이도 분석
-    </h3>
-
-    `;
-
-
-
-    list.slice(0,10)
-
-    .forEach(function(q,index){
+    if(count===0){
 
 
         html +=
 
-
-        `
-
-        <div class="questionBox">
-
-        <h4>
-        ${index+1}. ${q.level} 난이도
-        </h4>
+        "<p>분석 대상 문제가 없습니다.</p>";
 
 
-        <p>
-        ${q.question}
-        </p>
+    }
 
-
-        <p>
-        시대 :
-        ${q.period}
-        </p>
-
-
-        <p>
-        분야 :
-        ${q.category}
-        </p>
-
-
-        <p>
-        오답률 :
-        ${q.wrongRate}%
-        </p>
-
-
-        </div>
-
-
-        `;
-
-
-    });
 
 
 
     const area =
 
     document.getElementById(
-        "difficultyResult"
+        "qualityAnalysis"
     );
 
 
@@ -1660,622 +2148,441 @@ async function loadDifficultyAnalysis(){
 
 }
 
-// =====================================
-// 문제 품질 분석
-// =====================================
 
-async function loadQualityAnalysis(){
 
-    const list = questionCache;
 
 
-    let imageMissing = 0;
-    let explanationMissing = 0;
-    let unused = 0;
-    let highWrong = 0;
 
 
-    let gradeA = 0;
-    let gradeB = 0;
-    let gradeC = 0;
-
-
-    for(const q of list){
-
-
-        // 이미지 없는 문제
-        if(!q.image || q.image===""){
-            imageMissing++;
-        }
-
-
-        // 해설 없는 문제
-        if(!q.explanation || q.explanation===""){
-            explanationMissing++;
-        }
-
-
-        let score = 0;
-
-
-        // 이미지 있음
-        if(q.image){
-            score += 20;
-        }
-
-
-        // 해설 있음
-        if(q.explanation){
-            score += 30;
-        }
-
-
-        // 키워드 있음
-        if(
-            q.keywords &&
-            q.keywords.length>0
-        ){
-            score += 20;
-        }
-
-
-        // 통계 확인
-        const stat =
-        await db.collection("questionStats")
-        .doc(q.id)
-        .get();
-
-
-        if(stat.exists){
-
-            const data =
-            stat.data();
-
-
-            if(data.total){
-
-                score += 30;
-
-
-                const rate =
-                data.wrong /
-                data.total *
-                100;
-
-
-                if(rate>=70){
-
-                    highWrong++;
-
-                }
-
-            }
-
-
-        }
-
-        // =====================================
-// 문제 중복 검사
-// =====================================
-
-function checkDuplicateQuestions(){
-
-
-    const list = questionCache;
-
-
-    let duplicate = [];
-
-
-    for(let i=0;i<list.length;i++){
-
-
-        for(let j=i+1;j<list.length;j++){
-
-
-            const a =
-            list[i].question
-            .replace(/\s/g,"")
-            .toLowerCase();
-
-
-            const b =
-            list[j].question
-            .replace(/\s/g,"")
-            .toLowerCase();
-
-
-
-            // 완전 동일
-
-            if(a === b){
-
-
-                duplicate.push({
-
-                    q1:list[i],
-
-                    q2:list[j],
-
-                    type:"동일 문제"
-
-                });
-
-
-                continue;
-
-            }
-
-
-
-            // 80% 이상 유사
-
-            const similarity =
-            textSimilarity(a,b);
-
-
-
-            if(similarity >= 0.8){
-
-
-                duplicate.push({
-
-                    q1:list[i],
-
-                    q2:list[j],
-
-                    type:"유사 문제"
-
-                });
-
-
-            }
-
-
-        }
-
-    }
-
-
-    renderDuplicateResult(
-        duplicate
-    );
-
-
-}
-
-
-
-// =====================================
-// 문장 유사도
-// =====================================
-
-function textSimilarity(a,b){
-
-
-    let same = 0;
-
-
-    const length =
-    Math.min(
-        a.length,
-        b.length
-    );
-
-
-    for(let i=0;i<length;i++){
-
-
-        if(a[i]===b[i]){
-
-            same++;
-
-        }
-
-    }
-
-
-    return same /
-    Math.max(
-        a.length,
-        b.length
-    );
-
-}
-
-
-
-// =====================================
-// 중복 결과 표시
-// =====================================
-
-function renderDuplicateResult(list){
-
-
-    const box =
-    document.getElementById(
-        "duplicateAnalysis"
-    );
-
-
-    if(!box) return;
-
-
-
-    if(list.length===0){
-
-
-        box.innerHTML =
-
-        `
-        <div class="questionBox">
-
-        <h3>
-        ✅ 중복 문제 없음
-        </h3>
-
-        </div>
-        `;
-
-
-        return;
-
-    }
-
-
-
-    let html =
-
-    `
-
-    <div class="questionBox">
-
-    <h3>
-    🔁 중복 의심 문제
-    </h3>
-
-
-    <p>
-    ${list.length}건 발견
-    </p>
-
-    `;
-
-
-
-    list.forEach(function(item,index){
-
-
-        html +=
-
-
-        `
-
-        <hr>
-
-        <b>
-        ${index+1}.
-        ${item.type}
-        </b>
-
-
-        <p>
-        문제1 :
-        ${item.q1.question}
-        </p>
-
-
-        <p>
-        문제2 :
-        ${item.q2.question}
-        </p>
-
-
-        `;
-
-
-    });
-
-
-
-    html += "</div>";
-
-
-    box.innerHTML = html;
-
-
-}
-
-// =====================================
-// AI 출제 분석
-// =====================================
-
-async function loadAIQuestionAnalysis(){
-
-
-    const snapshot =
-    await db.collection("questionStats")
-    .get();
-
-
-
-    let list=[];
-
-
-    snapshot.forEach(function(doc){
-
-        const q = doc.data();
-
-        q.id = doc.id;
-
-        list.push(q);
-
-    });
-
-
-
-    // 오답률 계산
-
-    list.forEach(function(q){
-
-
-        q.wrongRate =
-
-        q.total > 0
-
-        ?
-
-        Math.round(
-
-            q.wrong /
-            q.total *
-            100
-
-        )
-
-        :
-
-        0;
-
-
-    });
-
-
-
-    // 많이 틀린 문제
-
-    const topWrong =
-
-    list
-
-    .slice()
-
-    .sort(function(a,b){
-
-        return b.wrongRate -
-        a.wrongRate;
-
-    })
-
-    .slice(0,10);
-
-
-
-    // 쉬운 문제
-
-    const easy =
-
-    list
-
-    .slice()
-
-    .sort(function(a,b){
-
-        return a.wrongRate -
-        b.wrongRate;
-
-    })
-
-    .slice(0,10);
-
-
-
-    let html =
-
-    `
-
-<div class="questionBox">
-
-<h3>
-🤖 AI 출제 분석
-</h3>
-
-
-<h4>
-🔥 가장 어려운 문제 TOP10
-</h4>
-
-`;
-
-
-
-topWrong.forEach(function(q,index){
-
-
-html +=
-
-`
-
-<p>
-
-${index+1}.
-${q.question}
-
-<br>
-
-오답률 :
-<b>${q.wrongRate}%</b>
-
-</p>
-
-`;
-
-});
-
-
-
-html +=
-
-`
-
-<hr>
-
-<h4>
-😊 가장 쉬운 문제 TOP10
-</h4>
-
-`;
-
-
-
-easy.forEach(function(q,index){
-
-
-html +=
-
-`
-
-<p>
-
-${index+1}.
-${q.question}
-
-<br>
-
-오답률 :
-<b>${q.wrongRate}%</b>
-
-</p>
-
-`;
-
-});
-
-
-
-html +=
-
-`
-
-</div>
-
-`;
-
-
-
-document.getElementById(
-"aiQuestionAnalysis"
-).innerHTML = html;
-
-
-
-}
-
-// =====================================
+// ================================
 // AI 문제 개선 추천
-// =====================================
+// ================================
 
-async function loadImprovementSuggestions(){
 
-    const questionSnap =
-    await db.collection("questions").get();
+function loadImprovementSuggestions(){
 
-    const statSnap =
-    await db.collection("questionStats").get();
 
-    const stats = {};
 
-    statSnap.forEach(function(doc){
-
-        stats[doc.id] = doc.data();
-
-    });
-
-    let html = `
-    <div class="questionBox">
-    <h3>🤖 AI 문제 개선 추천</h3>
-    `;
-
-    questionSnap.forEach(function(doc){
-
-        const q = doc.data();
-
-        const stat = stats[doc.id];
-
-        let reasons = [];
-
-        if(!q.explanation){
-
-            reasons.push("📝 해설 추가 필요");
-
-        }
-
-        if(!q.image){
-
-            reasons.push("🖼 이미지 추가 권장");
-
-        }
-
-        if(stat){
-
-            const rate =
-            stat.total > 0
-            ?
-            Math.round(stat.wrong/stat.total*100)
-            :
-            0;
-
-            if(rate>=80){
-
-                reasons.push("⚠ 오답률 매우 높음");
-
-            }
-
-            if(stat.total===0){
-
-                reasons.push("📊 아직 출제되지 않음");
-
-            }
-
-        }
-        else{
-
-            reasons.push("📊 출제 통계 없음");
-
-        }
-
-        if(reasons.length>0){
-
-            html += `
-            <hr>
-
-            <h4>${q.question}</h4>
-
-            <ul>
-            ${reasons.map(function(r){
-                return `<li>${r}</li>`;
-            }).join("")}
-            </ul>
-            `;
-
-        }
-
-    });
-
-    html += "</div>";
+    const area =
 
     document.getElementById(
         "improvementResult"
-    ).innerHTML = html;
+    );
+
+
+
+    if(area){
+
+
+        area.innerHTML =
+
+
+`
+
+<h3>
+AI 문제 개선 의견
+</h3>
+
+
+<p>
+1. 오답률 70% 이상 문제는 해설 보강 필요
+</p>
+
+
+<p>
+2. 보기 선택지 난이도 균형 검토 필요
+</p>
+
+
+<p>
+3. 사료형 문제 비율 확대 권장
+</p>
+
+
+<p>
+4. 특정 시대 편중 여부 확인 필요
+</p>
+
+
+`;
+
+
+
+    }
+
 
 }
+
+
+
+
+
+
+// ================================
+// AI 출제 분석
+// ================================
+
+
+function loadAIQuestionAnalysis(){
+
+
+
+    const area =
+
+    document.getElementById(
+        "aiQuestionAnalysis"
+    );
+
+
+
+    if(area){
+
+
+
+        area.innerHTML =
+
+
+
+`
+
+<h3>
+AI 출제 방향 분석
+</h3>
+
+
+<ul>
+
+
+<li>
+조선 정치·사회 분야 강화 필요
+</li>
+
+
+<li>
+문화·사료 분석 문제 확대 권장
+</li>
+
+
+<li>
+한국사능력검정시험 최신 유형 반영 필요
+</li>
+
+
+<li>
+고난도 자료 분석 문제 확보 필요
+</li>
+
+
+</ul>
+
+
+`;
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+// ================================
+// 공통 함수
+// ================================
+
+
+
+function getValue(id){
+
+
+    const el =
+
+    document.getElementById(id);
+
+
+
+    return el
+
+    ?
+
+    el.value
+
+    :
+
+    "";
+
+}
+
+
+
+
+function setValue(id,value){
+
+
+
+    const el =
+
+    document.getElementById(id);
+
+
+
+    if(el){
+
+        el.value =
+        value || "";
+
+    }
+
+
+
+}
+
+
+
+
+
+function setText(id,value){
+
+
+
+    const el =
+
+    document.getElementById(id);
+
+
+
+    if(el){
+
+        el.innerText =
+        value;
+
+    }
+
+
+}
+
+
+
+
+
+function clearForm(){
+
+
+
+    editingId=null;
+
+
+
+    const inputs =
+
+    document.querySelectorAll(
+
+        "input, textarea"
+
+    );
+
+
+
+    inputs.forEach(function(el){
+
+
+
+        if(
+
+            el.id !==
+            "searchQuestion"
+
+        ){
+
+            el.value="";
+
+        }
+
+
+
+    });
+
+
+
+}
+
+
+
+
+
+// ================================
+// 페이지 기능
+// ================================
+
+
+
+function renderPage(){
+
+
+    const start =
+
+    (currentPage-1)
+    *
+    pageSize;
+
+
+
+    const end =
+
+    start + pageSize;
+
+
+
+    const list =
+
+    questionCache.slice(
+        start,
+        end
+    );
+
+
+
+    renderQuestionList(
+        list
+    );
+
+
+
+    const pageInfo =
+
+    document.getElementById(
+        "pageInfo"
+    );
+
+
+
+    if(pageInfo){
+
+
+        pageInfo.innerText =
+
+
+        `
+
+        ${currentPage}
+        /
+        ${Math.ceil(
+            questionCache.length /
+            pageSize
+        )}
+
+        `;
+
+
+    }
+
+
+}
+
+
+
+
+
+
+// ================================
+// 페이지 버튼 연결
+// ================================
+
+
+
+document.addEventListener(
+"DOMContentLoaded",
+function(){
+
+
+
+    const prev =
+
+    document.getElementById(
+        "prevPageBtn"
+    );
+
+
+
+    const next =
+
+    document.getElementById(
+        "nextPageBtn"
+    );
+
+
+
+
+    if(prev){
+
+
+        prev.onclick=function(){
+
+
+
+            if(currentPage>1){
+
+
+                currentPage--;
+
+
+                renderPage();
+
+
+            }
+
+
+        };
+
+
+    }
+
+
+
+
+
+    if(next){
+
+
+        next.onclick=function(){
+
+
+
+            const max =
+
+            Math.ceil(
+
+                questionCache.length /
+
+                pageSize
+
+            );
+
+
+
+            if(currentPage < max){
+
+
+                currentPage++;
+
+
+                renderPage();
+
+
+            }
+
+
+        };
+
+
+    }
+
+
+
+});

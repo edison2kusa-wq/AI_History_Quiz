@@ -5,146 +5,372 @@
 
 <meta charset="UTF-8">
 
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
 <title>
-AI 한국사 관리자 문제 등록
+AI 한국사 관리자 V2
 </title>
 
 
-<style>
+<!-- Firebase -->
 
-body{
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 
-font-family:
-Arial;
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-padding:30px;
-
-}
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
 
-input,select,textarea{
+<!-- Chart -->
 
-width:100%;
-
-padding:10px;
-
-margin:5px 0;
-
-}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
-button{
+<!-- CSV -->
 
-padding:12px;
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
-background:#2196F3;
 
-color:white;
+<!-- Firebase 설정 -->
 
-border:none;
+<script src="../frontend/firebase-config.js"></script>
 
-cursor:pointer;
 
-}
-
-#dashboard{
-
-display:flex;
-gap:15px;
-flex-wrap:wrap;
-margin:20px 0;
-
-}
-
-.card{
-
-width:180px;
-padding:20px;
-background:#2196F3;
-color:white;
-border-radius:10px;
-text-align:center;
-
-}
-
-.card h3{
-
-font-size:34px;
-margin-top:10px;
-
-}
-
-.questionBox{
-
-border:1px solid #ccc;
-padding:10px;
-margin:10px 0;
-border-radius:8px;
-
-}
-</style>
+<link rel="stylesheet" href="admin.css">
 
 
 </head>
 
 
 <body>
-    
+
+
+<!-- ===================== -->
+<!-- LOGIN -->
+<!-- ===================== -->
+
+
 <div id="loginArea">
 
-<h3>
-관리자 로그인
-</h3>
+
+<div class="loginBox">
 
 
-<input id="adminEmail"
+<h2>
+📚 AI 한국사 관리자
+</h2>
+
+
+<input
+id="adminEmail"
 placeholder="관리자 이메일">
 
 
-<input id="adminPassword"
+<input
+id="adminPassword"
 type="password"
 placeholder="비밀번호">
 
 
 <button id="adminLoginBtn">
+
 로그인
+
 </button>
 
 
 </div>
 
 
-<div id="adminArea" style="display:none;">
-<h2>관리자 대시보드</h2>
+</div>
 
-<div id="dashboard">
+
+
+
+
+<!-- ===================== -->
+<!-- ADMIN -->
+<!-- ===================== -->
+
+
+<div id="adminArea"
+style="display:none;">
+
+
+
+<div id="adminContainer">
+
+
+
+
+
+<!-- ===================== -->
+<!-- SIDEBAR -->
+<!-- ===================== -->
+
+
+<aside id="sidebar">
+
+
+<h2>
+AI 한국사
+</h2>
+
+
+
+<button onclick="showPage('dashboardPage')">
+
+📊 대시보드
+
+</button>
+
+
+<button onclick="showPage('questionPage')">
+
+📝 문제관리
+
+</button>
+
+
+<button onclick="showPage('csvPage')">
+
+📂 CSV 관리
+
+</button>
+
+
+<button onclick="showPage('statisticsPage')">
+
+📈 통계
+
+</button>
+
+
+<button onclick="showPage('analysisPage')">
+
+🤖 AI 분석
+
+</button>
+
+
+<button onclick="logout()">
+
+🚪 로그아웃
+
+</button>
+
+
+
+</aside>
+
+
+
+
+
+<!-- ===================== -->
+<!-- CONTENT -->
+<!-- ===================== -->
+
+
+<main id="content">
+
+
+
+
+
+<!-- HEADER -->
+
+
+<div id="topHeader">
+
+
+<div>
+
+<h1>
+AI 한국사 관리자
+</h1>
+
+
+<p>
+한국사능력검정시험 문제은행 관리 시스템
+</p>
+
+
+</div>
+
+
+<div id="adminStatus">
+
+🟢 Firebase 연결
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<!-- ===================== -->
+<!-- DASHBOARD -->
+<!-- ===================== -->
+
+
+<section id="dashboardPage"
+class="page">
+
+
+<h2>
+📊 Dashboard
+</h2>
+
+
+
+<div class="dashboard">
+
 
 <div class="card">
+
+<p>
 총 문제
-<h3 id="totalQuestion">0</h3>
+</p>
+
+<h3 id="totalQuestion">
+0
+</h3>
+
 </div>
 
+
+
 <div class="card">
+
+<p>
 회원 수
-<h3 id="totalUser">0</h3>
+</p>
+
+<h3 id="totalUser">
+0
+</h3>
+
 </div>
 
+
+
 <div class="card">
+
+<p>
 시험 횟수
-<h3 id="totalExam">0</h3>
+</p>
+
+<h3 id="totalExam">
+0
+</h3>
+
 </div>
+
+
 
 <div class="card">
-오답 수
-<h3 id="totalWrong">0</h3>
-</div>
+
+<p>
+총 오답
+</p>
+
+<h3 id="totalWrong">
+0
+</h3>
 
 </div>
+
+
+
+<div class="card">
+
+<p>
+평균 정답률
+</p>
+
+<h3 id="avgScore">
+0%
+</h3>
+
+</div>
+
+
+</div>
+
+
 
 <hr>
-<h1>
-관리자 문제 등록
-</h1>
+
+
+<h2>
+📈 분석 그래프
+</h2>
+
+
+<div class="chartGrid">
+
+
+<div class="chartBox">
+
+<h3>
+시대별 문제
+</h3>
+
+<canvas id="periodChart"></canvas>
+
+</div>
+
+
+
+<div class="chartBox">
+
+<h3>
+분야별 문제
+</h3>
+
+<canvas id="categoryChart"></canvas>
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+<!-- 다음 Part에서 추가 -->
+
+<!-- ===================== -->
+<!-- 문제 관리 -->
+<!-- ===================== -->
+
+
+<section id="questionPage"
+class="page"
+style="display:none;">
+
+
+<h2>
+📝 문제 등록 관리
+</h2>
+
+
+
+<div class="formBox">
 
 
 <input id="question"
@@ -152,19 +378,20 @@ placeholder="문제 입력">
 
 
 <input id="choice1"
-placeholder="보기1">
+placeholder="보기 1">
 
 
 <input id="choice2"
-placeholder="보기2">
+placeholder="보기 2">
 
 
 <input id="choice3"
-placeholder="보기3">
+placeholder="보기 3">
 
 
 <input id="choice4"
-placeholder="보기4">
+placeholder="보기 4">
+
 
 
 <select id="answer">
@@ -186,6 +413,8 @@ placeholder="보기4">
 </option>
 
 </select>
+
+
 
 <select id="period">
 
@@ -219,21 +448,23 @@ placeholder="보기4">
 
 </select>
 
+
+
 <select id="category">
 
-<option>
+<option value="정치">
 정치
 </option>
 
-<option>
+<option value="경제">
 경제
 </option>
 
-<option>
+<option value="사회">
 사회
 </option>
 
-<option>
+<option value="문화">
 문화
 </option>
 
@@ -242,240 +473,543 @@ placeholder="보기4">
 
 
 
+
 <select id="level">
 
-<option>
+<option value="중">
 중
 </option>
 
-<option>
+<option value="상">
 상
 </option>
 
+
 </select>
+
+
+
 
 <select id="type">
 
 <option value="기출">
+
 기출
+
 </option>
+
 
 <option value="예상">
+
 예상
+
 </option>
+
 
 <option value="사료">
+
 사료
+
 </option>
 
+
 <option value="자료분석">
+
 자료분석
+
 </option>
+
 
 </select>
 
 
-<input id="source" placeholder="출처 예) 한국사능력검정시험 65회">
+
+<input
+id="source"
+placeholder="출처">
 
 
-<input id="keywords" placeholder="키워드 예) 광종, 노비안검법, 왕권강화">
-<textarea id="explanation" placeholder="해설 입력"> </textarea>
+<input
+id="keywords"
+placeholder="키워드">
 
 
-<label>문제 이미지</label>
+<textarea
+id="explanation"
+placeholder="해설">
+
+</textarea>
+
+
 
 <input
 id="image"
-placeholder="이미지 주소 입력">
+placeholder="이미지 주소">
+
+
 
 <button id="saveBtn">
-문제 저장
+
+💾 문제 저장
+
 </button>
+
+
+
+</div>
+
+
+
 <hr>
 
+
+
 <h2>
-등록 문제 목록
+🔍 문제 검색
 </h2>
 
 
-<input id="searchQuestion"
-placeholder="문제 검색">
+
+<input
+id="searchQuestion"
+placeholder="검색어 입력">
+
+
+
 <select id="filterCategory">
 
-    <option value="전체">
-    전체 분야
-    </option>
+<option value="전체">
+전체 분야
+</option>
 
-    <option value="정치">
-    정치
-    </option>
+<option value="정치">
+정치
+</option>
 
-    <option value="경제">
-    경제
-    </option>
+<option value="경제">
+경제
+</option>
 
-    <option value="사회">
-    사회
-    </option>
+<option value="사회">
+사회
+</option>
 
-    <option value="문화">
-    문화
-    </option>
+<option value="문화">
+문화
+</option>
+
 
 </select>
+
+
+
 <select id="filterLevel">
 
-    <option value="전체">
-    전체 난이도
-    </option>
+<option value="전체">
+전체 난이도
+</option>
 
-    <option value="중">
-    중
-    </option>
+<option value="중">
+중
+</option>
 
-    <option value="상">
-    상
-    </option>
+<option value="상">
+상
+</option>
+
 
 </select>
+
+
+
 <button id="searchBtn">
+
 검색
+
 </button>
-<hr>
+
+
 
 <button id="resetBtn">
+
 전체보기
+
 </button>
+
+
 
 <hr>
 
+
+
+<div id="questionList">
+
+
+</div>
+
+
+
+<div id="pageArea">
+
+
+<button id="prevPageBtn">
+
+◀ 이전
+
+</button>
+
+
+<span id="pageInfo">
+
+1 / 1
+
+</span>
+
+
+<button id="nextPageBtn">
+
+다음 ▶
+
+</button>
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+<!-- ===================== -->
+<!-- CSV 관리 -->
+<!-- ===================== -->
+
+
+<section id="csvPage"
+class="page"
+style="display:none;">
+
+
+
 <h2>
-엑셀 문제 업로드
+
+📂 CSV 문제 관리
+
 </h2>
 
 
-<input 
+
+
+<div class="formBox">
+
+
+<h3>
+
+CSV 업로드
+
+</h3>
+
+
+
+<input
+
 type="file"
+
 id="csvFile"
+
 accept=".csv">
+
 
 
 <button id="uploadCsvBtn">
 
-CSV 업로드
+📤 CSV 업로드
 
 </button>
+
+
+
+
 <div id="uploadProgress"
-style="
-display:none;
-margin-top:15px;
-">
+style="display:none;">
+
 
 <p id="uploadText">
-업로드 준비
+
+준비
+
 </p>
 
+
 <progress
+
 id="uploadBar"
+
 value="0"
-max="100"
-style="
-width:300px;
-height:25px;
-">
+
+max="100">
+
 </progress>
+
+
 
 </div>
 
+
+
+</div>
+
+
+
+
 <hr>
+
+
+
+
+<h3>
+
+CSV 다운로드
+
+</h3>
+
+
 
 <button id="downloadCsvBtn">
-CSV 다운로드
+
+📥 CSV 다운로드
+
 </button>
-<div id="questionList"></div>
 
-<hr>
 
-<h2>서비스 통계</h2>
 
-<div id="statistics"></div>
 
-<hr>
+</section>
+
+
+<!-- ===================== -->
+<!-- 통계 페이지 -->
+<!-- ===================== -->
+
+
+<section id="statisticsPage"
+class="page"
+style="display:none;">
+
 
 <h2>
-📊 문제 분석
+📈 서비스 통계
+</h2>
+<canvas id="periodChart"></canvas>
+
+<br>
+
+<canvas id="categoryChart"></canvas>
+
+<div class="dashboard">
+
+
+<div class="card">
+
+<p>
+총 응시
+</p>
+
+<h3 id="statExam">
+
+0
+
+</h3>
+
+</div>
+
+
+
+<div class="card">
+
+<p>
+총 오답
+
+</p>
+
+<h3 id="statWrong">
+
+0
+
+</h3>
+
+</div>
+
+
+
+<div class="card">
+
+<p>
+평균 점수
+
+</p>
+
+<h3 id="statAvg">
+
+0%
+
+</h3>
+
+</div>
+
+
+</div>
+
+
+
+<hr>
+
+
+
+<h3>
+시대별 오답률
+</h3>
+
+
+<div id="periodAnalysis">
+
+</div>
+
+
+
+<h3>
+분야별 오답률
+</h3>
+
+
+<div id="categoryAnalysis">
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+<!-- ===================== -->
+<!-- AI 분석 -->
+<!-- ===================== -->
+
+
+<section id="analysisPage"
+class="page"
+style="display:none;">
+
+
+
+<h2>
+🤖 AI 문제 분석
 </h2>
 
 
-<button id="analysisBtn">
-
-오답률 높은 문제 분석
-
-</button>
-
-<button id="periodAnalysisBtn">
-시대별 분석
-</button>
 
 
-
-<div id="analysisResult">
-
-</div>
-<div id="qualityAnalysis">
-
-</div>
-
-<div id="difficultyResult">
-
-</div>
-<div id="pageArea">
-
-<button id="prevPageBtn">
-◀ 이전
-</button>
-
-<span id="pageInfo">
-1 / 1
-</span>
-
-<button id="nextPageBtn">
-다음 ▶
-</button>
-
-</div>
-
-</div>
-<div class="card">
-
-<h3 id="avgScore">
-0%
-</h3>
-
-<p>
-평균 정답률
-</p>
-
-</div>
-<button onclick="loadQualityAnalysis()">
+<button id="qualityBtn">
 
 📚 문제 품질 분석
 
 </button>
-<button onclick="loadImprovementSuggestions()">
 
-🤖 AI 문제 개선 추천
 
-</button>
-<div id="improvementResult"></div>
-<button onclick="loadAIQuestionAnalysis()">
 
-🤖 AI 출제 분석
+<button id="improveBtn">
+
+💡 문제 개선 추천
 
 </button>
-<div id="aiQuestionAnalysis">
+
+
+
+<button id="aiAnalysisBtn">
+
+🎯 출제 경향 분석
+
+</button>
+
+
+
+<hr>
+
+
+
+
+<h3>
+문제 품질 평가
+</h3>
+
+
+
+<div id="qualityAnalysis">
+
 
 </div>
+
+
+
+
+<hr>
+
+
+
+<h3>
+AI 개선 추천
+
+</h3>
+
+
+
+<div id="improvementResult">
+
+
+</div>
+
+
+
+
+<hr>
+
+
+
+<h3>
+출제 분석
+
+</h3>
+
+
+
+<div id="aiQuestionAnalysis">
+
+
+</div>
+
+
+
+
+</section>
+
+
+
+</main>
+
+
+</div>
+
+
+</div>
+
+
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -484,11 +1018,11 @@ CSV 다운로드
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
 <script src="../frontend/firebase-config.js"></script>
 
 <script src="admin.js"></script>
+
 
 </body>
 
