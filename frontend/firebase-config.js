@@ -20,12 +20,12 @@ measurementId: "G-HFNQHBRC86"
 };
 
 // Firebase 중복 초기화 방지
-if (!firebase.apps.length) {
+if(!firebase.apps.length){
+
     firebase.initializeApp(firebaseConfig);
+
 }
 
-// 공통 객체
-// 공통 객체
 
 window.auth =
 firebase.auth();
@@ -34,6 +34,13 @@ firebase.auth();
 window.db =
 firebase.firestore();
 
+
+if(firebase.storage){
+
+    window.storage =
+    firebase.storage();
+
+}
 
 // Storage는 필요할 때만 사용
 if(firebase.storage){
