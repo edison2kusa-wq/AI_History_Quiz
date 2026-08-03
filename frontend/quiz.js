@@ -648,6 +648,7 @@ calculateGrade(score);
 async function saveQuizHistory() {
 
     await updateUserLevel();
+    await updateStudyStreak();
     const user = auth.currentUser;
 
     if (!user) return;
@@ -1777,6 +1778,120 @@ navigator.serviceWorker.register(
 console.log(
 "PWA 설치 준비 완료"
 );
+
+
+});
+
+
+}
+async function updateStudyStreak(){
+
+
+const user =
+auth.currentUser;
+
+
+if(!user)return;
+
+
+
+const ref =
+
+db.collection("users")
+.doc(user.uid);
+
+
+
+const doc =
+await ref.get();
+
+
+
+let data =
+doc.data() || {};
+
+
+
+let streak =
+data.streak || 0;
+
+
+
+const today =
+new Date()
+.toISOString()
+.substring(0,10);
+
+
+
+if(data.lastStudyDate !== today){
+
+
+streak++;
+
+
+}
+
+
+
+await ref.set({
+
+streak:streak,
+
+lastStudyDate:today
+
+
+},
+
+{
+
+merge:true
+
+});
+
+
+}
+
+async function updateRanking(){
+
+
+const user =
+auth.currentUser;
+
+
+if(!user)return;
+
+
+
+const profile =
+
+await db.collection("users")
+
+.doc(user.uid)
+
+.get();
+
+
+
+const data =
+profile.data();
+
+
+
+await db.collection("ranking")
+
+.doc(user.uid)
+
+.set({
+
+nickname:
+data.nickname || "학습자",
+
+point:
+data.point || 0,
+
+level:
+data.level || "Lv.1"
 
 
 });

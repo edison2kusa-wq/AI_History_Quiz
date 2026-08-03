@@ -2987,3 +2987,259 @@ console.log(result);
 
 
 }
+async function createAIQuestion(){
+
+
+const topic =
+getValue("aiTopic");
+
+
+const period =
+getValue("aiPeriod");
+
+
+const level =
+getValue("aiLevel");
+
+
+
+const questionData = {
+
+
+question:
+
+topic+
+"에 대한 설명으로 옳은 것은?",
+
+
+choices:[
+
+topic+
+"과 관련된 올바른 설명",
+
+"잘못된 설명 1",
+
+"잘못된 설명 2",
+
+"잘못된 설명 3"
+
+],
+
+
+answer:0,
+
+
+period:period,
+
+
+category:"정치",
+
+
+level:level,
+
+
+type:"AI생성",
+
+
+explanation:
+
+topic+
+"의 역사적 의미를 이해하는 문제입니다.",
+
+
+status:"pending",
+
+
+created:
+
+firebase.firestore
+.FieldValue
+.serverTimestamp()
+
+
+};
+
+
+
+await db.collection(
+"aiGeneratedQuestions"
+)
+.add(questionData);
+
+
+
+alert(
+"AI 문제 생성 완료\n관리자 검토 필요"
+);
+
+
+loadAIQuestions();
+
+
+}
+async function approveAIQuestion(id){
+
+
+const doc =
+
+await db.collection(
+"aiGeneratedQuestions"
+)
+.doc(id)
+.get();
+
+
+
+const q =
+doc.data();
+
+
+
+await db.collection(
+"questions"
+)
+.add({
+
+...q,
+
+
+approved:true,
+
+
+sourceType:"AI생성"
+
+
+});
+
+
+
+await db.collection(
+"aiGeneratedQuestions"
+)
+.doc(id)
+.update({
+
+status:"approved"
+
+});
+
+
+alert(
+"문제은행 등록 완료"
+);
+
+
+}
+async function autoTagQuestion(){
+
+
+const question =
+
+getValue(
+"question"
+);
+
+
+
+if(!question){
+
+alert(
+"문제를 입력하세요"
+);
+
+return;
+
+}
+
+
+
+let tag={};
+
+
+
+if(question.includes("세종")
+||
+question.includes("훈민정음")){
+
+
+tag={
+
+period:"조선",
+
+category:"문화",
+
+theme:"문자",
+
+keyword:[
+"세종",
+"훈민정음"
+]
+
+};
+
+
+}
+
+
+else if(
+question.includes("고려")
+){
+
+
+tag={
+
+period:"고려",
+
+category:"정치",
+
+theme:"왕권"
+
+};
+
+
+}
+
+
+else{
+
+
+tag={
+
+period:"분석 필요",
+
+category:"분석 필요"
+
+};
+
+
+}
+
+
+
+document.getElementById(
+"tagResult"
+)
+.innerHTML=
+
+`
+
+<h3>
+AI 분석 결과
+</h3>
+
+<p>
+시대 : ${tag.period}
+</p>
+
+<p>
+분야 : ${tag.category}
+</p>
+
+<p>
+주제 : ${tag.theme || ""}
+
+</p>
+
+`;
+
+}

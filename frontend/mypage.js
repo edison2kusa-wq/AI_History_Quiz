@@ -804,3 +804,191 @@ data.point ||
 
 
 }
+document
+.getElementById(
+"pdfReportBtn"
+)
+.onclick =
+createStudyReport;
+
+// ===========================================
+// AI 학습 리포트 PDF
+// ===========================================
+
+
+async function createStudyReport(){
+
+
+const user =
+auth.currentUser;
+
+
+if(!user){
+
+alert(
+"로그인이 필요합니다."
+);
+
+return;
+
+}
+
+
+
+const userDoc =
+
+await db.collection("users")
+
+.doc(user.uid)
+
+.get();
+
+
+
+const data =
+userDoc.data() || {};
+
+
+
+const history =
+
+await db.collection("users")
+
+.doc(user.uid)
+
+.collection("quizHistory")
+
+.limit(10)
+
+.get();
+
+
+
+let avg=0;
+
+let count=0;
+
+
+
+history.forEach(function(doc){
+
+
+const q =
+doc.data();
+
+
+avg += q.percent || 0;
+
+count++;
+
+
+});
+
+
+avg =
+
+count?
+
+Math.round(avg/count)
+
+:
+
+0;
+
+
+
+
+const {
+jsPDF
+}
+
+=
+
+window.jspdf;
+
+
+
+const pdf =
+
+new jsPDF();
+
+
+
+pdf.text(
+"AI 한국사 학습 분석 리포트",
+20,
+20
+);
+
+
+
+pdf.text(
+
+"레벨 : "
+
++
+
+(data.level || "Lv.1"),
+
+20,
+
+40
+
+);
+
+
+
+pdf.text(
+
+"포인트 : "
+
++
+
+(data.point || 0),
+
+20,
+
+50
+
+);
+
+
+
+pdf.text(
+
+"평균 정답률 : "
+
++
+
+avg
+
++
+
+"%",
+
+20,
+
+60
+
+);
+
+
+
+pdf.text(
+
+"추천 학습 : 조선 정치사 및 사료 분석 강화",
+
+20,
+
+80
+
+);
+
+
+
+pdf.save(
+"AI한국사_학습리포트.pdf"
+);
+
+
+}
