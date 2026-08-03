@@ -25,11 +25,29 @@ if (!firebase.apps.length) {
 }
 
 // 공통 객체
-window.auth = firebase.auth();
+// 공통 객체
 
-window.db = firebase.firestore();
+window.auth =
+firebase.auth();
 
-window.storage = firebase.storage();
+
+window.db =
+firebase.firestore();
+
+
+// Storage는 필요할 때만 사용
+if(firebase.storage){
+
+    window.storage =
+    firebase.storage();
+
+}
+else{
+
+    window.storage =
+    null;
+
+}
 
 // Firestore 설정
 db.settings({
