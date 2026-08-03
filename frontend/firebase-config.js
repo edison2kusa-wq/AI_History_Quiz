@@ -25,9 +25,11 @@ if (!firebase.apps.length) {
 }
 
 // 공통 객체
-const auth = firebase.auth();
-const db = firebase.firestore();
-const storage = firebase.storage();
+window.auth = firebase.auth();
+
+window.db = firebase.firestore();
+
+window.storage = firebase.storage();
 
 // Firestore 설정
 db.settings({
