@@ -24,6 +24,13 @@ let examSeconds = 600;
 // 초기화
 // ----------------------------
 
+function $(id){
+
+    return document.getElementById(id);
+
+}
+
+
 function initQuiz() {
 
     if ($("startBtn"))

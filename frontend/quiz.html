@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+
+<title>
+AI 한국사 심화 퀴즈
+</title>
+
+
+<link rel="stylesheet" href="style.css">
+
+
+</head>
+
+
+<body>
+
+
+<!-- =====================
+     메인 메뉴
+===================== -->
+
+
+<div id="mainMenu">
+
+
+<h1>
+📚 AI 한국사 심화 퀴즈
+</h1>
+
+
+<p>
+한국사능력검정시험 심화 대비
+</p>
+
+
+
+<button id="startBtn">
+
+시험 시작
+
+</button>
+
+
+
+<button id="wrongQuizBtn">
+
+오답 다시 풀기
+
+</button>
+
+
+
+<button id="myHistoryBtn">
+
+내 시험 기록
+
+</button>
+
+
+
+<div id="myHistory">
+
+</div>
+
+
+</div>
+
+
+
+
+
+<!-- =====================
+     시험 설정
+===================== -->
+
+
+<div id="settingMenu"
+style="display:none;">
+
+
+<h2>
+시험 설정
+</h2>
+
+
+<label>
+시대
+</label>
+
+
+<select id="periodSelect">
+
+
+<option value="전체">
+전체
+</option>
+
+
+<option value="선사">
+선사
+</option>
+
+
+<option value="고대">
+고대
+</option>
+
+
+<option value="고려">
+고려
+</option>
+
+
+<option value="조선">
+조선
+</option>
+
+
+<option value="개항기">
+개항기
+</option>
+
+
+<option value="일제강점기">
+일제강점기
+</option>
+
+
+<option value="현대">
+현대
+</option>
+
+
+</select>
+
+
+
+<br>
+
+
+
+<label>
+분야
+</label>
+
+
+<select id="categorySelect">
+
+
+<option value="전체">
+전체
+</option>
+
+
+<option value="정치">
+정치
+</option>
+
+
+<option value="경제">
+경제
+</option>
+
+
+<option value="사회">
+사회
+</option>
+
+
+<option value="문화">
+문화
+</option>
+
+
+</select>
+
+
+
+<br>
+
+
+<label>
+난이도
+</label>
+
+
+<select id="levelSelect">
+
+
+<option value="전체">
+전체
+</option>
+
+
+<option value="중">
+중
+</option>
+
+
+<option value="상">
+상
+</option>
+
+
+</select>
+
+
+
+<br>
+
+
+
+<label>
+문제 수
+</label>
+
+
+<select id="countSelect">
+
+
+<option value="10">
+10문제
+</option>
+
+
+<option value="20">
+20문제
+</option>
+
+
+<option value="50">
+50문제
+</option>
+
+
+</select>
+
+
+
+
+<br><br>
+
+
+
+<button id="settingStartBtn">
+
+시험 시작
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+<!-- =====================
+     시험 화면
+===================== -->
+
+
+<div id="quizScreen"
+style="display:none;">
+
+
+
+<h1>
+AI 한국사 시험
+</h1>
+
+
+
+<div id="progress">
+
+
+문제 1 / 50
+
+
+</div>
+
+
+
+<div class="progressBox">
+
+<div id="progressBar">
+
+</div>
+
+
+</div>
+
+
+
+<div id="questionNav">
+
+</div>
+
+
+
+<hr>
+
+
+
+
+<h2 id="question">
+
+문제
+
+</h2>
+
+
+
+<img id="questionImage"
+style="
+display:none;
+max-width:400px;
+">
+
+
+
+<div id="choices">
+
+
+</div>
+
+
+
+
+<div id="result">
+
+
+</div>
+
+
+
+<br>
+
+
+
+<button id="prevBtn">
+
+◀ 이전
+
+</button>
+
+
+
+<button id="nextBtn">
+
+다음 ▶
+
+</button>
+
+
+
+<button id="submitBtn"
+style="display:none;">
+
+시험 종료
+
+</button>
+
+
+
+<button id="bookmarkBtn"
+style="display:none;">
+
+⭐ 즐겨찾기
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+<!-- =====================
+     결과
+===================== -->
+
+
+<div id="reportBox">
+
+
+</div>
+
+
+<div id="reportChart">
+
+
+</div>
+
+
+
+
+
+<!-- Firebase -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+
+<script src="firebase-config.js"></script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script src="quiz-helper.js"></script>
+
+<script src="quiz.js"></script>
+
+
+
+</body>
+
+</html>
