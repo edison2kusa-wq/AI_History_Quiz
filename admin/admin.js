@@ -227,15 +227,15 @@ loadAIQuestionAnalysis;
     checkLogin();
 
 
-const aiBtn =
+const aiGenerateBtn =
 document.getElementById(
 "aiGenerateBtn"
 );
 
 
-if(aiBtn){
+if(aiGenerateBtn){
 
-aiBtn.onclick =
+aiGenerateBtn.onclick =
 generateAIQuestion;
 
 }
