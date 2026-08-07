@@ -1727,3 +1727,33 @@ min-height:48px;
 
 
 }
+.choiceBtn{
+
+background:white;
+
+color:#222;
+
+border:2px solid #ddd;
+
+padding:16px;
+
+border-radius:15px;
+
+width:100%;
+
+text-align:left;
+
+margin-bottom:10px;
+
+font-size:16px;
+
+}
+
+
+.choiceBtn:hover{
+
+border-color:#2563eb;
+
+background:#eff6ff;
+
+}

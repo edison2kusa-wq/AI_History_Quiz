@@ -242,6 +242,28 @@ function buildQuestionNav(){
 // ===========================================
 
 function showQuestion() {
+    const checkIds = [
+"progress",
+"progressBar",
+"question",
+"questionImage",
+"choices",
+"result"
+];
+
+
+checkIds.forEach(function(id){
+
+if(!$(id)){
+
+console.error(
+"필수 DOM 없음 : ",
+id
+);
+
+}
+
+});
 
     answered = false;
 
