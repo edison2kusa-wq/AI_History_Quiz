@@ -157,15 +157,22 @@ async function loadQuestions(
     const snapshot =
         await db.collection("questions").get();
 
-    snapshot.forEach(function(doc){
+    for(const doc of snapshot.docs){
 
-        const q = doc.data();
 
-        q.id = doc.id;
+    const q = doc.data();
 
-        list.push(q);
+    q.id = doc.id;
 
-    });
+
+    const statDoc =
+    await db
+    .collection("questionStats")
+    .doc(doc.id)
+    .get();
+
+
+}
 
     if (period !== "전체") {
 
