@@ -119,21 +119,14 @@ q.category===weakCategory
 
 
 
-            snapshot.forEach(function(doc){
+            for(const doc of snapshot.docs){
 
+    const statDoc =
+    await db.collection("questionStats")
+    .doc(doc.id)
+    .get();
 
-                const q =
-                doc.data();
-
-
-                q.id =
-                doc.id;
-
-
-                candidates.push(q);
-
-
-            });
+}
 
 
         }
