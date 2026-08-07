@@ -606,14 +606,12 @@ function calculateAIWeight(
 
     // 6. 오래된 미학습 문제
 
-    if(q.updated){
+if(q.updated){
 
     let updateTime;
 
 
-    if(
-        q.updated.toDate
-    ){
+    if(q.updated.toDate){
 
         updateTime =
         q.updated.toDate();
@@ -627,6 +625,7 @@ function calculateAIWeight(
     }
 
 
+
     const days =
     (
         Date.now()
@@ -637,28 +636,12 @@ function calculateAIWeight(
     86400000;
 
 
-    if(days>30){
+
+    if(days > 30){
 
         weight += 10;
 
     }
-
-}
-        /
-        86400000;
-
-
-        if(days>30){
-
-            weight += 10;
-
-        }
-
-    }
-
-
-
-    return Math.round(weight);
 
 }
 // =====================================
