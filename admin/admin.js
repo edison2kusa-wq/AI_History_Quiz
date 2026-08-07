@@ -83,15 +83,15 @@ loadImprovementSuggestions;
 }
 
 
-const aiBtn =
+const aiAnalysisBtn =
 document.getElementById(
 "aiAnalysisBtn"
 );
 
-if(aiBtn){
+if(aiAnalysisBtn){
 
-aiBtn.onclick =
-loadAIQuestionAnalysis;
+    aiAnalysisBtn.onclick =
+    loadAIQuestionAnalysis;
 
 }
     const loginBtn =
