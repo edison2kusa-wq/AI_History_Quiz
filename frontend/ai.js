@@ -243,16 +243,19 @@ buildQuestionNav();
 
     catch(e){
 
-
-        console.error(e);
-
-
-        alert(
-            "AI 추천 시험 생성 실패"
-        );
+    console.error(
+        "AI 추천 오류:",
+        e
+    );
 
 
-    }
+    alert(
+        "AI 추천 실패 : "
+        +
+        e.message
+    );
+
+}
 
 
 }
