@@ -501,42 +501,42 @@ async function saveQuestionResult(q, selected){
 
 
     await db.collection("questionStats")
-    .doc(q.id)
-    .set({
+.doc(q.id)
+.set({
 
-        question:q.question,
+    question:q.question,
 
-        category:q.category,
+    category:q.category,
 
-        period:q.period || "",
+    period:q.period || "",
 
-        level:q.level || "",
+    level:q.level || "",
 
-        type:q.type || "",
+    difficulty:q.level || "중",
 
-        total:
-        firebase.firestore.FieldValue.increment(1),
-
-
-        correct:
-        firebase.firestore.FieldValue.increment(
-            selected===q.answer ? 1 : 0
-        ),
+    type:q.type || "",
 
 
-        wrong:
-        firebase.firestore.FieldValue.increment(
-            selected===q.answer ? 0 : 1
-        )
+    total:
+    firebase.firestore.FieldValue.increment(1),
 
 
-    },
-    {
-        merge:true
-        difficulty:
+    correct:
+    firebase.firestore.FieldValue.increment(
+        selected===q.answer ? 1 : 0
+    ),
 
-q.level || "중",
-    });
+
+    wrong:
+    firebase.firestore.FieldValue.increment(
+        selected===q.answer ? 0 : 1
+    )
+
+
+},
+{
+    merge:true
+});
 
 
 }
