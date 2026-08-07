@@ -56,15 +56,14 @@ async function startAIRecommend(){
         let candidates=[];
 
 
+for (const doc of snapshot.docs) {
 
-        for (const doc of snapshot.docs) {
 
     const q = doc.data();
 
     q.id = doc.id;
 
 
-    // 문제 통계 가져오기
     const statDoc =
     await db
     .collection("questionStats")
@@ -72,10 +71,10 @@ async function startAIRecommend(){
     .get();
 
 
+
     if(statDoc.exists){
 
         const stat = statDoc.data();
-
 
         q.solveCount =
         stat.total || 0;
@@ -95,38 +94,15 @@ async function startAIRecommend(){
     }
 
 
-}
 
+    if(
+        !weakCategory ||
+        q.category === weakCategory
+    ){
 
-if(statDoc.exists){
+        candidates.push(q);
 
-    const stat = statDoc.data();
-
-    q.solveCount =
-    stat.total || 0;
-
-
-    q.wrongCount =
-    stat.wrong || 0;
-
-
-}
-else{
-
-    q.solveCount=0;
-
-    q.wrongCount=0;
-
-}
-
-
-
-if(
-!weakCategory ||
-q.category===weakCategory
-){
-
-    candidates.push(q);
+    }
 
 }
 
@@ -1164,7 +1140,12 @@ function createAICoachingReport(){
         message:message,
 
 
-        weak:getWeakArea()
+        weak:
+typeof getWeakArea === "function"
+?
+getWeakArea()
+:
+[]
 
 
     };
