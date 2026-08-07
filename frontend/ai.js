@@ -306,104 +306,72 @@ function shuffleArray(array){
 
 async function getWeakCategory(){
 
-
     const user =
     auth.currentUser;
 
 
-    if(!user)
-    return null;
+    if(!user){
 
+        return null;
+
+    }
 
 
     const snapshot =
-
     await db
-
     .collection("users")
-
     .doc(user.uid)
-
     .collection("wrongAnswers")
-
     .get();
 
 
 
-    const count={};
+    const count = {};
 
 
 
-    for(const doc of snapshot.docs){
+    snapshot.forEach(function(doc){
+
+        const q = doc.data();
 
 
-    const q = doc.data();
-
-    q.id = doc.id;
-
-
-    const statDoc =
-        await db
-        .collection("questionStats")
-        .doc(doc.id)
-        .get();
+        const category =
+        q.category || "기타";
 
 
-    if(statDoc.exists){
+        if(!count[category]){
 
-        const stat = statDoc.data();
+            count[category]=0;
 
-        q.solveCount =
-        stat.total || 0;
+        }
 
 
-        q.wrongCount =
-        stat.wrong || 0;
+        count[category]++;
 
-    }
-    else{
 
-        q.solveCount = 0;
-
-        q.wrongCount = 0;
-
-    }
+    });
 
 
 
-    if(
-        !weakCategory ||
-        q.category === weakCategory
-    ){
+    let max = null;
 
-        candidates.push(q);
-
-    }
-
-}
-
-
-
-    let max=null;
-
-
-    let value=0;
+    let value = 0;
 
 
 
     Object.keys(count)
-
     .forEach(function(key){
 
 
-
-        if(count[key]>value){
-
-
-            value=count[key];
+        if(count[key] > value){
 
 
-            max=key;
+            value =
+            count[key];
+
+
+            max =
+            key;
 
 
         }
@@ -414,7 +382,6 @@ async function getWeakCategory(){
 
 
     return max;
-
 
 }
 
