@@ -605,13 +605,42 @@ function calculateAIWeight(
 
     if(q.updated){
 
-        const days =
+    let updateTime;
 
-        (
-            Date.now()
-            -
-            q.updated.toDate()
-        )
+
+    if(
+        q.updated.toDate
+    ){
+
+        updateTime =
+        q.updated.toDate();
+
+    }
+    else{
+
+        updateTime =
+        new Date(q.updated);
+
+    }
+
+
+    const days =
+    (
+        Date.now()
+        -
+        updateTime.getTime()
+    )
+    /
+    86400000;
+
+
+    if(days>30){
+
+        weight += 10;
+
+    }
+
+}
         /
         86400000;
 
