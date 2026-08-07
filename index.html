@@ -1,17 +1,12 @@
 <!DOCTYPE html>
-
 <html lang="ko">
 
 <head>
-<link rel="manifest"
-href="manifest.json">
 
-
-<meta name="theme-color"
-content="#2563eb">
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
 
 <title>
@@ -19,11 +14,20 @@ AI 한국사 심화 퀴즈
 </title>
 
 
-<link rel="stylesheet" href="frontend/style.css">
-
-
 <meta name="description"
 content="한국사능력검정시험 심화 대비 AI 문제은행">
+
+
+<link rel="manifest"
+href="manifest.json">
+
+
+<meta name="theme-color"
+content="#2563eb">
+
+
+<link rel="stylesheet"
+href="frontend/style.css">
 
 
 </head>
@@ -32,15 +36,40 @@ content="한국사능력검정시험 심화 대비 AI 문제은행">
 <body>
 
 
-<div class="container">
+<div class="app-container">
 
 
 
-<!-- =================================
-로그인 영역
-================================= -->
+<!-- ==========================
+헤더
+========================== -->
 
-<div id="loginBox">
+<header class="app-header">
+
+
+<h1>
+🏛 AI 한국사 심화 퀴즈
+</h1>
+
+
+<p>
+한국사능력검정시험 심화 대비 AI 학습 플랫폼
+</p>
+
+
+</header>
+
+
+
+
+
+<!-- ==========================
+로그인
+========================== -->
+
+
+<section id="loginBox"
+class="login-card">
 
 
 <h3>
@@ -48,11 +77,13 @@ content="한국사능력검정시험 심화 대비 AI 문제은행">
 </h3>
 
 
-<input 
+
+<input
 id="email"
 type="email"
 placeholder="이메일"
 >
+
 
 
 <input
@@ -60,6 +91,10 @@ id="password"
 type="password"
 placeholder="비밀번호"
 >
+
+
+
+<div class="login-buttons">
 
 
 <button id="signupBtn">
@@ -76,121 +111,223 @@ placeholder="비밀번호"
 </button>
 
 
+</div>
+
+
+
 <p id="loginResult"></p>
 
 
-</div>
+</section>
+
+
+
+
+
+
+
+<!-- ==========================
+메인 메뉴
+========================== -->
+
+
+<section id="mainMenu">
+
+
+
+<div class="welcome-box">
+
+
 <h2>
-시험 방식 선택
+오늘의 한국사 학습
 </h2>
-
-<button onclick="startMockExam()">
-
-📝 한국사능력검정 모의고사
-
-</button>
-
-<button onclick="startNormalMode()">
-
-📚 학습 모드
-
-</button>
-
-
-
-<!-- =================================
-메인 화면
-================================= -->
-
-
-<div id="mainMenu">
-
-
-
-<h1>
-AI 한국사 심화 퀴즈
-</h1>
-
 
 
 <p>
-한국사능력검정시험 심화 대비
+AI가 나의 학습 상태를 분석합니다.
 </p>
 
 
+</div>
 
 
 
-<!-- 랜덤 시험 -->
+
+
+
+
+<!-- ==========================
+메인 카드 메뉴
+========================== -->
+
+
+<div class="menu-grid">
+
+
+
+
+
+<div class="menu-card">
+
+
+<h3>
+📝 모의고사
+</h3>
+
+
+<p>
+실전 시험처럼 풀기
+</p>
+
 
 <button id="startBtn">
 
-📝 랜덤 모의고사
+시험 시작
 
 </button>
 
 
+</div>
 
 
 
 
-<!-- =================================
+
+
+
+<div class="menu-card ai-card">
+
+
+<h3>
+🤖 AI 추천 시험
+</h3>
+
+
+<p>
+취약 분야 맞춤 출제
+</p>
+
+
+<button id="aiRecommendBtn">
+
+AI 학습 시작
+
+</button>
+
+
+</div>
+
+
+
+
+
+<div class="menu-card">
+
+
+<h3>
+📒 오답노트
+</h3>
+
+
+<p>
+틀린 문제 다시 학습
+</p>
+
+
+<button id="wrongNoteBtn">
+
+확인
+
+</button>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="menu-card">
+
+
+<h3>
+📊 학습 분석
+</h3>
+
+
+<p>
+나의 성장 기록 확인
+</p>
+
+
+<button id="reportBtn">
+
+분석 보기
+
+</button>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+<!-- ==========================
 시험 설정
-================================= -->
+========================== -->
 
 
 <div id="settingMenu"
+class="setting-card"
 style="display:none;">
 
 
 
 <h3>
-시험 설정
+⚙ 시험 설정
 </h3>
 
 
 
-
-<p>
-시대 선택
-</p>
+<label>
+시대
+</label>
 
 
 <select id="periodSelect">
 
 
 <option value="전체">
-
 전체
-
 </option>
 
 
 <option value="고대">
-
 고대
-
 </option>
 
 
 <option value="고려">
-
 고려
-
 </option>
 
 
 <option value="조선">
-
 조선
-
 </option>
 
 
 <option value="근현대">
-
 근현대
-
 </option>
 
 
@@ -200,46 +337,37 @@ style="display:none;">
 
 
 
-<p>
-분야 선택
-</p>
+
+<label>
+분야
+</label>
 
 
 <select id="categorySelect">
 
 
 <option value="전체">
-
 전체
-
 </option>
 
 
 <option value="정치">
-
 정치
-
 </option>
 
 
 <option value="경제">
-
 경제
-
 </option>
 
 
 <option value="사회">
-
 사회
-
 </option>
 
 
 <option value="문화">
-
 문화
-
 </option>
 
 
@@ -249,32 +377,27 @@ style="display:none;">
 
 
 
-<p>
+
+<label>
 난이도
-</p>
+</label>
 
 
 <select id="levelSelect">
 
 
 <option value="전체">
-
 전체
-
 </option>
 
 
 <option value="중">
-
 중
-
 </option>
 
 
 <option value="상">
-
 상
-
 </option>
 
 
@@ -284,36 +407,31 @@ style="display:none;">
 
 
 
-<p>
+<label>
 문제 수
-</p>
+</label>
 
 
 <select id="countSelect">
 
 
 <option value="10">
-
 10문제
-
 </option>
 
 
 <option value="20">
-
 20문제
-
 </option>
 
 
 <option value="50">
-
 50문제
-
 </option>
 
 
 </select>
+
 
 
 
@@ -333,25 +451,34 @@ style="display:none;">
 
 
 
-<hr>
+
+<!-- AI 결과 -->
+
+<div id="aiResultBox">
+
+</div>
+
+<!-- ==========================
+학습 관리 영역
+========================== -->
+
+
+<section class="study-panel">
 
 
 
+<details>
 
 
-<!-- =================================
-학습 메뉴
-================================= -->
+<summary>
+📚 학습 관리 메뉴
+</summary>
 
 
 
-<button id="aiRecommendBtn">
+<div class="sub-menu">
 
-🤖 AI 추천 시험
 
-</button>
-
-<div id="aiResultBox"></div>
 
 <button id="historyBtn">
 
@@ -363,18 +490,15 @@ style="display:none;">
 
 <button id="myHistoryBtn">
 
-📋 나의 시험 기록
+📋 나의 학습 기록
 
 </button>
+
 
 <div id="myHistory">
+
 </div>
 
-<button id="reportBtn">
-
-📈 학습 리포트
-
-</button>
 
 
 
@@ -386,13 +510,13 @@ style="display:none;">
 
 
 
-<div id="weakAnalysis"></div>
+<div id="weakAnalysis">
+
+</div>
 
 
 
 
-
-<!-- 분야별 -->
 
 <button id="categoryBtn">
 
@@ -401,13 +525,17 @@ style="display:none;">
 </button>
 
 
+
+
 <div id="categoryMenu"
 style="display:none;">
+
 
 
 <h3>
 분야 선택
 </h3>
+
 
 
 <button class="category"
@@ -418,12 +546,14 @@ data-category="고대">
 </button>
 
 
+
 <button class="category"
 data-category="고려">
 
 고려사
 
 </button>
+
 
 
 <button class="category"
@@ -434,12 +564,14 @@ data-category="조선">
 </button>
 
 
+
 <button class="category"
 data-category="근현대">
 
 근현대사
 
 </button>
+
 
 
 <button class="category"
@@ -452,9 +584,9 @@ data-category="문화">
 
 </div>
 
-<!-- =================================
-즐겨찾기
-================================= -->
+
+
+
 
 
 <button id="bookmarkListBtn">
@@ -464,31 +596,12 @@ data-category="문화">
 </button>
 
 
+
 <div id="bookmarkList">
 
 </div>
 
 
-
-
-
-
-<!-- =================================
-오답노트
-================================= -->
-
-
-<button id="wrongNoteBtn">
-
-📒 오답노트
-
-</button>
-
-
-
-<div id="wrongNote">
-
-</div>
 
 
 
@@ -500,13 +613,29 @@ data-category="문화">
 
 
 
+</div>
+
+
+
+</details>
+
+
+</section>
 
 
 
 
-<!-- =================================
+
+
+
+
+
+<!-- ==========================
 리포트
-================================= -->
+========================== -->
+
+
+<section class="report-panel">
 
 
 <div id="reportBox">
@@ -515,25 +644,28 @@ data-category="문화">
 
 
 
+
+
 <div id="reportCharts">
 
 
 <h3>
-📊 학습 분석 그래프
+📈 학습 분석 그래프
 </h3>
 
 
 
 <canvas id="scoreChart">
+
 </canvas>
 
 
 
 <br>
-
 
 
 <canvas id="correctWrongChart">
+
 </canvas>
 
 
@@ -541,8 +673,8 @@ data-category="문화">
 <br>
 
 
-
 <canvas id="categoryChart">
+
 </canvas>
 
 
@@ -550,23 +682,34 @@ data-category="문화">
 </div>
 
 
+</section>
 
 
 
 
-<!-- 관리자 -->
+
+
+
+<!-- ==========================
+관리자
+========================== -->
+
 
 <button id="adminBtn"
 style="display:none;">
 
+
 관리자 문제 관리
+
 
 </button>
 
 
 
 
-</div>
+
+
+</section>
 <!-- mainMenu 종료 -->
 
 
@@ -575,17 +718,23 @@ style="display:none;">
 
 
 
-<!-- =================================
+
+
+<!-- ==========================
 퀴즈 화면
-================================= -->
+========================== -->
 
 
-<div id="quizScreen"
+<section id="quizScreen"
 style="display:none;">
 
 
 
-<div id="progress">
+
+
+
+<div class="quiz-header">
+
 
 
 <div id="timer">
@@ -596,9 +745,18 @@ style="display:none;">
 
 
 
+
+<div class="progress-text">
+
 문제 진행
 
 </div>
+
+
+
+</div>
+
+
 
 
 
@@ -614,7 +772,10 @@ style="display:none;">
 
 
 
+
+
 <!-- 진행률 -->
+
 
 <div class="progress-box">
 
@@ -627,30 +788,35 @@ style="display:none;">
 </div>
 
 
+
+
+
+
+
 <!-- 문제 -->
+
+
+<div class="question-card">
+
+
 
 <h2 id="question">
 
 </h2>
 
 
-<!-- 이미지 -->
+
+
+
+
 
 <img
 
 id="questionImage"
 
-style="
-
-display:none;
-
+style="display:none;
 max-width:100%;
-
-margin:15px 0;
-
-border-radius:10px;
-
-"
+border-radius:15px;"
 
 >
 
@@ -660,9 +826,17 @@ border-radius:10px;
 
 
 
+
 <!-- 보기 -->
 
+
 <div id="choices">
+
+</div>
+
+
+
+
 
 </div>
 
@@ -675,6 +849,7 @@ border-radius:10px;
 
 <!-- 결과 -->
 
+
 <div id="result">
 
 </div>
@@ -685,63 +860,79 @@ border-radius:10px;
 
 
 
-<!-- 즐겨찾기 -->
+
+
+<!-- 문제 이동 -->
+
+
+<div class="quiz-buttons">
+
+
 
 <button id="bookmarkBtn"
 style="display:none;">
 
+
 ⭐ 즐겨찾기
+
 
 </button>
 
 
 
 
-
-
-<!-- 이전 -->
 
 <button id="prevBtn"
 style="display:none;">
 
-이전 문제
+
+◀ 이전
+
 
 </button>
 
 
 
 
-
-
-
-<!-- 다음 -->
 
 <button id="nextBtn"
 style="display:none;">
 
-다음 문제
+
+다음 ▶
+
 
 </button>
 
 
 
 
-
-
-
-<!-- 제출 -->
 
 <button id="submitBtn"
 style="display:none;">
 
+
 시험 제출
+
 
 </button>
 
 
 
+
 </div>
-<!-- Firebase -->
+
+
+
+
+
+
+</section>
+<!-- ==========================
+Firebase SDK
+========================== -->
+
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -751,40 +942,146 @@ style="display:none;">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
 
-<!-- Firebase 설정 -->
-<script src="frontend/firebase-config.js"></script>
 
 
-<!-- 문제 데이터 -->
+
+
+
+<!-- ==========================
+문제 데이터
+========================== -->
+
+
 <script src="questions/questions.js"></script>
 
 
-<!-- Chart -->
+
+
+
+
+
+<!-- Chart
+========================== -->
+
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
-<!-- 기능 파일 -->
+
+
+
+
+
+<!-- ==========================
+기능 Script
+========================== -->
+
+
 <script src="frontend/utils.js"></script>
+
+
+<script src="frontend/firebase-config.js"></script>
+
 
 <script src="frontend/auth.js"></script>
 
+
 <script src="frontend/analysis.js"></script>
+
 
 <script src="frontend/quiz.js"></script>
 
+
 <script src="frontend/history.js"></script>
+
 
 <script src="frontend/bookmark.js"></script>
 
+
 <script src="frontend/wrongnote.js"></script>
 
+
 <script src="frontend/report.js"></script>
+
 
 <script src="frontend/ai.js"></script>
 
 
-<!-- 메인 -->
+
+
+<!-- 메인 실행 -->
+
+
 <script src="frontend/app.js"></script>
+
+
+
+
+
+
+
+
+</div>
+<!-- app-container 종료 -->
+
+
+
+
+
+
+
+
+<!-- ==========================
+Service Worker
+========================== -->
+
+
+<script>
+
+
+if("serviceWorker" in navigator){
+
+
+window.addEventListener(
+"load",
+function(){
+
+
+navigator.serviceWorker.register(
+"service-worker.js"
+)
+
+.then(function(){
+
+console.log(
+"Service Worker 등록 완료"
+);
+
+})
+
+.catch(function(error){
+
+console.log(
+"Service Worker 오류",
+error
+);
+
+});
+
+
+});
+
+
+}
+
+
+
+</script>
+
+
+
+
+
 
 
 </body>
