@@ -654,11 +654,15 @@ calculateGrade(score);
 
 async function saveQuizHistory() {
 
-    await updateUserLevel();
-    await updateStudyStreak();
     const user = auth.currentUser;
 
     if (!user) return;
+
+
+    await updateUserLevel();
+
+    await updateStudyStreak();
+
 
     await db.collection("users")
 
@@ -703,7 +707,7 @@ solveCount:0,
 correctCount:0,
 
 updated:
-firebase.firestore.FieldValue.serverTimestamp()
+firebase.firestore.FieldValue.serverTimestamp(),
 
 examType:
 
