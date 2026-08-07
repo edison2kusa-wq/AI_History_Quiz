@@ -57,19 +57,45 @@ async function startAIRecommend(){
 
 
 
-        snapshot.forEach(function(doc){
+        for (const doc of snapshot.docs) {
+
+    const q = doc.data();
+
+    q.id = doc.id;
 
 
-            const q = doc.data();
+    // 문제 통계 가져오기
+    const statDoc =
+    await db
+    .collection("questionStats")
+    .doc(doc.id)
+    .get();
 
-q.id = doc.id;
+
+    if(statDoc.exists){
+
+        const stat = statDoc.data();
 
 
-// 문제 통계 가져오기
-const statDoc = await db
-.collection("questionStats")
-.doc(doc.id)
-.get();
+        q.solveCount =
+        stat.total || 0;
+
+
+        q.wrongCount =
+        stat.wrong || 0;
+
+
+    }
+    else{
+
+        q.solveCount = 0;
+
+        q.wrongCount = 0;
+
+    }
+
+
+}
 
 
 if(statDoc.exists){
@@ -105,32 +131,29 @@ q.category===weakCategory
 }
 
 
-        });
-
-
-
-
         // 부족하면 전체 문제 사용
 
         if(candidates.length < 20){
 
-
-            candidates=[];
-
+    candidates=[];
 
 
-            for(const doc of snapshot.docs){
+    snapshot.forEach(function(doc){
 
-    const statDoc =
-    await db.collection("questionStats")
-    .doc(doc.id)
-    .get();
+        const q = doc.data();
+
+        q.id = doc.id;
+
+        q.solveCount = 0;
+
+        q.wrongCount = 0;
+
+
+        candidates.push(q);
+
+    });
 
 }
-
-
-        }
-
 
 
         const userLevel =
