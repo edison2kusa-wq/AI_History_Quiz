@@ -641,75 +641,61 @@ async function saveQuestion(){
     try{
 
         // ----------------------------
-        // 문제 데이터
+        // 키워드
         // ----------------------------
 
         const keywordValue =
             getValue("keywords");
 
 
+        // ----------------------------
+        // 문제 데이터
+        // ----------------------------
+
         const data = {
 
-            // 기본 문제
             question:
                 getValue("question"),
-
 
             choices: [
 
                 getValue("choice1"),
-
                 getValue("choice2"),
-
                 getValue("choice3"),
-
                 getValue("choice4"),
                 getValue("choice5")
 
             ],
-
 
             answer:
                 Number(
                     getValue("answer")
                 ),
 
-
-            // 분류
             period:
                 getValue("period"),
-
 
             category:
                 getValue("category"),
 
-
             level:
                 getValue("level"),
-
 
             type:
                 getValue("type"),
 
-
-            // 출처
             source:
                 getValue("source"),
-
 
             sourceType:
                 getValue("sourceType"),
 
-
             sourceYear:
                 getValue("sourceYear"),
-
 
             reference:
                 getValue("reference"),
 
-
-            // 키워드
             keywords:
                 keywordValue
                 ? keywordValue
@@ -726,65 +712,49 @@ async function saveQuestion(){
                     })
                 : [],
 
-
-            // 해설
             explanation:
                 getValue("explanation"),
 
-
-            // 이미지
             image:
                 getValue("image"),
 
-
-            // 추가 학습 정보
             concept:
                 getValue("concept"),
-
 
             wrongPoint:
                 getValue("wrongPoint"),
 
-
             memory:
                 getValue("memory"),
 
-
-            // 문제 품질
             qualityScore:
                 0,
-
 
             approved:
                 false,
 
-
-            // 통계
             solveCount:
                 0,
-
 
             correctCount:
                 0,
 
-
             wrongCount:
                 0,
 
-
-            // 생성일
             created:
-                firebase.firestore.FieldValue.serverTimestamp(),
-
+                firebase.firestore.FieldValue
+                    .serverTimestamp(),
 
             updated:
-                firebase.firestore.FieldValue.serverTimestamp()
+                firebase.firestore.FieldValue
+                    .serverTimestamp()
 
         };
 
 
         // ----------------------------
-        // 필수값 검사
+        // 문제 검사
         // ----------------------------
 
         if(!data.question){
@@ -798,21 +768,48 @@ async function saveQuestion(){
         }
 
 
+        // ----------------------------
+        // 5선지 검사
+        // ----------------------------
+
         if(
-    !data.choices ||
-    data.choices.length !== 5 ||
-    data.choices.some(function(choice){
-        return !choice.trim();
-    })
-){
+            !data.choices ||
+            data.choices.length !== 5 ||
+            data.choices.some(function(choice){
 
-    alert(
-        "보기 5개를 모두 입력해주세요."
-    );
+                return !choice ||
+                       !choice.trim();
 
-    return;
+            })
+        ){
 
-}
+            alert(
+                "보기 5개를 모두 입력해주세요."
+            );
+
+            return;
+
+        }
+
+
+        // ----------------------------
+        // 정답 번호 검사
+        // ----------------------------
+
+        if(
+            isNaN(data.answer) ||
+            data.answer < 0 ||
+            data.answer > 4
+        ){
+
+            alert(
+                "정답을 1~5번 중에서 선택해주세요."
+            );
+
+            return;
+
+        }
+
 
         // ----------------------------
         // 중복 문제 검사
@@ -845,11 +842,8 @@ async function saveQuestion(){
         if(editingId){
 
             await db
-
                 .collection("questions")
-
                 .doc(editingId)
-
                 .update(data);
 
 
@@ -867,9 +861,7 @@ async function saveQuestion(){
         else{
 
             await db
-
                 .collection("questions")
-
                 .add(data);
 
 
@@ -886,12 +878,9 @@ async function saveQuestion(){
 
         editingId = null;
 
-
         clearForm();
 
-
         await loadQuestions();
-
 
     }
 
@@ -902,17 +891,14 @@ async function saveQuestion(){
             e
         );
 
-
         alert(
-            "저장 오류 : "
-            +
+            "저장 오류 : " +
             e.message
         );
 
     }
 
 }
-
 // ================================
 // 문제 불러오기
 // ================================
