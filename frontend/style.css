@@ -1757,3 +1757,1022 @@ border-color:#2563eb;
 background:#eff6ff;
 
 }
+/* ==========================================
+   AI 한국사 Mobile App UI V4
+   앱 한 화면 구조
+========================================== */
+
+
+/* 앱 배경 */
+
+html,
+body{
+
+    margin:0;
+
+    padding:0;
+
+    width:100%;
+
+    min-height:100%;
+
+    background:#eef2f7;
+
+}
+
+
+/* 앱 컨테이너 */
+
+.app-container{
+
+    width:100%;
+
+    max-width:480px;
+
+    min-height:100vh;
+
+    margin:auto;
+
+    background:#f5f7fb;
+
+    padding:
+
+        0
+
+        15px
+
+        90px
+
+        15px;
+
+}
+
+
+/* ==========================================
+   상단 헤더
+========================================== */
+
+.app-header{
+
+    position:sticky;
+
+    top:0;
+
+    z-index:100;
+
+    margin:
+
+        0
+
+        -15px
+
+        15px
+
+        -15px;
+
+    padding:
+
+        18px
+
+        20px;
+
+    border-radius:
+
+        0
+
+        0
+
+        22px
+
+        22px;
+
+    background:white;
+
+    color:#111827;
+
+    box-shadow:
+
+        0 5px 18px
+        rgba(15,23,42,.08);
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+}
+
+
+.app-header h1{
+
+    margin:0;
+
+    color:#2563eb;
+
+    font-size:22px;
+
+}
+
+
+.app-header p{
+
+    margin:3px 0 0;
+
+    color:#64748b;
+
+    font-size:12px;
+
+}
+
+
+
+/* ==========================================
+   메인 Hero
+========================================== */
+
+.hero-card{
+
+    margin-bottom:15px;
+
+    padding:25px 24px;
+
+    border-radius:22px;
+
+    color:white;
+
+    background:
+
+        linear-gradient(
+
+            135deg,
+
+            #2563eb,
+
+            #4f46e5
+
+        );
+
+    box-shadow:
+
+        0 10px 25px
+        rgba(37,99,235,.20);
+
+}
+
+
+.hero-card h2{
+
+    margin:0 0 10px;
+
+    font-size:27px;
+
+    line-height:1.3;
+
+}
+
+
+.hero-card p{
+
+    margin:5px 0;
+
+    opacity:.9;
+
+    font-size:14px;
+
+}
+
+
+
+/* ==========================================
+   통계
+========================================== */
+
+.stats{
+
+    display:grid;
+
+    grid-template-columns:
+
+        repeat(3,1fr);
+
+    gap:10px;
+
+    margin-bottom:15px;
+
+}
+
+
+.stats div{
+
+    min-height:78px;
+
+    background:white;
+
+    border:
+
+        1px solid #e5e7eb;
+
+    border-radius:17px;
+
+    padding:13px 8px;
+
+    text-align:center;
+
+    box-shadow:
+
+        0 3px 10px
+        rgba(0,0,0,.04);
+
+}
+
+
+.stats small{
+
+    display:block;
+
+    color:#64748b;
+
+    font-size:11px;
+
+    margin-bottom:7px;
+
+}
+
+
+.stats strong{
+
+    display:block;
+
+    font-size:18px;
+
+    color:#111827;
+
+}
+
+
+
+/* ==========================================
+   기능 카드
+========================================== */
+
+.feature-card{
+
+    width:100%;
+
+    min-height:110px;
+
+    margin-bottom:14px;
+
+    padding:18px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    border:
+
+        1px solid #e5e7eb;
+
+    border-radius:20px;
+
+    background:white;
+
+    color:#111827;
+
+    text-align:left;
+
+    box-shadow:
+
+        0 4px 13px
+        rgba(0,0,0,.06);
+
+}
+
+
+.feature-card:hover{
+
+    transform:none;
+
+    opacity:1;
+
+}
+
+
+.feature-icon{
+
+    width:55px;
+
+    height:55px;
+
+    flex:none;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:17px;
+
+    background:#eff6ff;
+
+    font-size:29px;
+
+}
+
+
+.feature-content{
+
+    flex:1;
+
+}
+
+
+.feature-content strong{
+
+    display:block;
+
+    font-size:19px;
+
+    margin-bottom:6px;
+
+}
+
+
+.feature-content span{
+
+    display:block;
+
+    color:#64748b;
+
+    font-size:13px;
+
+    line-height:1.5;
+
+}
+
+
+.feature-card > b{
+
+    color:#94a3b8;
+
+    font-size:27px;
+
+}
+
+
+.ai-card{
+
+    border-left:
+
+        5px solid #6366f1;
+
+}
+
+
+.exam-card{
+
+    border-left:
+
+        5px solid #2563eb;
+
+}
+
+
+.study-card{
+
+    border-left:
+
+        5px solid #10b981;
+
+}
+
+
+
+/* ==========================================
+   리스트 메뉴
+========================================== */
+
+.menu-list{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+
+    margin-bottom:15px;
+
+}
+
+
+.list-menu{
+
+    width:100%;
+
+    min-height:72px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    padding:14px 16px;
+
+    background:white;
+
+    color:#111827;
+
+    border:
+
+        1px solid #e5e7eb;
+
+    border-radius:17px;
+
+    text-align:left;
+
+    box-shadow:
+
+        0 3px 10px
+        rgba(0,0,0,.04);
+
+}
+
+
+.list-menu > span{
+
+    width:42px;
+
+    height:42px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:13px;
+
+    background:#f1f5f9;
+
+    font-size:22px;
+
+}
+
+
+.list-menu div{
+
+    flex:1;
+
+}
+
+
+.list-menu strong{
+
+    display:block;
+
+    font-size:15px;
+
+    margin-bottom:3px;
+
+}
+
+
+.list-menu small{
+
+    color:#94a3b8;
+
+    font-size:11px;
+
+}
+
+
+.list-menu > b{
+
+    color:#94a3b8;
+
+    font-size:22px;
+
+}
+
+
+
+/* ==========================================
+   카드
+========================================== */
+
+.card{
+
+    background:white;
+
+    border-radius:20px;
+
+    padding:18px;
+
+    margin-bottom:15px;
+
+    border:
+
+        1px solid #e5e7eb;
+
+    box-shadow:
+
+        0 4px 12px
+        rgba(0,0,0,.05);
+
+}
+
+
+
+/* ==========================================
+   퀴즈 화면
+========================================== */
+
+#quizScreen{
+
+    min-height:calc(100vh - 20px);
+
+    padding-bottom:100px;
+
+}
+
+
+.quiz-header{
+
+    position:sticky;
+
+    top:0;
+
+    z-index:50;
+
+    padding:15px;
+
+    margin-bottom:15px;
+
+    border-radius:18px;
+
+    background:
+
+        linear-gradient(
+
+            135deg,
+
+            #2563eb,
+
+            #1e40af
+
+        );
+
+    color:white;
+
+    box-shadow:
+
+        0 6px 15px
+        rgba(37,99,235,.20);
+
+}
+
+
+#progress{
+
+    text-align:center;
+
+}
+
+
+#progress #timer{
+
+    font-size:20px;
+
+    font-weight:bold;
+
+    margin-bottom:5px;
+
+}
+
+
+
+/* ==========================================
+   문제 번호
+========================================== */
+
+.question-nav{
+
+    display:flex;
+
+    gap:6px;
+
+    overflow-x:auto;
+
+    padding:3px 0 12px;
+
+}
+
+
+.question-number{
+
+    flex:none;
+
+    width:34px;
+
+    height:34px;
+
+    border-radius:50%;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:#e2e8f0;
+
+    color:#475569;
+
+}
+
+
+.question-number.active{
+
+    background:#2563eb;
+
+    color:white;
+
+}
+
+
+
+/* ==========================================
+   문제 카드
+========================================== */
+
+.question-card{
+
+    background:white;
+
+    padding:20px;
+
+    border-radius:20px;
+
+    margin-bottom:15px;
+
+    border:
+
+        1px solid #e5e7eb;
+
+    box-shadow:
+
+        0 4px 12px
+        rgba(0,0,0,.05);
+
+}
+
+
+.question-label{
+
+    display:inline-block;
+
+    margin-bottom:10px;
+
+    padding:5px 9px;
+
+    border-radius:8px;
+
+    background:#eff6ff;
+
+    color:#2563eb;
+
+    font-size:10px;
+
+    font-weight:bold;
+
+}
+
+
+#question{
+
+    margin:0;
+
+    font-size:20px;
+
+    line-height:1.65;
+
+    color:#111827;
+
+}
+
+
+
+/* ==========================================
+   보기
+========================================== */
+
+#choices{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+
+}
+
+
+#choices .choiceBtn{
+
+    width:100%;
+
+    min-height:58px;
+
+    margin:0;
+
+    padding:15px;
+
+    border:
+
+        2px solid #e2e8f0;
+
+    border-radius:16px;
+
+    background:white;
+
+    color:#1e293b;
+
+    text-align:left;
+
+    font-size:15px;
+
+    line-height:1.4;
+
+}
+
+
+#choices .choiceBtn:hover{
+
+    border-color:#2563eb;
+
+    background:#eff6ff;
+
+}
+
+
+
+/* ==========================================
+   퀴즈 버튼
+========================================== */
+
+.quiz-buttons{
+
+    margin-top:15px;
+
+}
+
+
+.quiz-buttons button{
+
+    margin-bottom:8px;
+
+}
+
+
+.secondary-btn{
+
+    background:#64748b;
+
+}
+
+
+.submit-btn{
+
+    width:100%;
+
+    background:#111827;
+
+    font-weight:bold;
+
+}
+
+
+
+/* ==========================================
+   하단 네비게이션
+========================================== */
+
+.bottom-nav{
+
+    position:fixed;
+
+    left:50%;
+
+    bottom:0;
+
+    transform:translateX(-50%);
+
+    width:100%;
+
+    max-width:480px;
+
+    height:70px;
+
+    z-index:999;
+
+    display:grid;
+
+    grid-template-columns:
+
+        repeat(4,1fr);
+
+    background:
+
+        rgba(255,255,255,.96);
+
+    border-top:
+
+        1px solid #e2e8f0;
+
+    box-shadow:
+
+        0 -5px 20px
+        rgba(0,0,0,.08);
+
+    backdrop-filter:blur(10px);
+
+}
+
+
+.nav-btn{
+
+    height:70px;
+
+    padding:5px;
+
+    border:none;
+
+    border-radius:0;
+
+    background:transparent;
+
+    color:#94a3b8;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:3px;
+
+}
+
+
+.nav-btn span{
+
+    font-size:21px;
+
+    line-height:1;
+
+}
+
+
+.nav-btn small{
+
+    font-size:10px;
+
+}
+
+
+.nav-btn.active{
+
+    color:#2563eb;
+
+    background:#eff6ff;
+
+}
+
+
+
+/* ==========================================
+   AI 결과
+========================================== */
+
+.result-container{
+
+    margin-bottom:15px;
+
+}
+
+
+#aiResultBox{
+
+    border-radius:18px;
+
+    padding:15px;
+
+}
+
+
+
+/* ==========================================
+   리포트
+========================================== */
+
+.report-container{
+
+    margin-top:15px;
+
+}
+
+
+#reportCharts{
+
+    margin-bottom:20px;
+
+}
+
+
+#reportCharts canvas{
+
+    width:100%!important;
+
+    max-height:230px;
+
+    margin-bottom:20px;
+
+}
+
+
+
+/* ==========================================
+   모바일
+========================================== */
+
+@media(max-width:480px){
+
+    .app-container{
+
+        padding-left:10px;
+
+        padding-right:10px;
+
+    }
+
+
+    .app-header{
+
+        margin-left:-10px;
+
+        margin-right:-10px;
+
+    }
+
+
+    .hero-card h2{
+
+        font-size:25px;
+
+    }
+
+
+    #question{
+
+        font-size:18px;
+
+    }
+
+}
+
+
+
+/* ==========================================
+   PC에서도 스마트폰 앱처럼
+========================================== */
+
+@media(min-width:481px){
+
+    body{
+
+        padding-bottom:20px;
+
+    }
+
+
+    .app-container{
+
+        margin-top:20px;
+
+        border-radius:25px;
+
+        box-shadow:
+
+            0 0 40px
+            rgba(0,0,0,.08);
+
+    }
+
+}
