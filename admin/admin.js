@@ -585,208 +585,283 @@ catch(e){
 // 문제 CRUD
 // ========================================
 
-
 // ================================
 // 문제 저장
 // ================================
 
-
 async function saveQuestion(){
-
-    qualityScore:0,
-
-approved:false
-    const data = {
-
-
-        question:
-        getValue("question"),
-
-
-        choices:[
-
-            getValue("choice1"),
-
-            getValue("choice2"),
-
-            getValue("choice3"),
-
-            getValue("choice4")
-
-        ],
-
-
-        answer:
-        Number(
-            getValue("answer")
-        ),
-
-
-        period:
-        getValue("period"),
-
-
-        category:
-        getValue("category"),
-
-
-        level:
-        getValue("level"),
-
-
-        type:
-        getValue("type"),
-
-
-        source:
-        getValue("source"),
-
-        sourceType:
-
-        getValue("sourceType"),
-
-
-        sourceYear:
-
-        getValue("sourceYear"),
-
-
-        reference:
-
-        getValue("reference"),
-
-
-        keywords:
-
-        getValue("keywords")
-
-        ?
-
-        getValue("keywords")
-        .split(",")
-
-        :
-
-        [],
-
-
-
-        explanation:
-        getValue("explanation"),
-
-
-        image:
-        getValue("image")
-
-    };
-
-
-    const duplicate =
-
-await checkDuplicateQuestion(
-data.question
-);
-
-
-if(duplicate){
-
-
-alert(
-"이미 등록된 문제입니다."
-);
-
-
-return;
-
-
-}
 
     try{
 
+        // ----------------------------
+        // 문제 데이터
+        // ----------------------------
+
+        const keywordValue =
+            getValue("keywords");
+
+
+        const data = {
+
+            // 기본 문제
+            question:
+                getValue("question"),
+
+
+            choices: [
+
+                getValue("choice1"),
+
+                getValue("choice2"),
+
+                getValue("choice3"),
+
+                getValue("choice4")
+
+            ],
+
+
+            answer:
+                Number(
+                    getValue("answer")
+                ),
+
+
+            // 분류
+            period:
+                getValue("period"),
+
+
+            category:
+                getValue("category"),
+
+
+            level:
+                getValue("level"),
+
+
+            type:
+                getValue("type"),
+
+
+            // 출처
+            source:
+                getValue("source"),
+
+
+            sourceType:
+                getValue("sourceType"),
+
+
+            sourceYear:
+                getValue("sourceYear"),
+
+
+            reference:
+                getValue("reference"),
+
+
+            // 키워드
+            keywords:
+                keywordValue
+                ? keywordValue
+                    .split(",")
+                    .map(function(item){
+
+                        return item.trim();
+
+                    })
+                    .filter(function(item){
+
+                        return item !== "";
+
+                    })
+                : [],
+
+
+            // 해설
+            explanation:
+                getValue("explanation"),
+
+
+            // 이미지
+            image:
+                getValue("image"),
+
+
+            // 추가 학습 정보
+            concept:
+                getValue("concept"),
+
+
+            wrongPoint:
+                getValue("wrongPoint"),
+
+
+            memory:
+                getValue("memory"),
+
+
+            // 문제 품질
+            qualityScore:
+                0,
+
+
+            approved:
+                false,
+
+
+            // 통계
+            solveCount:
+                0,
+
+
+            correctCount:
+                0,
+
+
+            wrongCount:
+                0,
+
+
+            // 생성일
+            created:
+                firebase.firestore.FieldValue.serverTimestamp(),
+
+
+            updated:
+                firebase.firestore.FieldValue.serverTimestamp()
+
+        };
+
+
+        // ----------------------------
+        // 필수값 검사
+        // ----------------------------
+
+        if(!data.question){
+
+            alert(
+                "문제를 입력해주세요."
+            );
+
+            return;
+
+        }
+
+
+        if(
+            !data.choices ||
+            data.choices.length !== 4
+        ){
+
+            alert(
+                "보기 4개를 입력해주세요."
+            );
+
+            return;
+
+        }
+
+
+        // ----------------------------
+        // 중복 문제 검사
+        // ----------------------------
+
+        const duplicate =
+            await checkDuplicateQuestion(
+                data.question
+            );
+
+
+        if(
+            duplicate &&
+            duplicate !== editingId
+        ){
+
+            alert(
+                "이미 등록된 문제입니다."
+            );
+
+            return;
+
+        }
+
+
+        // ----------------------------
+        // 수정
+        // ----------------------------
 
         if(editingId){
 
+            await db
 
-            await db.collection(
-                "questions"
-            )
-            .doc(editingId)
-            .update(data);
+                .collection("questions")
 
+                .doc(editingId)
+
+                .update(data);
 
 
             alert(
                 "문제가 수정되었습니다."
             );
 
+        }
+
+
+        // ----------------------------
+        // 신규 등록
+        // ----------------------------
+
+        else{
+
+            await db
+
+                .collection("questions")
+
+                .add(data);
+
+
+            alert(
+                "문제가 등록되었습니다."
+            );
 
         }
 
 
-        else{
+        // ----------------------------
+        // 초기화
+        // ----------------------------
 
-
-    data.created =
-    new Date();
-
-
-
-    await db.collection(
-        "questions"
-    )
-    .add(data);
-
-
-
-    alert(
-        "문제가 등록되었습니다."
-    );
-
-
-}
-
-
+        editingId = null;
 
 
         clearForm();
 
 
-        loadQuestions();
+        await loadQuestions();
 
 
     }
 
-
     catch(e){
 
-
-        console.error(e);
+        console.error(
+            "문제 저장 오류:",
+            e
+        );
 
 
         alert(
             "저장 오류 : "
-            + e.message
+            +
+            e.message
         );
 
-
     }
-concept:
-getValue("concept"),
-
-
-wrongPoint:
-getValue("wrongPoint"),
-
-
-memory:
-getValue("memory"),
 
 }
-
-
-
-
-
 
 // ================================
 // 문제 불러오기
