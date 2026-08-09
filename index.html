@@ -741,6 +741,52 @@
 </div>
 
 
+<!-- =====================================
+하단 앱 메뉴
+===================================== -->
+
+<nav id="bottomNav" class="bottom-nav">
+
+    <button
+        class="bottom-nav-item active"
+        onclick="showAppView('homeView')">
+
+        <span>⌂</span>
+        <small>홈</small>
+
+    </button>
+
+
+    <button
+        class="bottom-nav-item"
+        onclick="showAppView('studyView')">
+
+        <span>📚</span>
+        <small>학습</small>
+
+    </button>
+
+
+    <button
+        class="bottom-nav-item"
+        onclick="showAppView('aiView')">
+
+        <span>🤖</span>
+        <small>AI 추천</small>
+
+    </button>
+
+
+    <button
+        class="bottom-nav-item"
+        onclick="showAppView('reportView')">
+
+        <span>📊</span>
+        <small>리포트</small>
+
+    </button>
+
+</nav>
 
 </main>
 
@@ -1115,7 +1161,58 @@ document.addEventListener(
 
 
 </div>
+<script>
 
+function showAppView(viewId) {
+
+    const views =
+        document.querySelectorAll(".app-view");
+
+    views.forEach(function(view) {
+
+        view.classList.remove("active-view");
+
+    });
+
+
+    const target =
+        document.getElementById(viewId);
+
+    if(target){
+
+        target.classList.add("active-view");
+
+    }
+
+
+    const buttons =
+        document.querySelectorAll(
+            ".bottom-nav-item"
+        );
+
+
+    buttons.forEach(function(btn){
+
+        btn.classList.remove("active");
+
+    });
+
+
+    const activeButton =
+        document.querySelector(
+            `.bottom-nav-item[onclick*="${viewId}"]`
+        );
+
+
+    if(activeButton){
+
+        activeButton.classList.add("active");
+
+    }
+
+}
+
+</script>
 </body>
 
 </html>
