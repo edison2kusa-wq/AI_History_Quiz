@@ -1702,7 +1702,13 @@ function drawCategoryChart(data){
 // ========================================
 
 async function uploadCSV(){
+    console.log(
+        "===== 새 CSV 업로드 함수 실행 ====="
+    );
 
+    console.log(
+        "admin.js 5선지 버전"
+    );
     const file =
         document.getElementById("csvFile")?.files[0];
 
