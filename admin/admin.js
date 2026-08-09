@@ -56,6 +56,17 @@ function(){
 
 function initAdmin(){
 
+const templateBtn =
+    document.getElementById(
+        "downloadTemplateBtn"
+    );
+
+if(templateBtn){
+
+    templateBtn.onclick =
+        downloadCSVTemplate;
+
+}
 
     const qualityBtn =
 document.getElementById(
@@ -907,9 +918,11 @@ async function loadQuestions(){
 
 
 
-        renderQuestionList(
-            questionCache
-        );
+        buildQuestionFilters();
+
+        currentPage = 1;
+
+        renderFilteredPage(questionCache);
 
 
 
@@ -1060,105 +1073,118 @@ function renderQuestionList(list){
 
 function searchQuestions(){
 
-
-
     const keyword =
+        getValue("searchQuestion")
+        .trim()
+        .toLowerCase();
 
-    getValue(
-        "searchQuestion"
-    )
-    .toLowerCase();
+    const year =
+        document.getElementById("filterYear")?.value
+        || "전체";
 
+    const reference =
+        document.getElementById("filterReference")?.value
+        || "전체";
 
+    const period =
+        document.getElementById("filterPeriod")?.value
+        || "전체";
 
     const category =
-
-    document.getElementById(
-        "filterCategory"
-    )
-    ?.value || "전체";
-
-
+        document.getElementById("filterCategory")?.value
+        || "전체";
 
     const level =
+        document.getElementById("filterLevel")?.value
+        || "전체";
 
-    document.getElementById(
-        "filterLevel"
-    )
-    ?.value || "전체";
-
-
-
+    const approved =
+        document.getElementById("filterApproved")?.value
+        || "전체";
 
 
     const result =
+        questionCache.filter(function(q){
 
-    questionCache.filter(function(q){
-
-
-
-        const matchKeyword =
-
-
-        keyword === ""
-
-        ||
-
-        q.question
-        .toLowerCase()
-        .includes(keyword);
+            const question =
+                (q.question || "")
+                .toLowerCase();
 
 
-
-        const matchCategory =
-
-
-        category === "전체"
-
-        ||
-
-        q.category === category;
+            const matchKeyword =
+                keyword === ""
+                ||
+                question.includes(keyword);
 
 
-
-        const matchLevel =
-
-
-        level === "전체"
-
-        ||
-
-        q.level === level;
+            const matchYear =
+                year === "전체"
+                ||
+                String(q.sourceYear || "") === year;
 
 
-
-        return (
-
-            matchKeyword
-
-            &&
-
-            matchCategory
-
-            &&
-
-            matchLevel
-
-        );
+            const matchReference =
+                reference === "전체"
+                ||
+                String(q.reference || "") === reference;
 
 
-    });
+            const matchPeriod =
+                period === "전체"
+                ||
+                q.period === period;
 
 
+            const matchCategory =
+                category === "전체"
+                ||
+                q.category === category;
 
 
-    renderQuestionList(
-        result
-    );
+            const matchLevel =
+                level === "전체"
+                ||
+                q.level === level;
 
+
+            const matchApproved =
+                approved === "전체"
+
+                ||
+
+                (
+                    approved === "승인"
+                    &&
+                    q.approved === true
+                )
+
+                ||
+
+                (
+                    approved === "검토"
+                    &&
+                    q.approved !== true
+                );
+
+
+            return (
+                matchKeyword &&
+                matchYear &&
+                matchReference &&
+                matchPeriod &&
+                matchCategory &&
+                matchLevel &&
+                matchApproved
+            );
+
+        });
+
+
+    currentPage = 1;
+
+    renderFilteredPage(result);
 
 }
-
 
 
 
@@ -1624,256 +1650,442 @@ function drawCategoryChart(data){
 
 
 // ========================================
-// CSV 업로드
+// CSV 문제 일괄 업로드 V2
 // ========================================
-
 
 async function uploadCSV(){
 
-
-
     const file =
-
-    document.getElementById(
-        "csvFile"
-    )
-    ?.files[0];
-
-
+        document.getElementById("csvFile")?.files[0];
 
     if(!file){
 
-
-        alert(
-            "CSV 파일을 선택하세요."
-        );
-
-
+        alert("CSV 파일을 선택하세요.");
         return;
 
     }
 
-
-
-    Papa.parse(
-
-        file,
-
-        {
-
+    Papa.parse(file, {
 
         header:true,
 
-
         skipEmptyLines:true,
 
+        encoding:"UTF-8",
 
+        complete: async function(result){
 
-        complete:
-        async function(result){
+            try{
 
+                const rows = result.data;
 
+                if(!rows.length){
 
-            const rows =
-            result.data;
-
-
-
-            let success=0;
-
-            let duplicate=0;
-
-
-
-            const snapshot =
-            await db.collection(
-                "questions"
-            )
-            .get();
-
-
-
-            const existing =
-            new Set();
-
-
-
-            snapshot.forEach(function(doc){
-
-
-                existing.add(
-                    doc.data().question
-                );
-
-
-            });
-
-
-
-
-
-            for(
-                const row
-                of rows
-            ){
-
-
-
-                if(
-                    existing.has(
-                    row.question
-                    )
-                ){
-
-
-                    duplicate++;
-
-                    continue;
-
+                    alert("CSV에 문제가 없습니다.");
+                    return;
 
                 }
 
 
+                // --------------------------------
+                // 기존 문제 가져오기
+                // --------------------------------
 
+                const snapshot =
+                    await db.collection("questions").get();
 
-                await db.collection(
-                    "questions"
-                )
-                .add({
+                const existing =
+                    new Set();
 
+                snapshot.forEach(function(doc){
 
+                    const q = doc.data();
 
-                    question:
-                    row.question,
+                    if(q.question){
 
+                        existing.add(
+                            q.question.trim()
+                        );
 
-
-                    choices:[
-
-                        row.choice1,
-
-                        row.choice2,
-
-                        row.choice3,
-
-                        row.choice4
-
-                    ],
-
-
-
-                    answer:
-
-                    Number(
-                        row.answer
-                    )-1,
-
-
-
-                    period:
-                    row.period || "기타",
-
-
-
-                    category:
-                    row.category || "기타",
-
-
-
-                    level:
-                    row.level || "중",
-
-
-
-                    type:
-                    row.type || "예상",
-
-
-
-
-                    source:
-                    row.source || "",
-
-
-
-                    keywords:
-
-                    row.keywords
-
-                    ?
-
-                    row.keywords.split(",")
-
-                    :
-
-                    [],
-
-
-
-
-                    explanation:
-                    row.explanation || "",
-
-
-
-                    image:
-                    row.image || "",
-
-
-
-                    created:
-
-                    new Date()
-
+                    }
 
                 });
 
 
+                let success = 0;
+                let duplicate = 0;
+                let errorCount = 0;
 
 
-                existing.add(
-                    row.question
+                // --------------------------------
+                // 진행 표시
+                // --------------------------------
+
+                const progressBox =
+                    document.getElementById(
+                        "uploadProgress"
+                    );
+
+                const uploadBar =
+                    document.getElementById(
+                        "uploadBar"
+                    );
+
+                const uploadText =
+                    document.getElementById(
+                        "uploadText"
+                    );
+
+
+                if(progressBox){
+
+                    progressBox.style.display =
+                        "block";
+
+                }
+
+
+                // --------------------------------
+                // 문제 등록
+                // --------------------------------
+
+                for(let i=0; i<rows.length; i++){
+
+                    const row = rows[i];
+
+
+                    try{
+
+                        const question =
+                            (row.question || "").trim();
+
+
+                        // 문제 없는 행 제외
+                        if(!question){
+
+                            errorCount++;
+                            continue;
+
+                        }
+
+
+                        // --------------------------------
+                        // 중복 검사
+                        // --------------------------------
+
+                        if(existing.has(question)){
+
+                            duplicate++;
+
+                            continue;
+
+                        }
+
+
+                        // --------------------------------
+                        // 키워드
+                        // --------------------------------
+
+                        const keywords =
+                            row.keywords
+
+                            ?
+
+                            row.keywords
+                                .split(",")
+                                .map(function(item){
+
+                                    return item.trim();
+
+                                })
+                                .filter(function(item){
+
+                                    return item !== "";
+
+                                })
+
+                            :
+
+                            [];
+
+
+                        // --------------------------------
+                        // 정답
+                        // CSV는 1~4
+                        // Firebase는 0~3
+                        // --------------------------------
+
+                        let answer =
+                            Number(row.answer);
+
+
+                        if(answer >= 1 && answer <= 4){
+
+                            answer--;
+
+                        }
+
+
+                        // --------------------------------
+                        // Firebase 데이터
+                        // --------------------------------
+
+                        const data = {
+
+                            question:
+                                question,
+
+
+                            choices:[
+
+                                row.choice1 || "",
+
+                                row.choice2 || "",
+
+                                row.choice3 || "",
+
+                                row.choice4 || ""
+
+                            ],
+
+
+                            answer:
+                                answer,
+
+
+                            period:
+                                row.period || "기타",
+
+
+                            category:
+                                row.category || "기타",
+
+
+                            level:
+                                row.level || "중",
+
+
+                            type:
+                                row.type || "기출",
+
+
+                            source:
+                                row.source || "",
+
+
+                            sourceType:
+                                row.sourceType ||
+                                "한국사능력검정 기출",
+
+
+                            sourceYear:
+                                row.sourceYear || "",
+
+
+                            reference:
+                                row.reference || "",
+
+
+                            keywords:
+                                keywords,
+
+
+                            explanation:
+                                row.explanation || "",
+
+
+                            concept:
+                                row.concept || "",
+
+
+                            wrongPoint:
+                                row.wrongPoint || "",
+
+
+                            memory:
+                                row.memory || "",
+
+
+                            image:
+                                row.image || "",
+
+
+                            // 문제 품질
+                            qualityScore:
+                                0,
+
+
+                            approved:
+                                false,
+
+
+                            // 통계
+                            solveCount:
+                                0,
+
+
+                            correctCount:
+                                0,
+
+
+                            wrongCount:
+                                0,
+
+
+                            created:
+                                firebase.firestore
+                                .FieldValue
+                                .serverTimestamp(),
+
+
+                            updated:
+                                firebase.firestore
+                                .FieldValue
+                                .serverTimestamp()
+
+                        };
+
+
+                        // --------------------------------
+                        // 보기 검사
+                        // --------------------------------
+
+                        if(
+
+                            !data.choices[0] ||
+                            !data.choices[1] ||
+                            !data.choices[2] ||
+                            !data.choices[3]
+
+                        ){
+
+                            errorCount++;
+
+                            continue;
+
+                        }
+
+
+                        // --------------------------------
+                        // 저장
+                        // --------------------------------
+
+                        await db
+                            .collection("questions")
+                            .add(data);
+
+
+                        existing.add(question);
+
+                        success++;
+
+
+                        // --------------------------------
+                        // 진행률
+                        // --------------------------------
+
+                        const percent =
+                            Math.round(
+                                ((i + 1) / rows.length) *
+                                100
+                            );
+
+
+                        if(uploadBar){
+
+                            uploadBar.value =
+                                percent;
+
+                        }
+
+
+                        if(uploadText){
+
+                            uploadText.innerText =
+                                `업로드 중... ${i + 1} / ${rows.length}`;
+
+                        }
+
+
+                    }
+
+                    catch(e){
+
+                        console.error(
+                            "행 처리 오류:",
+                            i + 1,
+                            e
+                        );
+
+                        errorCount++;
+
+                    }
+
+                }
+
+
+                // --------------------------------
+                // 완료
+                // --------------------------------
+
+                if(uploadText){
+
+                    uploadText.innerText =
+                        "업로드 완료";
+
+                }
+
+
+                alert(
+
+`CSV 업로드 완료
+
+전체 : ${rows.length}문제
+
+신규 등록 : ${success}문제
+
+중복 제외 : ${duplicate}문제
+
+오류 제외 : ${errorCount}문제`
+
                 );
 
 
-                success++;
-
+                await loadQuestions();
 
 
             }
 
+            catch(e){
+
+                console.error(
+                    "CSV 업로드 오류:",
+                    e
+                );
 
 
+                alert(
+                    "CSV 업로드 오류 : " +
+                    e.message
+                );
+
+            }
+
+        },
+
+        error:function(error){
+
+            console.error(error);
 
             alert(
-
-`
-CSV 업로드 완료
-
-신규 등록 : ${success}
-
-중복 제외 : ${duplicate}
-`
-
+                "CSV 파일을 읽을 수 없습니다."
             );
 
-
-
-            loadQuestions();
-
-
-
         }
 
-
-        }
-
-    );
-
+    });
 
 }
-
-
 
 
 
@@ -3310,5 +3522,316 @@ AI 분석 결과
 </p>
 
 `;
+
+}
+// ========================================
+// CSV 등록 양식 다운로드
+// ========================================
+
+function downloadCSVTemplate(){
+
+    const headers = [
+
+        "question",
+        "choice1",
+        "choice2",
+        "choice3",
+        "choice4",
+        "answer",
+        "period",
+        "category",
+        "level",
+        "type",
+        "source",
+        "sourceType",
+        "sourceYear",
+        "reference",
+        "keywords",
+        "explanation",
+        "concept",
+        "wrongPoint",
+        "memory",
+        "image"
+
+    ];
+
+
+    const example = {
+
+        question:
+            "여기에 문제를 입력하세요.",
+
+        choice1:
+            "보기 1",
+
+        choice2:
+            "보기 2",
+
+        choice3:
+            "보기 3",
+
+        choice4:
+            "보기 4",
+
+        answer:
+            "1",
+
+        period:
+            "조선",
+
+        category:
+            "정치",
+
+        level:
+            "중",
+
+        type:
+            "기출",
+
+        source:
+            "한국사능력검정시험",
+
+        sourceType:
+            "한국사능력검정 기출",
+
+        sourceYear:
+            "2020",
+
+        reference:
+            "회차 입력",
+
+        keywords:
+            "키워드1,키워드2",
+
+        explanation:
+            "문제 해설",
+
+        concept:
+            "핵심 개념",
+
+        wrongPoint:
+            "오답 포인트",
+
+        memory:
+            "암기법",
+
+        image:
+            ""
+
+    };
+
+
+    const csv =
+        Papa.unparse({
+
+            fields: headers,
+
+            data: [
+
+                headers.map(function(header){
+
+                    return example[header] || "";
+
+                })
+
+            ]
+
+        });
+
+
+    const BOM = "\uFEFF";
+
+
+    const blob =
+        new Blob(
+
+            [BOM + csv],
+
+            {
+                type:
+                    "text/csv;charset=utf-8;"
+            }
+
+        );
+
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    const a =
+        document.createElement("a");
+
+
+    a.href = url;
+
+
+    a.download =
+        "AI한국사_문제등록_양식.csv";
+
+
+    document.body.appendChild(a);
+
+
+    a.click();
+
+
+    document.body.removeChild(a);
+
+
+    URL.revokeObjectURL(url);
+
+
+    alert(
+        "CSV 등록 양식을 다운로드했습니다.\n\n" +
+        "엑셀에서 문제를 작성한 후\n" +
+        "관리자 → CSV 관리 → CSV 업로드를 이용하세요."
+    );
+
+}
+function renderFilteredPage(list){
+
+    const start =
+        (currentPage - 1) * pageSize;
+
+    const end =
+        start + pageSize;
+
+    renderQuestionList(
+        list.slice(start, end)
+    );
+
+
+    const pageInfo =
+        document.getElementById("pageInfo");
+
+
+    const maxPage =
+        Math.max(
+            1,
+            Math.ceil(list.length / pageSize)
+        );
+
+
+    if(pageInfo){
+
+        pageInfo.innerText =
+            `${currentPage} / ${maxPage}`;
+
+    }
+
+
+    const prev =
+        document.getElementById("prevPageBtn");
+
+    const next =
+        document.getElementById("nextPageBtn");
+
+
+    if(prev){
+
+        prev.disabled =
+            currentPage <= 1;
+
+    }
+
+
+    if(next){
+
+        next.disabled =
+            currentPage >= maxPage;
+
+    }
+
+}
+function buildQuestionFilters(){
+
+    const yearSet = new Set();
+    const referenceSet = new Set();
+    const periodSet = new Set();
+
+
+    questionCache.forEach(function(q){
+
+        if(q.sourceYear){
+
+            yearSet.add(
+                String(q.sourceYear)
+            );
+
+        }
+
+        if(q.reference){
+
+            referenceSet.add(
+                String(q.reference)
+            );
+
+        }
+
+        if(q.period){
+
+            periodSet.add(
+                String(q.period)
+            );
+
+        }
+
+    });
+
+
+    fillSelect(
+        "filterYear",
+        Array.from(yearSet).sort()
+    );
+
+
+    fillSelect(
+        "filterReference",
+        Array.from(referenceSet).sort()
+    );
+
+
+    fillSelect(
+        "filterPeriod",
+        Array.from(periodSet)
+    );
+
+}
+function fillSelect(id, values){
+
+    const select =
+        document.getElementById(id);
+
+    if(!select) return;
+
+
+    const firstOption =
+        select.options[0];
+
+    select.innerHTML = "";
+
+
+    if(firstOption){
+
+        select.appendChild(
+            firstOption
+        );
+
+    }
+
+
+    values.forEach(function(value){
+
+        const option =
+            document.createElement("option");
+
+        option.value = value;
+
+        option.textContent = value;
+
+        select.appendChild(option);
+
+    });
 
 }
