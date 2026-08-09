@@ -642,28 +642,56 @@ async function startNormalQuiz(){
 
     // 화면 이동
 
-    document
+    showAppScreen("quizScreen");
 
-    .getElementById(
-        "mainMenu"
-    )
-
-    .style.display="none";
-
-
-
-    document
-
-    .getElementById(
-        "quizScreen"
-    )
-
-    .style.display="block";
-
-
-
-    showQuestion();
+showQuestion();
 
 
 }
 
+// =====================================
+// 모바일 앱 화면 전환
+// =====================================
+
+function showAppScreen(screenId) {
+
+    const mainMenu = document.getElementById("mainMenu");
+    const quizScreen = document.getElementById("quizScreen");
+
+    if (mainMenu) {
+        mainMenu.style.display = "none";
+    }
+
+    if (quizScreen) {
+        quizScreen.style.display = "none";
+    }
+
+    const target = document.getElementById(screenId);
+
+    if (target) {
+        target.style.display = "block";
+    }
+
+    window.scrollTo(0, 0);
+}
+
+
+// =====================================
+// 메인 화면으로 돌아가기
+// =====================================
+
+function showMainMenu() {
+
+    const mainMenu = document.getElementById("mainMenu");
+    const quizScreen = document.getElementById("quizScreen");
+
+    if (quizScreen) {
+        quizScreen.style.display = "none";
+    }
+
+    if (mainMenu) {
+        mainMenu.style.display = "block";
+    }
+
+    window.scrollTo(0, 0);
+}
