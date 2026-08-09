@@ -25,1965 +25,980 @@
     <link rel="stylesheet"
           href="frontend/style.css">
 
-
-    <style>
-
-    /* =========================================
-       APP 기본
-    ========================================= */
-
-    * {
-        box-sizing: border-box;
-        -webkit-tap-highlight-color: transparent;
-    }
-
-    html,
-    body {
-
-        margin: 0;
-        padding: 0;
-
-        width: 100%;
-        height: 100%;
-
-        background: #eef2f7;
-
-        font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        "Noto Sans KR",
-        sans-serif;
-
-    }
-
-
-    body {
-
-        overflow: hidden;
-
-    }
-
-
-    /* =========================================
-       스마트폰 APP 화면
-    ========================================= */
-
-    .app {
-
-        width: 100%;
-        height: 100vh;
-
-        display: flex;
-        justify-content: center;
-
-    }
-
-
-    .app-shell {
-
-        width: 100%;
-        max-width: 480px;
-
-        height: 100vh;
-
-        background: #f8fafc;
-
-        display: flex;
-        flex-direction: column;
-
-        position: relative;
-
-        overflow: hidden;
-
-        box-shadow:
-        0 0 30px rgba(0,0,0,.08);
-
-    }
-
-
-    /* =========================================
-       상단
-    ========================================= */
-
-    .app-header {
-
-        height: 64px;
-
-        flex-shrink: 0;
-
-        background: white;
-
-        border-bottom:
-        1px solid #e5e7eb;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: space-between;
-
-        padding:
-        0 18px;
-
-        z-index: 100;
-
-    }
-
-
-    .app-logo {
-
-        font-size: 19px;
-
-        font-weight: 800;
-
-        color: #111827;
-
-    }
-
-
-    .app-logo span {
-
-        color: #2563eb;
-
-    }
-
-
-    .header-right {
-
-        display: flex;
-
-        align-items: center;
-
-        gap: 8px;
-
-    }
-
-
-    .header-btn {
-
-        border: none;
-
-        background: #f3f4f6;
-
-        width: 38px;
-        height: 38px;
-
-        border-radius: 12px;
-
-        font-size: 18px;
-
-        cursor: pointer;
-
-    }
-
-
-    /* =========================================
-       메인 콘텐츠
-    ========================================= */
-
-    .app-content {
-
-        flex: 1;
-
-        overflow-y: auto;
-
-        overflow-x: hidden;
-
-        padding: 16px;
-
-        padding-bottom: 90px;
-
-        scroll-behavior: smooth;
-
-    }
-
-
-    .app-content::-webkit-scrollbar {
-
-        width: 0;
-
-    }
-
-
-    /* =========================================
-       화면
-    ========================================= */
-
-    .app-screen {
-
-        display: none;
-
-        animation:
-        screenFade .18s ease;
-
-    }
-
-
-    .app-screen.active {
-
-        display: block;
-
-    }
-
-
-    @keyframes screenFade {
-
-        from {
-
-            opacity: 0;
-
-            transform: translateY(5px);
-
-        }
-
-        to {
-
-            opacity: 1;
-
-            transform: translateY(0);
-
-        }
-
-    }
-
-
-    /* =========================================
-       카드
-    ========================================= */
-
-    .app-card {
-
-        background: white;
-
-        border-radius: 18px;
-
-        padding: 18px;
-
-        margin-bottom: 14px;
-
-        border:
-        1px solid #e5e7eb;
-
-        box-shadow:
-        0 4px 14px rgba(15,23,42,.04);
-
-    }
-
-
-    .hero-card {
-
-        background:
-        linear-gradient(
-            135deg,
-            #2563eb,
-            #4f46e5
-        );
-
-        color: white;
-
-        border: none;
-
-        padding: 22px;
-
-    }
-
-
-    .hero-title {
-
-        font-size: 23px;
-
-        font-weight: 800;
-
-        margin-bottom: 7px;
-
-    }
-
-
-    .hero-sub {
-
-        font-size: 13px;
-
-        opacity: .9;
-
-    }
-
-
-    /* =========================================
-       홈 통계
-    ========================================= */
-
-    .stat-grid {
-
-        display: grid;
-
-        grid-template-columns:
-        repeat(2,1fr);
-
-        gap: 10px;
-
-    }
-
-
-    .stat-card {
-
-        background: white;
-
-        border-radius: 16px;
-
-        padding: 15px;
-
-        border:
-        1px solid #e5e7eb;
-
-    }
-
-
-    .stat-label {
-
-        font-size: 12px;
-
-        color: #6b7280;
-
-    }
-
-
-    .stat-value {
-
-        margin-top: 5px;
-
-        font-size: 22px;
-
-        font-weight: 800;
-
-        color: #111827;
-
-    }
-
-
-    /* =========================================
-       메뉴 버튼
-    ========================================= */
-
-    .menu-card {
-
-        width: 100%;
-
-        border: none;
-
-        background: white;
-
-        border-radius: 16px;
-
-        padding: 16px;
-
-        margin-bottom: 10px;
-
-        text-align: left;
-
-        display: flex;
-
-        align-items: center;
-
-        gap: 14px;
-
-        border:
-        1px solid #e5e7eb;
-
-        cursor: pointer;
-
-    }
-
-
-    .menu-icon {
-
-        width: 44px;
-        height: 44px;
-
-        border-radius: 13px;
-
-        background: #eff6ff;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        font-size: 21px;
-
-        flex-shrink: 0;
-
-    }
-
-
-    .menu-title {
-
-        font-weight: 700;
-
-        color: #111827;
-
-    }
-
-
-    .menu-desc {
-
-        margin-top: 3px;
-
-        font-size: 12px;
-
-        color: #6b7280;
-
-    }
-
-
-    /* =========================================
-       메인 버튼
-    ========================================= */
-
-    .primary-btn {
-
-        width: 100%;
-
-        border: none;
-
-        background: #2563eb;
-
-        color: white;
-
-        padding: 15px;
-
-        border-radius: 13px;
-
-        font-size: 15px;
-
-        font-weight: 700;
-
-        cursor: pointer;
-
-    }
-
-
-    .secondary-btn {
-
-        width: 100%;
-
-        border: 1px solid #dbe2ea;
-
-        background: white;
-
-        color: #374151;
-
-        padding: 14px;
-
-        border-radius: 13px;
-
-        font-weight: 600;
-
-        cursor: pointer;
-
-    }
-
-
-    /* =========================================
-       하단 네비게이션
-    ========================================= */
-
-    .bottom-nav {
-
-        position: absolute;
-
-        left: 0;
-        right: 0;
-        bottom: 0;
-
-        height: 70px;
-
-        background:
-        rgba(255,255,255,.97);
-
-        backdrop-filter:
-        blur(12px);
-
-        border-top:
-        1px solid #e5e7eb;
-
-        display: grid;
-
-        grid-template-columns:
-        repeat(4,1fr);
-
-        z-index: 200;
-
-    }
-
-
-    .nav-btn {
-
-        border: none;
-
-        background: transparent;
-
-        color: #9ca3af;
-
-        display: flex;
-
-        flex-direction: column;
-
-        align-items: center;
-
-        justify-content: center;
-
-        gap: 3px;
-
-        font-size: 11px;
-
-        cursor: pointer;
-
-    }
-
-
-    .nav-icon {
-
-        font-size: 21px;
-
-    }
-
-
-    .nav-btn.active {
-
-        color: #2563eb;
-
-        font-weight: 700;
-
-    }
-
-
-    /* =========================================
-       로그인
-    ========================================= */
-
-    #loginBox {
-
-        background: white;
-
-        padding: 18px;
-
-        border-radius: 18px;
-
-        margin-bottom: 15px;
-
-        border:
-        1px solid #e5e7eb;
-
-    }
-
-
-    #loginBox input {
-
-        width: 100%;
-
-        padding: 13px;
-
-        margin:
-        5px 0;
-
-        border:
-        1px solid #dbe2ea;
-
-        border-radius: 10px;
-
-        font-size: 14px;
-
-    }
-
-
-    #loginBox button {
-
-        padding: 11px 14px;
-
-        margin-top: 5px;
-
-        border: none;
-
-        border-radius: 10px;
-
-        background: #2563eb;
-
-        color: white;
-
-    }
-
-
-    /* =========================================
-       시험 설정
-    ========================================= */
-
-    #settingMenu {
-
-        background: white;
-
-        border-radius: 18px;
-
-        padding: 18px;
-
-        border:
-        1px solid #e5e7eb;
-
-    }
-
-
-    #settingMenu select {
-
-        width: 100%;
-
-        padding: 13px;
-
-        margin-bottom: 10px;
-
-        border:
-        1px solid #dbe2ea;
-
-        border-radius: 10px;
-
-        background: white;
-
-    }
-
-
-    /* =========================================
-       퀴즈 화면
-    ========================================= */
-
-    #quizScreen {
-
-        position: absolute;
-
-        inset: 0;
-
-        background: #f8fafc;
-
-        z-index: 300;
-
-        display: none;
-
-        flex-direction: column;
-
-    }
-
-
-    #quizScreen.active {
-
-        display: flex;
-
-    }
-
-
-    .quiz-header {
-
-        height: 60px;
-
-        flex-shrink: 0;
-
-        background: white;
-
-        border-bottom:
-        1px solid #e5e7eb;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: space-between;
-
-        padding: 0 15px;
-
-    }
-
-
-    .quiz-body {
-
-        flex: 1;
-
-        overflow-y: auto;
-
-        padding: 16px;
-
-        padding-bottom: 90px;
-
-    }
-
-
-    #progress {
-
-        background: white;
-
-        padding: 12px 15px;
-
-        border-radius: 13px;
-
-        margin-bottom: 12px;
-
-        font-size: 13px;
-
-        font-weight: 700;
-
-    }
-
-
-    #progressBar {
-
-        height: 6px;
-
-        width: 0%;
-
-        background: #2563eb;
-
-        border-radius: 20px;
-
-        transition: width .25s ease;
-
-    }
-
-
-    .progress-box {
-
-        height: 6px;
-
-        background: #e5e7eb;
-
-        border-radius: 20px;
-
-        margin-bottom: 18px;
-
-    }
-
-
-    #question {
-
-        background: white;
-
-        padding: 20px;
-
-        border-radius: 18px;
-
-        font-size: 18px;
-
-        line-height: 1.65;
-
-        margin: 0 0 14px;
-
-        border:
-        1px solid #e5e7eb;
-
-    }
-
-
-    #questionImage {
-
-        max-width: 100%;
-
-        border-radius: 13px;
-
-        margin-bottom: 14px;
-
-    }
-
-
-    #choices {
-
-        display: flex;
-
-        flex-direction: column;
-
-        gap: 10px;
-
-    }
-
-
-    .choiceBtn {
-
-        width: 100%;
-
-        min-height: 58px;
-
-        padding: 14px;
-
-        background: white;
-
-        border:
-        1px solid #dbe2ea;
-
-        border-radius: 14px;
-
-        text-align: left;
-
-        font-size: 14px;
-
-        line-height: 1.5;
-
-        cursor: pointer;
-
-    }
-
-
-    .choiceBtn:active {
-
-        transform: scale(.985);
-
-    }
-
-
-    #result {
-
-        margin-top: 14px;
-
-        background: white;
-
-        border-radius: 14px;
-
-    }
-
-
-    .quiz-footer {
-
-        position: absolute;
-
-        left: 0;
-        right: 0;
-        bottom: 0;
-
-        height: 70px;
-
-        background: white;
-
-        border-top:
-        1px solid #e5e7eb;
-
-        display: flex;
-
-        align-items: center;
-
-        gap: 8px;
-
-        padding: 10px;
-
-        z-index: 10;
-
-    }
-
-
-    .quiz-footer button {
-
-        flex: 1;
-
-        height: 48px;
-
-        border: none;
-
-        border-radius: 12px;
-
-        font-weight: 700;
-
-        background: #f3f4f6;
-
-    }
-
-
-    #nextBtn {
-
-        background: #2563eb;
-
-        color: white;
-
-    }
-
-
-    #submitBtn {
-
-        background: #dc2626;
-
-        color: white;
-
-    }
-
-
-    /* =========================================
-       문제 번호
-    ========================================= */
-
-    #questionNav {
-
-        display: flex;
-
-        gap: 6px;
-
-        overflow-x: auto;
-
-        padding-bottom: 10px;
-
-    }
-
-
-    #questionNav button {
-
-        flex-shrink: 0;
-
-        width: 32px;
-        height: 32px;
-
-        border: none;
-
-        border-radius: 8px;
-
-        background: #e5e7eb;
-
-    }
-
-
-    /* =========================================
-       기존 기능 영역 호환
-    ========================================= */
-
-    #reportBox,
-    #reportCharts,
-    #weakAnalysis,
-    #myHistory,
-    #wrongNote,
-    #bookmarkList,
-    #categoryMenu,
-    #aiResultBox {
-
-        margin-top: 12px;
-
-    }
-
-
-    /* =========================================
-       모바일
-    ========================================= */
-
-    @media(max-width:480px){
-
-        .app-shell {
-
-            box-shadow: none;
-
-        }
-
-        .app-content {
-
-            padding: 13px;
-
-            padding-bottom: 85px;
-
-        }
-
-        .hero-title {
-
-            font-size: 21px;
-
-        }
-
-        #question {
-
-            font-size: 17px;
-
-        }
-
-    }
-
-
-    </style>
-
 </head>
 
 
 <body>
 
 
-<div class="app">
+<!-- ==================================================
+     앱 전체
+================================================== -->
 
-<div class="app-shell">
-
-
-<!-- =====================================
-     APP HEADER
-===================================== -->
-
-<header class="app-header">
-
-    <div class="app-logo">
-
-        AI <span>한국사</span>
-
-    </div>
+<div id="app">
 
 
-    <div class="header-right">
+    <!-- ==================================================
+         상단 헤더
+    ================================================== -->
+
+    <header class="app-header">
+
+        <div class="app-logo">
+            <span>AI</span> 한국사
+        </div>
 
         <button
-            class="header-btn"
-            onclick="showAppScreen('homeScreen')">
+            id="homeBtn"
+            class="icon-btn"
+            type="button"
+            onclick="showAppScreen('home')">
 
             ⌂
 
         </button>
 
-    </div>
-
-</header>
+    </header>
 
 
 
-<!-- =====================================
-     APP CONTENT
-===================================== -->
+    <!-- ==================================================
+         앱 화면 영역
+    ================================================== -->
 
-<main class="app-content">
-
-
-<!-- =====================================
-     HOME
-===================================== -->
-
-<section
-    id="homeScreen"
-    class="app-screen active">
-
-
-    <!-- 로그인 -->
-
-    <div id="loginBox">
-
-        <h3>로그인</h3>
-
-        <input
-            id="email"
-            type="email"
-            placeholder="이메일">
-
-        <input
-            id="password"
-            type="password"
-            placeholder="비밀번호">
-
-        <button id="signupBtn">
-            회원가입
-        </button>
-
-        <button id="loginBtn">
-            로그인
-        </button>
-
-        <p id="loginResult"></p>
-
-    </div>
+    <main id="appContent">
 
 
 
-    <!-- Hero -->
+        <!-- ==================================================
+             HOME
+        ================================================== -->
 
-    <div class="app-card hero-card">
-
-        <div class="hero-title">
-
-            AI 한국사 심화 퀴즈
-
-        </div>
-
-        <div class="hero-sub">
-
-            한국사능력검정시험 심화 대비<br>
-            AI 기반 문제은행 학습
-
-        </div>
-
-    </div>
+        <section
+            id="homeScreen"
+            class="app-screen active">
 
 
+            <!-- 로그인 -->
 
-    <!-- 통계 -->
+            <div id="loginBox"
+                 class="login-card">
 
-    <div class="stat-grid">
+                <h3>로그인</h3>
 
-        <div class="stat-card">
+                <input
+                    id="email"
+                    type="email"
+                    placeholder="이메일">
 
-            <div class="stat-label">
-                오늘의 학습
+                <input
+                    id="password"
+                    type="password"
+                    placeholder="비밀번호">
+
+                <div class="login-buttons">
+
+                    <button id="signupBtn">
+                        회원가입
+                    </button>
+
+                    <button id="loginBtn"
+                            class="primary-btn">
+                        로그인
+                    </button>
+
+                </div>
+
+                <p id="loginResult"></p>
+
             </div>
 
-            <div class="stat-value">
-                학습
+
+
+            <!-- 메인 메뉴 -->
+
+            <div id="mainMenu">
+
+
+                <!-- Hero -->
+
+                <div class="hero-card">
+
+                    <div class="hero-title">
+                        AI 한국사 심화 퀴즈
+                    </div>
+
+                    <div class="hero-subtitle">
+                        한국사능력검정시험 심화 대비
+                        <br>
+                        AI 기반 문제은행 학습
+                    </div>
+
+                </div>
+
+
+
+                <!-- 오늘의 학습 -->
+
+                <div class="stat-row">
+
+                    <div class="stat-card">
+
+                        <span>
+                            오늘의 학습
+                        </span>
+
+                        <strong id="todayStudy">
+                            학습
+                        </strong>
+
+                    </div>
+
+
+                    <div class="stat-card">
+
+                        <span>
+                            학습 목표
+                        </span>
+
+                        <strong>
+                            20문제
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- AI 추천 -->
+
+                <button
+                    id="aiRecommendBtn"
+                    class="feature-card ai-card">
+
+                    <div class="feature-icon">
+                        🤖
+                    </div>
+
+                    <div class="feature-content">
+
+                        <h2>
+                            AI 추천 시험
+                        </h2>
+
+                        <p>
+                            나의 취약 분야를 분석하여
+                            <br>
+                            문제를 추천합니다.
+                        </p>
+
+                    </div>
+
+                    <span class="arrow">
+                        ›
+                    </span>
+
+                </button>
+
+
+                <!-- 모의고사 -->
+
+                <button
+                    id="startBtn"
+                    class="feature-card">
+
+                    <div class="feature-icon">
+                        📝
+                    </div>
+
+                    <div class="feature-content">
+
+                        <h2>
+                            한국사능력검정 모의고사
+                        </h2>
+
+                        <p>
+                            실제 시험처럼 풀어보기
+                        </p>
+
+                    </div>
+
+                    <span class="arrow">
+                        ›
+                    </span>
+
+                </button>
+
+
+
+                <!-- 학습 -->
+
+                <button
+                    class="feature-card"
+                    type="button"
+                    onclick="showAppScreen('study')">
+
+                    <div class="feature-icon">
+                        📚
+                    </div>
+
+                    <div class="feature-content">
+
+                        <h2>
+                            한국사 학습
+                        </h2>
+
+                        <p>
+                            시대별·분야별 문제를
+                            학습합니다.
+                        </p>
+
+                    </div>
+
+                    <span class="arrow">
+                        ›
+                    </span>
+
+                </button>
+
+
+
+                <!-- 기존 기능 컨테이너 -->
+
+                <div id="aiResultBox"></div>
+
+                <div id="myHistory"></div>
+
+                <div id="weakAnalysis"></div>
+
+                <div id="bookmarkList"></div>
+
+                <div id="wrongNote"></div>
+
+                <div id="reportBox"></div>
+
+
             </div>
 
-        </div>
+
+        </section>
 
 
-        <div class="stat-card">
 
-            <div class="stat-label">
-                학습 목표
+        <!-- ==================================================
+             STUDY
+        ================================================== -->
+
+        <section
+            id="studyScreen"
+            class="app-screen">
+
+
+            <div class="screen-title">
+
+                <button
+                    class="back-btn"
+                    onclick="showAppScreen('home')">
+
+                    ‹
+
+                </button>
+
+                <div>
+                    <h1>한국사 학습</h1>
+                    <p>원하는 방식으로 학습하세요.</p>
+                </div>
+
             </div>
 
-            <div class="stat-value">
-                20문제
+
+
+            <!-- 시대별 -->
+
+            <div class="menu-section">
+
+                <h3>
+                    시대별 학습
+                </h3>
+
+                <div class="grid-menu">
+
+                    <button
+                        class="menu-card category"
+                        data-category="고대">
+
+                        <span>🏺</span>
+                        <b>고대사</b>
+
+                    </button>
+
+
+                    <button
+                        class="menu-card category"
+                        data-category="고려">
+
+                        <span>🏯</span>
+                        <b>고려사</b>
+
+                    </button>
+
+
+                    <button
+                        class="menu-card category"
+                        data-category="조선">
+
+                        <span>📜</span>
+                        <b>조선사</b>
+
+                    </button>
+
+
+                    <button
+                        class="menu-card category"
+                        data-category="근현대">
+
+                        <span>🏛️</span>
+                        <b>근현대사</b>
+
+                    </button>
+
+                </div>
+
             </div>
 
-        </div>
-
-    </div>
 
 
-    <br>
+            <!-- 학습 기능 -->
+
+            <div class="menu-section">
+
+                <h3>
+                    학습 도구
+                </h3>
 
 
-    <!-- AI 추천 -->
+                <button
+                    id="wrongQuizBtn"
+                    class="list-card">
 
-    <button
-        class="menu-card"
-        id="aiRecommendBtn">
+                    <span>🔄</span>
 
-        <div class="menu-icon">
-            🤖
-        </div>
+                    <div>
+                        <b>오답 다시 풀기</b>
+                        <small>
+                            틀린 문제를 다시 학습
+                        </small>
+                    </div>
 
-        <div>
+                    <span>›</span>
 
-            <div class="menu-title">
-                AI 추천 시험
+                </button>
+
+
+                <button
+                    id="wrongNoteBtn"
+                    class="list-card">
+
+                    <span>📒</span>
+
+                    <div>
+                        <b>오답노트</b>
+                        <small>
+                            나의 틀린 문제 확인
+                        </small>
+                    </div>
+
+                    <span>›</span>
+
+                </button>
+
+
+                <button
+                    id="bookmarkListBtn"
+                    class="list-card">
+
+                    <span>⭐</span>
+
+                    <div>
+                        <b>즐겨찾기</b>
+                        <small>
+                            저장한 문제 확인
+                        </small>
+                    </div>
+
+                    <span>›</span>
+
+                </button>
+
             </div>
 
-            <div class="menu-desc">
-                나의 취약 분야를 분석하여 문제를 추천합니다.
-            </div>
 
-        </div>
 
-    </button>
-
-
-    <div id="aiResultBox"></div>
-
-
-
-    <!-- 모의고사 -->
-
-    <button
-        class="menu-card"
-        onclick="startMockExam()">
-
-        <div class="menu-icon">
-            📝
-        </div>
-
-        <div>
-
-            <div class="menu-title">
-                한국사능력검정 모의고사
-            </div>
-
-            <div class="menu-desc">
-                실제 시험처럼 풀어보기
-            </div>
-
-        </div>
-
-    </button>
-
-
-
-    <!-- 학습 -->
-
-    <button
-        class="menu-card"
-        onclick="showAppScreen('studyScreen')">
-
-        <div class="menu-icon">
-            📚
-        </div>
-
-        <div>
-
-            <div class="menu-title">
-                한국사 학습
-            </div>
-
-            <div class="menu-desc">
-                시대별·분야별 문제를 학습합니다.
-            </div>
-
-        </div>
-
-    </button>
-
-
-
-</section>
-
-
-
-<!-- =====================================
-     STUDY
-===================================== -->
-
-<section
-    id="studyScreen"
-    class="app-screen">
-
-
-    <div class="app-card">
-
-        <h2>학습</h2>
-
-        <p>
-            원하는 방식으로 한국사를 학습하세요.
-        </p>
-
-    </div>
-
-
-    <button
-        class="menu-card"
-        onclick="startMockExam()">
-
-        <div class="menu-icon">
-            📝
-        </div>
-
-        <div>
-
-            <div class="menu-title">
-                랜덤 모의고사
-            </div>
-
-            <div class="menu-desc">
-                문제를 랜덤으로 출제합니다.
-            </div>
-
-        </div>
-
-    </button>
-
-
-    <button
-        class="menu-card"
-        onclick="startNormalMode()">
-
-        <div class="menu-icon">
-            📖
-        </div>
-
-        <div>
-
-            <div class="menu-title">
-                학습 모드
-            </div>
-
-            <div class="menu-desc">
-                원하는 조건으로 문제를 풉니다.
-            </div>
-
-        </div>
-
-    </button>
-
-
-
-    <!-- 기존 시험 설정 -->
-
-    <div
-        id="settingMenu"
-        style="display:none;">
-
-
-        <h3>
-            시험 설정
-        </h3>
-
-
-        <p>시대</p>
-
-        <select id="periodSelect">
-
-            <option value="전체">
-                전체
-            </option>
-
-            <option value="고대">
-                고대
-            </option>
-
-            <option value="고려">
-                고려
-            </option>
-
-            <option value="조선">
-                조선
-            </option>
-
-            <option value="근현대">
-                근현대
-            </option>
-
-        </select>
-
-
-        <p>분야</p>
-
-        <select id="categorySelect">
-
-            <option value="전체">
-                전체
-            </option>
-
-            <option value="정치">
-                정치
-            </option>
-
-            <option value="경제">
-                경제
-            </option>
-
-            <option value="사회">
-                사회
-            </option>
-
-            <option value="문화">
-                문화
-            </option>
-
-        </select>
-
-
-        <p>난이도</p>
-
-        <select id="levelSelect">
-
-            <option value="전체">
-                전체
-            </option>
-
-            <option value="중">
-                중
-            </option>
-
-            <option value="상">
-                상
-            </option>
-
-        </select>
-
-
-        <p>문제 수</p>
-
-        <select id="countSelect">
-
-            <option value="10">
-                10문제
-            </option>
-
-            <option value="20">
-                20문제
-            </option>
-
-            <option value="50">
-                50문제
-            </option>
-
-        </select>
-
-
-        <button
-            class="primary-btn"
-            id="settingStartBtn">
-
-            시험 시작
-
-        </button>
-
-
-    </div>
-
-
-
-    <!-- 분야별 -->
-
-    <button
-        class="menu-card"
-        id="categoryBtn">
-
-        <div class="menu-icon">
-            🏛️
-        </div>
-
-        <div>
-
-            <div class="menu-title">
-                시대별 학습
-            </div>
-
-            <div class="menu-desc">
-                고대·고려·조선·근현대
-            </div>
-
-        </div>
-
-    </button>
-
-
-    <div
-        id="categoryMenu"
-        style="display:none;">
-
-
-        <button
-            class="category secondary-btn"
-            data-category="고대">
-
-            고대사
-
-        </button>
-
-
-        <button
-            class="category secondary-btn"
-            data-category="고려">
-
-            고려사
-
-        </button>
-
-
-        <button
-            class="category secondary-btn"
-            data-category="조선">
-
-            조선사
-
-        </button>
-
-
-        <button
-            class="category secondary-btn"
-            data-category="근현대">
-
-            근현대사
-
-        </button>
-
-
-        <button
-            class="category secondary-btn"
-            data-category="문화">
-
-            문화사
-
-        </button>
-
-
-    </div>
-
-
-</section>
-
-
-
-<!-- =====================================
-     AI
-===================================== -->
-
-<section
-    id="aiScreen"
-    class="app-screen">
-
-
-    <div class="app-card hero-card">
-
-        <div class="hero-title">
-            AI 학습 코치
-        </div>
-
-        <div class="hero-sub">
-            나의 학습 데이터를 분석하여
-            맞춤형 문제를 추천합니다.
-        </div>
-
-    </div>
-
-
-    <button
-        class="primary-btn"
-        id="aiRecommendBtn2"
-        onclick="startAIRecommend()">
-
-        AI 추천 시험 시작
-
-    </button>
-
-
-    <div
-        id="aiScreenResult"
-        class="app-card">
-
-        <h3>
-            AI 분석
-        </h3>
-
-        <p>
-            최근 학습 기록을 기반으로
-            취약 분야와 난이도를 분석합니다.
-        </p>
-
-    </div>
-
-
-    <div id="weakAnalysis"></div>
-
-
-</section>
-
-
-
-<!-- =====================================
-     REPORT
-===================================== -->
-
-<section
-    id="reportScreen"
-    class="app-screen">
-
-
-    <div class="app-card">
-
-        <h2>
-            학습 리포트
-        </h2>
-
-        <p>
-            나의 한국사 학습 상태를 확인합니다.
-        </p>
-
-    </div>
-
-
-    <div id="reportBox"></div>
-
-
-    <div id="reportCharts">
-
-        <h3>
-            학습 분석
-        </h3>
-
-
-        <canvas
-            id="scoreChart">
-        </canvas>
-
-
-        <br>
-
-
-        <canvas
-            id="correctWrongChart">
-        </canvas>
-
-
-        <br>
-
-
-        <canvas
-            id="categoryChart">
-        </canvas>
-
-    </div>
-
-
-
-    <!-- 기존 기록 -->
-
-    <button
-        class="menu-card"
-        id="historyBtn">
-
-        <div class="menu-icon">
-            📊
-        </div>
-
-        <div>
-
-            <div class="menu-title">
-                시험 기록
-            </div>
-
-        </div>
-
-    </button>
-
-
-    <button
-        class="menu-card"
-        id="myHistoryBtn">
-
-        <div class="menu-icon">
-            📋
-        </div>
-
-        <div>
-
-            <div class="menu-title">
-                나의 시험 기록
-            </div>
-
-        </div>
-
-    </button>
-
-
-    <div id="myHistory"></div>
-
-
-</section>
-
-
-
-<!-- =====================================
-     MY / 추가 기능
-===================================== -->
-
-<section
-    id="myScreen"
-    class="app-screen">
-
-
-    <div class="app-card">
-
-        <h2>
-            나의 학습
-        </h2>
-
-    </div>
-
-
-    <button
-        class="menu-card"
-        id="wrongNoteBtn">
-
-        <div class="menu-icon">
-            📒
-        </div>
-
-        <div>
-
-            <div class="menu-title">
-                오답노트
-            </div>
-
-            <div class="menu-desc">
-                틀린 문제를 다시 확인합니다.
-            </div>
-
-        </div>
-
-    </button>
-
-
-    <div id="wrongNote"></div>
-
-
-    <button
-        class="menu-card"
-        id="wrongQuizBtn">
-
-        <div class="menu-icon">
-            🔄
-        </div>
-
-        <div>
-
-            <div class="menu-title">
-                오답 다시 풀기
-            </div>
-
-        </div>
-
-    </button>
-
-
-    <button
-        class="menu-card"
-        id="bookmarkListBtn">
-
-        <div class="menu-icon">
-            ⭐
-        </div>
-
-        <div>
-
-            <div class="menu-title">
-                즐겨찾기
-            </div>
-
-        </div>
-
-    </button>
-
-
-    <div id="bookmarkList"></div>
-
-
-    <button
-        class="menu-card"
-        id="weakBtn">
-
-        <div class="menu-icon">
-            🎯
-        </div>
-
-        <div>
-
-            <div class="menu-title">
-                취약 분야 분석
-            </div>
-
-        </div>
-
-    </button>
-
-
-    <!-- 관리자 -->
-
-    <button
-        id="adminBtn"
-        class="menu-card"
-        style="display:none;">
-
-        <div class="menu-icon">
-            ⚙️
-        </div>
-
-        <div>
-
-            <div class="menu-title">
-                관리자 문제 관리
-            </div>
-
-        </div>
-
-    </button>
-
-
-</section>
-
-
-
-</main>
-
-
-
-<!-- =====================================
-     하단 네비게이션
-===================================== -->
-
-<nav class="bottom-nav">
-
-
-    <button
-        class="nav-btn active"
-        data-screen="homeScreen"
-        onclick="showAppScreen('homeScreen')">
-
-        <span class="nav-icon">
-            🏠
-        </span>
-
-        홈
-
-    </button>
-
-
-    <button
-        class="nav-btn"
-        data-screen="studyScreen"
-        onclick="showAppScreen('studyScreen')">
-
-        <span class="nav-icon">
-            📚
-        </span>
-
-        학습
-
-    </button>
-
-
-    <button
-        class="nav-btn"
-        data-screen="aiScreen"
-        onclick="showAppScreen('aiScreen')">
-
-        <span class="nav-icon">
-            🤖
-        </span>
-
-        AI
-
-    </button>
-
-
-    <button
-        class="nav-btn"
-        data-screen="reportScreen"
-        onclick="showAppScreen('reportScreen')">
-
-        <span class="nav-icon">
-            📊
-        </span>
-
-        리포트
-
-    </button>
-
-
-</nav>
-
-
-
-<!-- =====================================
-     QUIZ SCREEN
-===================================== -->
-
-<div
-    id="quizScreen">
-
-
-    <div class="quiz-header">
-
-        <button
-            class="header-btn"
-            onclick="showAppScreen('homeScreen')">
-
-            ←
-
-        </button>
-
-
-        <strong>
-            한국사 퀴즈
-        </strong>
-
-
-        <div id="timer">
-
-            ⏰ 00:00
-
-        </div>
-
-    </div>
-
-
-
-    <div class="quiz-body">
-
-
-        <div id="progress">
-
-            문제 진행
-
-        </div>
-
-
-        <div
-            class="progress-box">
+            <!-- 기존 분야 메뉴 -->
 
             <div
-                id="progressBar">
+                id="categoryMenu"
+                style="display:none;">
+
+                <h3>분야 선택</h3>
+
+                <button
+                    class="category"
+                    data-category="고대">
+                    고대사
+                </button>
+
+                <button
+                    class="category"
+                    data-category="고려">
+                    고려사
+                </button>
+
+                <button
+                    class="category"
+                    data-category="조선">
+                    조선사
+                </button>
+
+                <button
+                    class="category"
+                    data-category="근현대">
+                    근현대사
+                </button>
+
+                <button
+                    class="category"
+                    data-category="문화">
+                    문화사
+                </button>
+
             </div>
 
-        </div>
+
+        </section>
 
 
-        <div id="questionNav"></div>
+
+        <!-- ==================================================
+             AI
+        ================================================== -->
+
+        <section
+            id="aiScreen"
+            class="app-screen">
 
 
-        <h2 id="question"></h2>
+            <div class="screen-title">
+
+                <button
+                    class="back-btn"
+                    onclick="showAppScreen('home')">
+
+                    ‹
+
+                </button>
+
+                <div>
+
+                    <h1>AI 학습</h1>
+
+                    <p>
+                        나의 학습 데이터를 분석합니다.
+                    </p>
+
+                </div>
+
+            </div>
 
 
-        <img
-            id="questionImage"
-            style="
-            display:none;
-            max-width:100%;
-            margin:15px 0;
-            border-radius:10px;
-            ">
+
+            <button
+                id="aiRecommendBtn2"
+                class="large-ai-card"
+                type="button"
+                onclick="startAIRecommend()">
+
+                <div class="big-icon">
+                    🤖
+                </div>
+
+                <h2>
+                    AI 추천 시험
+                </h2>
+
+                <p>
+                    최근 오답과 취약 분야를 분석하여
+                    나에게 맞는 문제를 자동으로 구성합니다.
+                </p>
+
+                <span>
+                    추천 시험 시작 →
+                </span>
+
+            </button>
 
 
-        <div id="choices"></div>
+
+            <button
+                id="weakBtn"
+                class="list-card">
+
+                <span>🎯</span>
+
+                <div>
+
+                    <b>취약 분야 분석</b>
+
+                    <small>
+                        내가 부족한 분야 확인
+                    </small>
+
+                </div>
+
+                <span>›</span>
+
+            </button>
 
 
-        <div id="result"></div>
+        </section>
+
+
+
+        <!-- ==================================================
+             REPORT
+        ================================================== -->
+
+        <section
+            id="reportScreen"
+            class="app-screen">
+
+
+            <div class="screen-title">
+
+                <button
+                    class="back-btn"
+                    onclick="showAppScreen('home')">
+
+                    ‹
+
+                </button>
+
+                <div>
+
+                    <h1>학습 리포트</h1>
+
+                    <p>
+                        나의 한국사 학습 현황
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <button
+                id="historyBtn"
+                class="list-card">
+
+                <span>📊</span>
+
+                <div>
+
+                    <b>시험 기록</b>
+
+                    <small>
+                        지금까지의 시험 결과
+                    </small>
+
+                </div>
+
+                <span>›</span>
+
+            </button>
+
+
+
+            <button
+                id="myHistoryBtn"
+                class="list-card">
+
+                <span>📋</span>
+
+                <div>
+
+                    <b>나의 시험 기록</b>
+
+                    <small>
+                        최근 학습 기록 확인
+                    </small>
+
+                </div>
+
+                <span>›</span>
+
+            </button>
+
+
+
+            <button
+                id="reportBtn"
+                class="list-card">
+
+                <span>📈</span>
+
+                <div>
+
+                    <b>학습 분석</b>
+
+                    <small>
+                        점수와 학습 성과 분석
+                    </small>
+
+                </div>
+
+                <span>›</span>
+
+            </button>
+
+
+
+            <div id="reportCharts">
+
+                <h3>
+                    학습 분석 그래프
+                </h3>
+
+                <canvas id="scoreChart"></canvas>
+
+                <canvas id="correctWrongChart"></canvas>
+
+                <canvas id="categoryChart"></canvas>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- ==================================================
+             시험 설정
+        ================================================== -->
+
+        <section
+            id="settingScreen"
+            class="app-screen">
+
+
+            <div class="screen-title">
+
+                <button
+                    class="back-btn"
+                    onclick="showAppScreen('home')">
+
+                    ‹
+
+                </button>
+
+                <div>
+
+                    <h1>시험 설정</h1>
+
+                    <p>
+                        원하는 시험 조건을 선택하세요.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div id="settingMenu"
+                 class="setting-card">
+
+
+                <label>
+                    시대
+                </label>
+
+                <select id="periodSelect">
+
+                    <option value="전체">
+                        전체
+                    </option>
+
+                    <option value="고대">
+                        고대
+                    </option>
+
+                    <option value="고려">
+                        고려
+                    </option>
+
+                    <option value="조선">
+                        조선
+                    </option>
+
+                    <option value="근현대">
+                        근현대
+                    </option>
+
+                </select>
+
+
+
+                <label>
+                    분야
+                </label>
+
+                <select id="categorySelect">
+
+                    <option value="전체">
+                        전체
+                    </option>
+
+                    <option value="정치">
+                        정치
+                    </option>
+
+                    <option value="경제">
+                        경제
+                    </option>
+
+                    <option value="사회">
+                        사회
+                    </option>
+
+                    <option value="문화">
+                        문화
+                    </option>
+
+                </select>
+
+
+
+                <label>
+                    난이도
+                </label>
+
+                <select id="levelSelect">
+
+                    <option value="전체">
+                        전체
+                    </option>
+
+                    <option value="중">
+                        중
+                    </option>
+
+                    <option value="상">
+                        상
+                    </option>
+
+                </select>
+
+
+
+                <label>
+                    문제 수
+                </label>
+
+                <select id="countSelect">
+
+                    <option value="10">
+                        10문제
+                    </option>
+
+                    <option value="20">
+                        20문제
+                    </option>
+
+                    <option value="50">
+                        50문제
+                    </option>
+
+                </select>
+
+
+
+                <button
+                    id="settingStartBtn"
+                    class="primary-btn full-btn">
+
+                    시험 시작
+
+                </button>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==================================================
+             QUIZ
+        ================================================== -->
+
+        <section
+            id="quizScreen"
+            class="quiz-screen"
+            style="display:none;">
+
+
+            <div id="progress">
+
+                <div id="timer">
+                    ⏰ 남은시간 : 00:00
+                </div>
+
+                문제 진행
+
+            </div>
+
+
+            <div
+                id="questionNav"
+                class="question-nav">
+            </div>
+
+
+            <div class="progress-box">
+
+                <div id="progressBar"></div>
+
+            </div>
+
+
+            <div class="question-card">
+
+                <h2 id="question"></h2>
+
+
+                <img
+                    id="questionImage"
+                    style="display:none;"
+                    alt="문제 이미지">
+
+
+                <div id="choices"></div>
+
+
+                <div id="result"></div>
+
+
+            </div>
+
+
+            <div class="quiz-controls">
+
+                <button
+                    id="bookmarkBtn"
+                    style="display:none;">
+
+                    ⭐
+
+                </button>
+
+
+                <button
+                    id="prevBtn"
+                    style="display:none;">
+
+                    이전
+
+                </button>
+
+
+                <button
+                    id="nextBtn"
+                    style="display:none;">
+
+                    다음
+
+                </button>
+
+
+                <button
+                    id="submitBtn"
+                    style="display:none;">
+
+                    시험 제출
+
+                </button>
+
+            </div>
+
+
+        </section>
+
+
+
+    </main>
+
+
+
+    <!-- ==================================================
+         하단 네비게이션
+    ================================================== -->
+
+    <nav class="bottom-nav">
 
 
         <button
-            id="bookmarkBtn"
-            style="display:none;">
+            class="nav-item active"
+            onclick="showAppScreen('home')">
 
-            ⭐ 즐겨찾기
+            <span>⌂</span>
+            <small>홈</small>
 
         </button>
 
 
-    </div>
-
-
-
-    <div class="quiz-footer">
-
-
         <button
-            id="prevBtn"
-            style="display:none;">
+            class="nav-item"
+            onclick="showAppScreen('study')">
 
-            이전
+            <span>📚</span>
+            <small>학습</small>
 
         </button>
 
 
         <button
-            id="nextBtn"
-            style="display:none;">
+            class="nav-item"
+            onclick="showAppScreen('ai')">
 
-            다음
+            <span>🤖</span>
+            <small>AI</small>
 
         </button>
 
 
         <button
-            id="submitBtn"
-            style="display:none;">
+            class="nav-item"
+            onclick="showAppScreen('report')">
 
-            제출
+            <span>📊</span>
+            <small>리포트</small>
 
         </button>
 
 
-    </div>
+    </nav>
+
 
 
 </div>
 
 
 
-</div>
-
-</div>
-
-
-
-<!-- =====================================
+<!-- ==================================================
      Firebase
-===================================== -->
+================================================== -->
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 
@@ -1994,11 +1009,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
 
-
 <!-- Firebase 설정 -->
 
 <script src="frontend/firebase-config.js"></script>
-
 
 
 <!-- 문제 데이터 -->
@@ -2006,14 +1019,12 @@
 <script src="questions/questions.js"></script>
 
 
-
 <!-- Chart -->
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
-
-<!-- 기능 -->
+<!-- 기존 기능 -->
 
 <script src="frontend/utils.js"></script>
 
@@ -2037,19 +1048,16 @@
 
 
 
-<!-- =====================================
-     APP 화면 전환
-===================================== -->
+<!-- ==================================================
+     앱 화면 전환
+================================================== -->
 
 <script>
 
-function showAppScreen(screenId) {
+function showAppScreen(screenName) {
 
     const screens =
-        document.querySelectorAll(
-            ".app-screen"
-        );
-
+        document.querySelectorAll(".app-screen");
 
     screens.forEach(function(screen) {
 
@@ -2059,7 +1067,9 @@ function showAppScreen(screenId) {
 
 
     const target =
-        document.getElementById(screenId);
+        document.getElementById(
+            screenName + "Screen"
+        );
 
 
     if(target) {
@@ -2069,102 +1079,98 @@ function showAppScreen(screenId) {
     }
 
 
-    const navButtons =
+    const navItems =
         document.querySelectorAll(
-            ".nav-btn"
+            ".nav-item"
         );
 
 
-    navButtons.forEach(function(btn) {
+    navItems.forEach(function(item) {
 
-        btn.classList.remove("active");
-
-
-        if(
-            btn.dataset.screen === screenId
-        ) {
-
-            btn.classList.add("active");
-
-        }
+        item.classList.remove("active");
 
     });
 
 
-    const content =
-        document.querySelector(
-            ".app-content"
-        );
+    const navMap = {
+
+        home: 0,
+
+        study: 1,
+
+        ai: 2,
+
+        report: 3
+
+    };
 
 
-    if(content) {
+    if(navMap[screenName] !== undefined) {
 
-        content.scrollTop = 0;
+        navItems[
+            navMap[screenName]
+        ].classList.add("active");
 
     }
 
 }
 
 
-/* =====================================
-   시험 화면 열기
-===================================== */
+/* 시험 설정 화면 */
 
-function openQuizAppScreen() {
+function showSettingScreen() {
 
-    const quiz =
-        document.getElementById(
-            "quizScreen"
-        );
-
-
-    if(quiz) {
-
-        quiz.style.display = "flex";
-
-    }
-
+    showAppScreen("setting");
 
 }
 
 
-/* =====================================
-   시험 종료 후 홈
-===================================== */
-
-function closeQuizAppScreen() {
-
-    const quiz =
-        document.getElementById(
-            "quizScreen"
-        );
-
-
-    if(quiz) {
-
-        quiz.style.display = "none";
-
-    }
-
-
-    showAppScreen(
-        "homeScreen"
-    );
-
-}
-
-
-/* =====================================
-   초기화
-===================================== */
+/* 기존 startBtn과 연결 */
 
 document.addEventListener(
     "DOMContentLoaded",
     function() {
 
-        showAppScreen(
-            "homeScreen"
-        );
+        const startBtn =
+            document.getElementById(
+                "startBtn"
+            );
+
+
+        if(startBtn) {
+
+            startBtn.addEventListener(
+                "click",
+                function() {
+
+                    showSettingScreen();
+
+                }
+            );
+
+        }
+
+
+        /* AI 화면에서도 기존 함수 사용 */
+
+        const aiBtn =
+            document.getElementById(
+                "aiRecommendBtn2"
+            );
+
+
+        if(aiBtn) {
+
+            aiBtn.addEventListener(
+                "click",
+                function() {
+
+                    startAIRecommend();
+
+                }
+            );
+
+        }
 
     }
 );
@@ -2173,4 +1179,5 @@ document.addEventListener(
 
 
 </body>
+
 </html>
