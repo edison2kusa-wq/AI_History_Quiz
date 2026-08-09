@@ -1698,7 +1698,7 @@ function drawCategoryChart(data){
 
 
 // ========================================
-// CSV 문제 일괄 업로드 V2
+// CSV 업로드 - 5선지형
 // ========================================
 
 async function uploadCSV(){
@@ -1706,557 +1706,441 @@ async function uploadCSV(){
     const file =
         document.getElementById("csvFile")?.files[0];
 
+
     if(!file){
 
         alert("CSV 파일을 선택하세요.");
+
         return;
 
     }
 
-    Papa.parse(file, {
 
-        header:true,
+    Papa.parse(
 
-        skipEmptyLines:true,
+        file,
 
-        encoding:"UTF-8",
+        {
 
-        complete: async function(result){
+            header: true,
 
-            try{
+            skipEmptyLines: true,
 
-                const rows = result.data;
+            encoding: "UTF-8",
 
-                if(!rows.length){
+            complete: async function(result){
 
-                    alert("CSV에 문제가 없습니다.");
-                    return;
+                try{
 
-                }
+                    const rows =
+                        result.data;
 
 
-                // --------------------------------
-                // 기존 문제 가져오기
-                // --------------------------------
+                    let success = 0;
+                    let duplicate = 0;
+                    let errorCount = 0;
 
-                await db.collection(
-    "questions"
-)
-.add({
 
-    question:
-        row.question || "",
+                    // ----------------------------
+                    // 기존 문제 가져오기
+                    // ----------------------------
 
-
-    choices: [
-
-        row.choice1 || "",
-
-        row.choice2 || "",
-
-        row.choice3 || "",
-
-        row.choice4 || "",
-        row.choice5 || ""
-    ],
-
-
-    answer:
-        Number(row.answer) - 1,
-
-
-    period:
-        row.period || "기타",
-
-
-    category:
-        row.category || "기타",
-
-
-    level:
-        row.level || "중",
-
-
-    type:
-        row.type || "기출",
-
-
-    source:
-        row.source || "",
-
-
-    sourceType:
-        row.sourceType ||
-        "한국사능력검정 기출",
-
-
-    sourceYear:
-        row.sourceYear || "",
-
-
-    reference:
-        row.reference || "",
-
-
-    keywords:
-
-        row.keywords
-
-        ?
-
-        row.keywords
-            .split(",")
-            .map(function(item){
-
-                return item.trim();
-
-            })
-            .filter(function(item){
-
-                return item !== "";
-
-            })
-
-        :
-
-        [],
-
-
-    explanation:
-        row.explanation || "",
-
-
-    concept:
-        row.concept || "",
-
-
-    wrongPoint:
-        row.wrongPoint || "",
-
-
-    memory:
-        row.memory || "",
-
-
-    image:
-        row.image || "",
-
-
-    // ==========================
-    // 승인 관리
-    // ==========================
-
-    approved:
-        false,
-
-
-    qualityScore:
-        0,
-
-
-    solveCount:
-        0,
-
-
-    correctCount:
-        0,
-
-
-    wrongCount:
-        0,
-
-
-    created:
-        firebase.firestore
-        .FieldValue
-        .serverTimestamp(),
-
-
-    updated:
-        firebase.firestore
-        .FieldValue
-        .serverTimestamp()
-
-});
-
-
-                let success = 0;
-                let duplicate = 0;
-                let errorCount = 0;
-
-
-                // --------------------------------
-                // 진행 표시
-                // --------------------------------
-
-                const progressBox =
-                    document.getElementById(
-                        "uploadProgress"
-                    );
-
-                const uploadBar =
-                    document.getElementById(
-                        "uploadBar"
-                    );
-
-                const uploadText =
-                    document.getElementById(
-                        "uploadText"
-                    );
-
-
-                if(progressBox){
-
-                    progressBox.style.display =
-                        "block";
-
-                }
-
-
-                // --------------------------------
-                // 문제 등록
-                // --------------------------------
-
-                for(let i=0; i<rows.length; i++){
-
-                    const row = rows[i];
-
-
-                    try{
-
-                        const question =
-                            (row.question || "").trim();
-
-
-                        // 문제 없는 행 제외
-                        if(!question){
-
-                            errorCount++;
-                            continue;
-
-                        }
-
-
-                        // --------------------------------
-                        // 중복 검사
-                        // --------------------------------
-
-                        if(existing.has(question)){
-
-                            duplicate++;
-
-                            continue;
-
-                        }
-
-
-                        // --------------------------------
-                        // 키워드
-                        // --------------------------------
-
-                        const keywords =
-                            row.keywords
-
-                            ?
-
-                            row.keywords
-                                .split(",")
-                                .map(function(item){
-
-                                    return item.trim();
-
-                                })
-                                .filter(function(item){
-
-                                    return item !== "";
-
-                                })
-
-                            :
-
-                            [];
-
-
-                        // --------------------------------
-                        // 정답
-                        // CSV는 1~4
-                        // Firebase는 0~3
-                        // --------------------------------
-
-                        let answer =
-                            Number(row.answer);
-
-
-                        if(answer >= 1 && answer <= 4){
-
-                            answer--;
-
-                        }
-
-
-                        // --------------------------------
-                        // Firebase 데이터
-                        // --------------------------------
-
-                        const data = {
-
-                            question:
-                                question,
-
-
-                            choices:[
-
-                                row.choice1 || "",
-
-                                row.choice2 || "",
-
-                                row.choice3 || "",
-
-                                row.choice4 || "",
-                                row.choice5 || ""
-
-                            ],
-
-
-                            answer:
-                                answer,
-
-
-                            period:
-                                row.period || "기타",
-
-
-                            category:
-                                row.category || "기타",
-
-
-                            level:
-                                row.level || "중",
-
-
-                            type:
-                                row.type || "기출",
-
-
-                            source:
-                                row.source || "",
-
-
-                            sourceType:
-                                row.sourceType ||
-                                "한국사능력검정 기출",
-
-
-                            sourceYear:
-                                row.sourceYear || "",
-
-
-                            reference:
-                                row.reference || "",
-
-
-                            keywords:
-                                keywords,
-
-
-                            explanation:
-                                row.explanation || "",
-
-
-                            concept:
-                                row.concept || "",
-
-
-                            wrongPoint:
-                                row.wrongPoint || "",
-
-
-                            memory:
-                                row.memory || "",
-
-
-                            image:
-                                row.image || "",
-
-
-                            // 문제 품질
-                            qualityScore:
-                                0,
-
-
-                            approved:
-                                false,
-
-
-                            // 통계
-                            solveCount:
-                                0,
-
-
-                            correctCount:
-                                0,
-
-
-                            wrongCount:
-                                0,
-
-
-                            created:
-                                firebase.firestore
-                                .FieldValue
-                                .serverTimestamp(),
-
-
-                            updated:
-                                firebase.firestore
-                                .FieldValue
-                                .serverTimestamp()
-
-                        };
-
-
-                        // --------------------------------
-                        // 보기 검사
-                        // --------------------------------
-
-                        if(
-
-                            !data.choices[0] ||
-                            !data.choices[1] ||
-                            !data.choices[2] ||
-                            !data.choices[3]
-
-                        ){
-
-                            errorCount++;
-
-                            continue;
-
-                        }
-
-
-                        // --------------------------------
-                        // 저장
-                        // --------------------------------
-
+                    const snapshot =
                         await db
                             .collection("questions")
-                            .add(data);
+                            .get();
 
 
-                        existing.add(question);
+                    const existing =
+                        new Set();
 
-                        success++;
+
+                    snapshot.forEach(function(doc){
+
+                        const q =
+                            doc.data();
 
 
-                        // --------------------------------
-                        // 진행률
-                        // --------------------------------
+                        if(q.question){
 
-                        const percent =
-                            Math.round(
-                                ((i + 1) / rows.length) *
-                                100
+                            existing.add(
+                                q.question.trim()
                             );
 
+                        }
 
-                        if(uploadBar){
+                    });
 
-                            uploadBar.value =
-                                percent;
+
+                    // ----------------------------
+                    // CSV 행 처리
+                    // ----------------------------
+
+                    for(
+                        const row
+                        of rows
+                    ){
+
+                        try{
+
+                            // ----------------------------
+                            // 문제
+                            // ----------------------------
+
+                            const question =
+                                (row.question || "")
+                                .trim();
+
+
+                            if(!question){
+
+                                errorCount++;
+
+                                continue;
+
+                            }
+
+
+                            // ----------------------------
+                            // 5개 보기
+                            // ----------------------------
+
+                            const choices = [
+
+                                (row.choice1 || "").trim(),
+
+                                (row.choice2 || "").trim(),
+
+                                (row.choice3 || "").trim(),
+
+                                (row.choice4 || "").trim(),
+
+                                (row.choice5 || "").trim()
+
+                            ];
+
+
+                            // ----------------------------
+                            // 5선지 검사
+                            // ----------------------------
+
+                            if(
+                                choices.some(function(choice){
+
+                                    return choice === "";
+
+                                })
+                            ){
+
+                                console.warn(
+                                    "보기 부족:",
+                                    question
+                                );
+
+                                errorCount++;
+
+                                continue;
+
+                            }
+
+
+                            // ----------------------------
+                            // 정답 검사
+                            // CSV에서는 1~5
+                            // Firestore에서는 0~4
+                            // ----------------------------
+
+                            const csvAnswer =
+                                Number(row.answer);
+
+
+                            if(
+                                isNaN(csvAnswer) ||
+                                csvAnswer < 1 ||
+                                csvAnswer > 5
+                            ){
+
+                                console.warn(
+                                    "정답 번호 오류:",
+                                    question,
+                                    row.answer
+                                );
+
+                                errorCount++;
+
+                                continue;
+
+                            }
+
+
+                            const answer =
+                                csvAnswer - 1;
+
+
+                            // ----------------------------
+                            // 중복 검사
+                            // ----------------------------
+
+                            if(
+                                existing.has(question)
+                            ){
+
+                                duplicate++;
+
+                                continue;
+
+                            }
+
+
+                            // ----------------------------
+                            // 키워드
+                            // ----------------------------
+
+                            const keywords =
+
+                                row.keywords
+
+                                ?
+
+                                row.keywords
+                                    .split(",")
+                                    .map(function(item){
+
+                                        return item.trim();
+
+                                    })
+                                    .filter(function(item){
+
+                                        return item !== "";
+
+                                    })
+
+                                :
+
+                                [];
+
+
+                            // ----------------------------
+                            // Firestore 데이터
+                            // ----------------------------
+
+                            const data = {
+
+                                question:
+
+                                    question,
+
+
+                                choices:
+
+                                    choices,
+
+
+                                answer:
+
+                                    answer,
+
+
+                                period:
+
+                                    row.period || "기타",
+
+
+                                category:
+
+                                    row.category || "기타",
+
+
+                                level:
+
+                                    row.level || "중",
+
+
+                                type:
+
+                                    row.type || "기출",
+
+
+                                source:
+
+                                    row.source || "",
+
+
+                                sourceType:
+
+                                    row.sourceType ||
+                                    "한국사능력검정 기출",
+
+
+                                sourceYear:
+
+                                    row.sourceYear || "",
+
+
+                                reference:
+
+                                    row.reference || "",
+
+
+                                keywords:
+
+                                    keywords,
+
+
+                                concept:
+
+                                    row.concept || "",
+
+
+                                wrongPoint:
+
+                                    row.wrongPoint || "",
+
+
+                                memory:
+
+                                    row.memory || "",
+
+
+                                explanation:
+
+                                    row.explanation || "",
+
+
+                                image:
+
+                                    row.image || "",
+
+
+                                approved:
+
+                                    row.approved === "true",
+
+
+                                qualityScore:
+
+                                    Number(
+                                        row.qualityScore
+                                    ) || 0,
+
+
+                                solveCount:
+
+                                    0,
+
+
+                                correctCount:
+
+                                    0,
+
+
+                                wrongCount:
+
+                                    0,
+
+
+                                created:
+
+                                    firebase.firestore
+                                        .FieldValue
+                                        .serverTimestamp(),
+
+
+                                updated:
+
+                                    firebase.firestore
+                                        .FieldValue
+                                        .serverTimestamp()
+
+                            };
+
+
+                            // ----------------------------
+                            // Firestore 저장
+                            // ----------------------------
+
+                            await db
+                                .collection("questions")
+                                .add(data);
+
+
+                            existing.add(question);
+
+
+                            success++;
+
 
                         }
 
+                        catch(rowError){
 
-                        if(uploadText){
+                            console.error(
+                                "행 처리 오류:",
+                                rowError,
+                                row
+                            );
 
-                            uploadText.innerText =
-                                `업로드 중... ${i + 1} / ${rows.length}`;
+                            errorCount++;
 
                         }
 
-
                     }
 
-                    catch(e){
 
-                        console.error(
-                            "행 처리 오류:",
-                            i + 1,
-                            e
-                        );
+                    // ----------------------------
+                    // 결과
+                    // ----------------------------
 
-                        errorCount++;
+                    alert(
 
-                    }
+                        "CSV 업로드 완료\n\n" +
+
+                        "신규 등록 : " +
+                        success +
+                        "문제\n\n" +
+
+                        "중복 제외 : " +
+                        duplicate +
+                        "문제\n\n" +
+
+                        "오류 제외 : " +
+                        errorCount +
+                        "문제"
+
+                    );
+
+
+                    // ----------------------------
+                    // 목록 새로고침
+                    // ----------------------------
+
+                    await loadQuestions();
+
 
                 }
 
+                catch(e){
 
-                // --------------------------------
-                // 완료
-                // --------------------------------
+                    console.error(
+                        "CSV 업로드 오류:",
+                        e
+                    );
 
-                if(uploadText){
 
-                    uploadText.innerText =
-                        "업로드 완료";
+                    alert(
+                        "CSV 업로드 오류 : " +
+                        e.message
+                    );
 
                 }
 
-
-                alert(
-
-`CSV 업로드 완료
-
-전체 : ${rows.length}문제
-
-신규 등록 : ${success}문제
-
-중복 제외 : ${duplicate}문제
-
-오류 제외 : ${errorCount}문제`
-
-                );
-
-
-                await loadQuestions();
-
-
             }
-
-            catch(e){
-
-                console.error(
-                    "CSV 업로드 오류:",
-                    e
-                );
-
-
-                alert(
-                    "CSV 업로드 오류 : " +
-                    e.message
-                );
-
-            }
-
-        },
-
-        error:function(error){
-
-            console.error(error);
-
-            alert(
-                "CSV 파일을 읽을 수 없습니다."
-            );
 
         }
 
-    });
+    );
 
 }
-
-
 
 
 // ========================================
