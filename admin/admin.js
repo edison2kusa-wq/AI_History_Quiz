@@ -55,7 +55,43 @@ function(){
 
 
 function initAdmin(){
+const selectAllBtn =
+    document.getElementById(
+        "selectAllBtn"
+    );
 
+if(selectAllBtn){
+
+    selectAllBtn.onclick =
+        selectAllQuestions;
+
+}
+
+
+const bulkApproveBtn =
+    document.getElementById(
+        "bulkApproveBtn"
+    );
+
+if(bulkApproveBtn){
+
+    bulkApproveBtn.onclick =
+        bulkApproveQuestions;
+
+}
+
+
+const bulkDeleteBtn =
+    document.getElementById(
+        "bulkDeleteBtn"
+    );
+
+if(bulkDeleteBtn){
+
+    bulkDeleteBtn.onclick =
+        bulkDeleteQuestions;
+
+}
 const templateBtn =
     document.getElementById(
         "downloadTemplateBtn"
@@ -627,7 +663,8 @@ async function saveQuestion(){
 
                 getValue("choice3"),
 
-                getValue("choice4")
+                getValue("choice4"),
+                getValue("choice5"),
 
             ],
 
@@ -762,9 +799,20 @@ async function saveQuestion(){
 
 
         if(
-            !data.choices ||
-            data.choices.length !== 4
-        ){
+    !data.choices ||
+    data.choices.length !== 5 ||
+    data.choices.some(function(choice){
+        return !choice.trim();
+    })
+){
+
+    alert(
+        "보기 5개를 모두 입력해주세요."
+    );
+
+    return;
+
+}
 
             alert(
                 "보기 4개를 입력해주세요."
@@ -1013,31 +1061,54 @@ function renderQuestionList(list){
             </p>
 
 
-            <div class="question-actions">
+           <div class="question-actions">
+
+    <label>
+
+        <input
+            type="checkbox"
+            class="question-check"
+            value="${q.id}"
+        >
+
+        선택
+
+    </label>
 
 
-                <button
-                    onclick="editQuestion('${q.id}')"
-                >
-                    수정
-                </button>
+    <button
+        onclick="editQuestion('${q.id}')"
+    >
+        수정
+    </button>
 
 
-                <button
-                    onclick="deleteQuestion('${q.id}')"
-                >
-                    삭제
-                </button>
+    <button
+        onclick="deleteQuestion('${q.id}')"
+    >
+        삭제
+    </button>
 
 
-                <button
-                    onclick="approveQuestion('${q.id}')"
-                >
-                    승인
-                </button>
+    ${
+        q.approved
 
+        ?
 
-            </div>
+        `<span class="approved-badge">
+            ✅ 승인
+        </span>`
+
+        :
+
+        `<button
+            onclick="approveQuestion('${q.id}')"
+        >
+            승인
+        </button>`
+    }
+
+</div>
 
 
         </div>
@@ -1691,25 +1762,145 @@ async function uploadCSV(){
                 // 기존 문제 가져오기
                 // --------------------------------
 
-                const snapshot =
-                    await db.collection("questions").get();
+                await db.collection(
+    "questions"
+)
+.add({
 
-                const existing =
-                    new Set();
+    question:
+        row.question || "",
 
-                snapshot.forEach(function(doc){
 
-                    const q = doc.data();
+    choices: [
 
-                    if(q.question){
+        row.choice1 || "",
 
-                        existing.add(
-                            q.question.trim()
-                        );
+        row.choice2 || "",
 
-                    }
+        row.choice3 || "",
 
-                });
+        row.choice4 || "",
+        row.choice5 || ""
+    ],
+
+
+    answer:
+        Number(row.answer) - 1,
+
+
+    period:
+        row.period || "기타",
+
+
+    category:
+        row.category || "기타",
+
+
+    level:
+        row.level || "중",
+
+
+    type:
+        row.type || "기출",
+
+
+    source:
+        row.source || "",
+
+
+    sourceType:
+        row.sourceType ||
+        "한국사능력검정 기출",
+
+
+    sourceYear:
+        row.sourceYear || "",
+
+
+    reference:
+        row.reference || "",
+
+
+    keywords:
+
+        row.keywords
+
+        ?
+
+        row.keywords
+            .split(",")
+            .map(function(item){
+
+                return item.trim();
+
+            })
+            .filter(function(item){
+
+                return item !== "";
+
+            })
+
+        :
+
+        [],
+
+
+    explanation:
+        row.explanation || "",
+
+
+    concept:
+        row.concept || "",
+
+
+    wrongPoint:
+        row.wrongPoint || "",
+
+
+    memory:
+        row.memory || "",
+
+
+    image:
+        row.image || "",
+
+
+    // ==========================
+    // 승인 관리
+    // ==========================
+
+    approved:
+        false,
+
+
+    qualityScore:
+        0,
+
+
+    solveCount:
+        0,
+
+
+    correctCount:
+        0,
+
+
+    wrongCount:
+        0,
+
+
+    created:
+        firebase.firestore
+        .FieldValue
+        .serverTimestamp(),
+
+
+    updated:
+        firebase.firestore
+        .FieldValue
+        .serverTimestamp()
+
+});
 
 
                 let success = 0;
@@ -1844,7 +2035,8 @@ async function uploadCSV(){
 
                                 row.choice3 || "",
 
-                                row.choice4 || ""
+                                row.choice4 || "",
+                                row.choice5 || ""
 
                             ],
 
@@ -2142,7 +2334,8 @@ async function downloadCSV(){
             choice4:
             q.choices?.[3] || "",
 
-
+            choice5:
+            q.choices?.[4] || "",
 
             answer:
             (q.answer || 0)+1,
@@ -3537,6 +3730,7 @@ function downloadCSVTemplate(){
         "choice2",
         "choice3",
         "choice4",
+        "choice5",
         "answer",
         "period",
         "category",
@@ -3572,7 +3766,8 @@ function downloadCSVTemplate(){
 
         choice4:
             "보기 4",
-
+        choice5:
+            "보기 5",
         answer:
             "1",
 
@@ -3831,6 +4026,217 @@ function fillSelect(id, values){
         option.textContent = value;
 
         select.appendChild(option);
+
+    });
+
+}
+// ========================================
+// 선택 문제 일괄 승인
+// ========================================
+
+async function bulkApproveQuestions(){
+
+    const checked =
+        document.querySelectorAll(
+            ".question-check:checked"
+        );
+
+
+    if(checked.length === 0){
+
+        alert(
+            "승인할 문제를 선택하세요."
+        );
+
+        return;
+
+    }
+
+
+    if(
+        !confirm(
+            `${checked.length}개 문제를 승인하시겠습니까?`
+        )
+    ){
+
+        return;
+
+    }
+
+
+    try{
+
+        const batch =
+            db.batch();
+
+
+        checked.forEach(function(box){
+
+            const ref =
+                db.collection("questions")
+                .doc(box.value);
+
+
+            batch.update(ref, {
+
+                approved: true,
+
+                qualityScore: 100,
+
+                updated:
+                    firebase.firestore
+                    .FieldValue
+                    .serverTimestamp()
+
+            });
+
+        });
+
+
+        await batch.commit();
+
+
+        alert(
+            `${checked.length}개 문제가 승인되었습니다.`
+        );
+
+
+        await loadQuestions();
+
+    }
+
+    catch(e){
+
+        console.error(
+            "일괄 승인 오류:",
+            e
+        );
+
+
+        alert(
+            "일괄 승인 오류 : " +
+            e.message
+        );
+
+    }
+
+}
+// ========================================
+// 선택 문제 일괄 삭제
+// ========================================
+
+async function bulkDeleteQuestions(){
+
+    const checked =
+        document.querySelectorAll(
+            ".question-check:checked"
+        );
+
+
+    if(checked.length === 0){
+
+        alert(
+            "삭제할 문제를 선택하세요."
+        );
+
+        return;
+
+    }
+
+
+    if(
+        !confirm(
+            `${checked.length}개 문제를 삭제하시겠습니까?\n\n삭제 후 복구할 수 없습니다.`
+        )
+    ){
+
+        return;
+
+    }
+
+
+    try{
+
+        const batch =
+            db.batch();
+
+
+        checked.forEach(function(box){
+
+            const ref =
+                db.collection("questions")
+                .doc(box.value);
+
+
+            batch.delete(ref);
+
+        });
+
+
+        await batch.commit();
+
+
+        alert(
+            `${checked.length}개 문제가 삭제되었습니다.`
+        );
+
+
+        await loadQuestions();
+
+    }
+
+    catch(e){
+
+        console.error(
+            "일괄 삭제 오류:",
+            e
+        );
+
+
+        alert(
+            "일괄 삭제 오류 : " +
+            e.message
+        );
+
+    }
+
+}
+// ========================================
+// 현재 목록 전체 선택
+// ========================================
+
+function selectAllQuestions(){
+
+    const boxes =
+        document.querySelectorAll(
+            ".question-check"
+        );
+
+
+    if(boxes.length === 0){
+
+        alert(
+            "현재 표시된 문제가 없습니다."
+        );
+
+        return;
+
+    }
+
+
+    const allChecked =
+        Array.from(boxes)
+        .every(function(box){
+
+            return box.checked;
+
+        });
+
+
+    boxes.forEach(function(box){
+
+        box.checked =
+            !allChecked;
 
     });
 

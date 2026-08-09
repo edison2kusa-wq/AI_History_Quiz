@@ -431,7 +431,36 @@ function showWeakAnalysis(){
 
 async function startNormalQuiz(){
 
+    if(!quizList || quizList.length === 0){
 
+    alert(
+        "출제 가능한 문제가 없습니다.\n\n" +
+        "관리자 페이지에서 문제를 등록하고\n" +
+        "승인된 문제인지 확인해주세요."
+    );
+
+    return;
+
+}
+if(
+    quizList.length < questionCount
+){
+
+    alert(
+
+        "현재 출제 가능한 문제는 " +
+        quizList.length +
+        "개입니다.\n\n" +
+
+        "선택한 문제 수 : " +
+        questionCount +
+        "개"
+
+    );
+
+    return;
+
+}
     let allQuestions = [];
 
 

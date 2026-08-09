@@ -241,109 +241,205 @@ function buildQuestionNav(){
 // 문제 표시
 // ===========================================
 
-function showQuestion() {
-    const checkIds = [
-"progress",
-"progressBar",
-"question",
-"questionImage",
-"choices",
-"result"
-];
-
-
-checkIds.forEach(function(id){
-
-if(!$(id)){
-
-console.error(
-"필수 DOM 없음 : ",
-id
-);
-
-}
-
-});
+function showQuestion(){
 
     answered = false;
 
-    const q = quizList[currentQuestion];
+    const q =
+        quizList[currentQuestion];
 
-    // 진행상황
-    $("progress").innerHTML =
-        `
-        <div id="timer">
-        ⏰ 남은시간 : ${secondToText(timeLeft)}
-        </div>
 
-        문제 ${currentQuestion + 1} / ${quizList.length}
-        `;
+    if(!q){
 
-    // 진행률
-    const percent =
-        ((currentQuestion + 1) / quizList.length) * 100;
+        console.error(
+            "문제를 찾을 수 없습니다.",
+            currentQuestion,
+            quizList
+        );
 
-    $("progressBar").style.width =
-        percent + "%";
-
-    // 문제
-    $("question").innerHTML =
-        q.question;
-
-    // 이미지
-    const img =
-        $("questionImage");
-
-    if (q.image && q.image !== "") {
-
-        img.src = q.image;
-
-        img.style.display = "block";
-
-    } else {
-
-        img.style.display = "none";
+        return;
 
     }
 
-    // 보기
-    let html = "";
 
-    q.choices.forEach(function(choice, index){
+    if(!Array.isArray(q.choices)){
 
-        html +=
+        console.error(
+            "보기 데이터 오류:",
+            q
+        );
 
-        `
-        <button
-            class="choiceBtn"
-            onclick="checkAnswer(${index})"
-            id="choice${index}"
-        >
+        return;
 
-            ${index+1}. ${choice}
+    }
 
-        </button>
+
+    if(q.choices.length < 4){
+
+        console.error(
+            "보기 개수가 부족합니다:",
+            q.choices
+        );
+
+        return;
+
+    }
+
+
+    // 진행상황
+
+    const progress =
+        $("progress");
+
+    if(progress){
+
+        progress.innerHTML = `
+
+            <div id="timer">
+                ⏰ 남은시간 :
+                ${secondToText(timeLeft)}
+            </div>
+
+            문제 ${currentQuestion + 1}
+            /
+            ${quizList.length}
+
         `;
 
-    });
+    }
 
-    $("choices").innerHTML = html;
 
-    $("result").innerHTML = "";
+    // 진행률
+
+    const progressBar =
+        $("progressBar");
+
+    if(progressBar){
+
+        const percent =
+            ((currentQuestion + 1)
+            / quizList.length) * 100;
+
+        progressBar.style.width =
+            percent + "%";
+
+    }
+
+
+    // 문제
+
+    const question =
+        $("question");
+
+    if(question){
+
+        question.innerHTML =
+            q.question || "";
+
+    }
+
+
+    // 이미지
+
+    const img =
+        $("questionImage");
+
+    if(img){
+
+        if(
+            q.image &&
+            q.image !== ""
+        ){
+
+            img.src =
+                q.image;
+
+            img.style.display =
+                "block";
+
+        }
+        else{
+
+            img.style.display =
+                "none";
+
+        }
+
+    }
+
+
+    // 보기
+
+    const choices =
+        $("choices");
+
+    if(!choices){
+
+        console.error(
+            "필수 DOM 없음 : choices"
+        );
+
+        return;
+
+    }
+
+
+    let html = "";
+
+
+    q.choices.forEach(
+        function(choice,index){
+
+            html += `
+
+                <button
+                    class="choiceBtn"
+                    onclick="checkAnswer(${index})"
+                    id="choice${index}"
+                >
+
+                    ${index + 1}.
+                    ${choice}
+
+                </button>
+
+            `;
+
+        }
+    );
+
+
+    choices.innerHTML =
+        html;
+
+
+    const result =
+        $("result");
+
+    if(result){
+
+        result.innerHTML =
+            "";
+
+    }
+
 
     hide("nextBtn");
 
     hide("submitBtn");
 
-    if(currentQuestion==0){
+
+    if(currentQuestion === 0){
 
         hide("prevBtn");
 
-    }else{
+    }
+    else{
 
         show("prevBtn");
 
     }
+
 
     updateQuestionNav();
 
@@ -1491,18 +1587,9 @@ MOCK_PATTERN[period];
 
 
 const snapshot =
-
-await db.collection(
-"questions"
-)
-
-.where(
-"period",
-"==",
-period
-)
-
-.get();
+    await db.collection("questions")
+    .where("approved", "==", true)
+    .get();
 
 
 
