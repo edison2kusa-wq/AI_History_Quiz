@@ -938,126 +938,120 @@ async function loadQuestions(){
 // 문제 목록 출력
 // ================================
 
-
 function renderQuestionList(list){
-<p>
 
-출처 :
-
-${q.sourceType || ""}
-
-${q.sourceYear || ""}
-
-</p>
-    <p>
-
-상태 :
-
-${q.approved ?
-
-"✅ 승인"
-
-:
-
-"⚠ 검토"
-
-}
-
-</p>
-    let html="";
+    let html = "";
 
 
+    // --------------------------------
+    // 문제 목록 생성
+    // --------------------------------
 
     list.forEach(function(q){
 
-
-
         html += `
 
-<div class="questionBox">
+        <div class="questionBox">
 
 
-<h3>
-${q.question}
-</h3>
+            <h3>
+                ${q.question || ""}
+            </h3>
 
 
-<p>
-시대 :
-${q.period || ""}
-</p>
+            <p>
+                시대 :
+                ${q.period || ""}
+            </p>
 
 
-<p>
-분야 :
-${q.category || ""}
-</p>
+            <p>
+                분야 :
+                ${q.category || ""}
+            </p>
 
 
-<p>
-난이도 :
-${q.level || ""}
-</p>
+            <p>
+                난이도 :
+                ${q.level || ""}
+            </p>
 
 
-<p>
-유형 :
-${q.type || ""}
-</p>
+            <p>
+                유형 :
+                ${q.type || ""}
+            </p>
 
 
-
-<button onclick="editQuestion('${q.id}')">
-
-수정
-
-</button>
-
+            <p>
+                출처 :
+                ${q.sourceType || ""}
+                ${q.sourceYear || ""}
+            </p>
 
 
-<button onclick="deleteQuestion('${q.id}')">
-
-삭제
-
-</button>
-<button onclick="approveQuestion('${q.id}')">
-
-승인
-
-</button>
-
-</div>
-
-`;
+            <p>
+                상태 :
+                ${
+                    q.approved
+                    ? "✅ 승인"
+                    : "⚠ 검토"
+                }
+            </p>
 
 
+            <div class="question-actions">
+
+
+                <button
+                    onclick="editQuestion('${q.id}')"
+                >
+                    수정
+                </button>
+
+
+                <button
+                    onclick="deleteQuestion('${q.id}')"
+                >
+                    삭제
+                </button>
+
+
+                <button
+                    onclick="approveQuestion('${q.id}')"
+                >
+                    승인
+                </button>
+
+
+            </div>
+
+
+        </div>
+
+        `;
 
     });
 
 
-
+    // --------------------------------
+    // 화면 출력
+    // --------------------------------
 
     const area =
-    document.getElementById(
-        "questionList"
-    );
-
+        document.getElementById(
+            "questionList"
+        );
 
 
     if(area){
 
         area.innerHTML =
-        html;
+            html;
 
     }
 
-
 }
-
-
-
-
-
 
 // ================================
 // 검색
