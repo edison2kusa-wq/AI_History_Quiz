@@ -118,149 +118,417 @@
  HOME
 ===================================== -->
 
-<section
-    id="homeView"
-    class="app-view active-view">
+<section id="homeView" class="app-view active-view">
 
-
-    <!-- 메인 배너 -->
-
-    <div class="hero-card">
+    <!-- 상단 헤더 -->
+    <div class="mobile-header">
 
         <div>
+            <div class="app-title">
+                AI 한국사
+            </div>
 
-            <h1>
-                AI 한국사<br>
-                심화 퀴즈
-            </h1>
+            <div class="app-subtitle">
+                한국사능력검정시험 심화
+            </div>
+        </div>
 
-            <p>
-                한국사능력검정시험 심화 대비
-            </p>
-
-            <small>
-                AI 기반 문제은행 학습
-            </small>
-
+        <div class="header-icon">
+            🇰🇷
         </div>
 
     </div>
 
+
+    <!-- 환영 카드 -->
+    <div class="welcome-card">
+
+        <div class="welcome-text">
+
+            <span class="welcome-small">
+                TODAY'S STUDY
+            </span>
+
+            <h2>
+                오늘의 한국사 학습
+            </h2>
+
+            <p>
+                AI와 함께 취약한 부분을<br>
+                집중적으로 학습해 보세요.
+            </p>
+
+        </div>
+
+    </div>
 
 
     <!-- 오늘의 학습 -->
+    <div class="section-title">
 
-    <div class="today-card">
+        <strong>
+            오늘의 학습
+        </strong>
 
-        <div class="today-item">
-
-            <span>오늘의 학습</span>
-
-            <strong>
-                학습
-            </strong>
-
-        </div>
-
-
-        <div class="today-item">
-
-            <span>학습 목표</span>
-
-            <strong>
-                20문제
-            </strong>
-
-        </div>
+        <span>
+            학습을 시작하세요
+        </span>
 
     </div>
 
 
+    <div class="main-study-card">
 
-    <!-- AI 추천 -->
-
-    <button
-        class="home-action ai-action"
-        id="aiRecommendBtn">
-
-        <div class="action-icon">
-            🤖
-        </div>
-
-        <div class="action-text">
-
-            <strong>
-                AI 추천 시험
-            </strong>
-
-            <span>
-                나의 취약 분야를 분석하여
-                문제를 추천합니다.
-            </span>
-
-        </div>
-
-        <b>›</b>
-
-    </button>
-
-
-
-    <!-- 모의고사 -->
-
-    <button
-        class="home-action"
-        id="startBtn">
-
-        <div class="action-icon">
+        <div class="study-icon">
             📝
         </div>
 
-        <div class="action-text">
+        <div class="study-info">
 
             <strong>
-                한국사능력검정 모의고사
+                한국사 모의고사
             </strong>
 
             <span>
-                실제 시험처럼 풀어보기
+                랜덤 문제로 실전 연습
             </span>
 
         </div>
 
-        <b>›</b>
+        <button
+            id="startBtn"
+            class="arrow-btn">
 
-    </button>
+            시작
+
+        </button>
+
+    </div>
 
 
+    <!-- 주요 학습 -->
+    <div class="menu-grid">
 
-    <!-- 학습 -->
+        <!-- AI 추천 -->
+        <button
+            id="aiRecommendBtn"
+            class="menu-card">
+
+            <div class="menu-icon ai">
+                🤖
+            </div>
+
+            <strong>
+                AI 추천
+            </strong>
+
+            <span>
+                취약 분야 맞춤 학습
+            </span>
+
+        </button>
+
+
+        <!-- 학습 모드 -->
+        <button
+            onclick="startNormalMode()"
+            class="menu-card">
+
+            <div class="menu-icon study">
+                📚
+            </div>
+
+            <strong>
+                학습 모드
+            </strong>
+
+            <span>
+                원하는 문제 학습
+            </span>
+
+        </button>
+
+
+        <!-- 오답노트 -->
+        <button
+            id="wrongNoteBtn"
+            class="menu-card">
+
+            <div class="menu-icon wrong">
+                📒
+            </div>
+
+            <strong>
+                오답노트
+            </strong>
+
+            <span>
+                틀린 문제 다시 보기
+            </span>
+
+        </button>
+
+
+        <!-- 즐겨찾기 -->
+        <button
+            id="bookmarkListBtn"
+            class="menu-card">
+
+            <div class="menu-icon bookmark">
+                ⭐
+            </div>
+
+            <strong>
+                즐겨찾기
+            </strong>
+
+            <span>
+                저장한 문제
+            </span>
+
+        </button>
+
+    </div>
+
+
+    <!-- 학습 분석 -->
+    <div class="section-title">
+
+        <strong>
+            학습 관리
+        </strong>
+
+        <span>
+            나의 학습 현황
+        </span>
+
+    </div>
+
+
+    <div class="management-list">
+
+        <button
+            id="historyBtn"
+            class="management-item">
+
+            <span class="management-icon">
+                📊
+            </span>
+
+            <span class="management-text">
+
+                <strong>
+                    시험 기록
+                </strong>
+
+                <small>
+                    지금까지의 시험 결과
+                </small>
+
+            </span>
+
+            <span class="management-arrow">
+                ›
+            </span>
+
+        </button>
+
+
+        <button
+            id="myHistoryBtn"
+            class="management-item">
+
+            <span class="management-icon">
+                📋
+            </span>
+
+            <span class="management-text">
+
+                <strong>
+                    나의 학습 기록
+                </strong>
+
+                <small>
+                    최근 학습 내역 확인
+                </small>
+
+            </span>
+
+            <span class="management-arrow">
+                ›
+            </span>
+
+        </button>
+
+
+        <button
+            id="reportBtn"
+            class="management-item">
+
+            <span class="management-icon">
+                📈
+            </span>
+
+            <span class="management-text">
+
+                <strong>
+                    학습 리포트
+                </strong>
+
+                <small>
+                    점수와 학습 통계 분석
+                </small>
+
+            </span>
+
+            <span class="management-arrow">
+                ›
+            </span>
+
+        </button>
+
+
+        <button
+            id="weakBtn"
+            class="management-item">
+
+            <span class="management-icon">
+                🎯
+            </span>
+
+            <span class="management-text">
+
+                <strong>
+                    취약 분야 분석
+                </strong>
+
+                <small>
+                    부족한 분야 확인
+                </small>
+
+            </span>
+
+            <span class="management-arrow">
+                ›
+            </span>
+
+        </button>
+
+    </div>
+
+
+    <!-- 기존 기능 영역
+         삭제하지 않고 유지 -->
+    <div id="aiResultBox"></div>
+
+    <div id="myHistory"></div>
+
+    <div id="weakAnalysis"></div>
+
+
+    <!-- 분야별 문제 -->
+    <div class="section-title">
+
+        <strong>
+            분야별 학습
+        </strong>
+
+    </div>
+
 
     <button
-        class="home-action"
-        onclick="switchMobileView('study')">
+        id="categoryBtn"
+        class="wide-btn">
 
-        <div class="action-icon">
-            📚
-        </div>
-
-        <div class="action-text">
-
-            <strong>
-                한국사 학습
-            </strong>
-
-            <span>
-                시대별·분야별 문제를 학습합니다.
-            </span>
-
-        </div>
-
-        <b>›</b>
+        📖 분야별 문제
 
     </button>
 
 
+    <div
+        id="categoryMenu"
+        style="display:none;">
+
+        <button
+            class="category"
+            data-category="고대">
+
+            고대사
+
+        </button>
+
+        <button
+            class="category"
+            data-category="고려">
+
+            고려사
+
+        </button>
+
+        <button
+            class="category"
+            data-category="조선">
+
+            조선사
+
+        </button>
+
+        <button
+            class="category"
+            data-category="근현대">
+
+            근현대사
+
+        </button>
+
+        <button
+            class="category"
+            data-category="문화">
+
+            문화사
+
+        </button>
+
+    </div>
+
+
+    <!-- 기존 오답 다시 풀기 -->
+    <button
+        id="wrongQuizBtn"
+        class="wide-btn">
+
+        🔄 오답 다시 풀기
+
+    </button>
+
+
+    <!-- 기존 리포트 영역 -->
+    <div id="reportBox"></div>
+
+
+    <div id="reportCharts">
+
+        <h3>
+            📊 학습 분석 그래프
+        </h3>
+
+        <canvas id="scoreChart"></canvas>
+
+        <canvas id="correctWrongChart"></canvas>
+
+        <canvas id="categoryChart"></canvas>
+
+    </div>
+
+
+    <!-- 관리자 -->
+    <button
+        id="adminBtn"
+        style="display:none;">
+
+        관리자 문제 관리
+
+    </button>
 
 </section>
 
@@ -795,38 +1063,30 @@
 <!-- =====================================
  QUIZ SCREEN
  기존 quiz.js 호환
+ 모바일 앱형
 ===================================== -->
 
-<section
-    id="quizScreen"
-    style="display:none;">
+<section id="quizScreen" style="display:none;">
 
-
+    <!-- 상단 시험 정보 -->
     <div class="quiz-header">
 
-
         <div id="progress">
-
             문제 진행
-
         </div>
-
 
         <div id="timer">
-
             ⏰ 남은시간 : 00:00
-
         </div>
-
 
     </div>
 
 
-
+    <!-- 문제 번호 -->
     <div id="questionNav"></div>
 
 
-
+    <!-- 진행률 -->
     <div class="progress-box">
 
         <div id="progressBar"></div>
@@ -834,33 +1094,37 @@
     </div>
 
 
-
+    <!-- 문제 카드 -->
     <div class="quiz-card">
 
-
-        <h2 id="question">
-        </h2>
+        <h2 id="question"></h2>
 
 
         <img
             id="questionImage"
-            style="display:none;">
+            style="
+                display:none;
+                max-width:100%;
+                width:100%;
+                border-radius:12px;
+                margin:15px 0;
+            "
+            alt="문제 이미지"
+        >
 
 
-        <div id="choices">
-        </div>
+        <!-- 보기 -->
+        <div id="choices"></div>
 
 
-        <div id="result">
-        </div>
-
+        <!-- 정답/해설 -->
+        <div id="result"></div>
 
     </div>
 
 
-
+    <!-- 문제 조작 버튼 -->
     <div class="quiz-buttons">
-
 
         <button
             id="bookmarkBtn"
@@ -871,22 +1135,26 @@
         </button>
 
 
-        <button
-            id="prevBtn"
-            style="display:none;">
+        <div class="quiz-nav-row">
 
-            이전
+            <button
+                id="prevBtn"
+                style="display:none;">
 
-        </button>
+                ← 이전
+
+            </button>
 
 
-        <button
-            id="nextBtn"
-            style="display:none;">
+            <button
+                id="nextBtn"
+                style="display:none;">
 
-            다음
+                다음 →
 
-        </button>
+            </button>
+
+        </div>
 
 
         <button
@@ -897,9 +1165,7 @@
 
         </button>
 
-
     </div>
-
 
 </section>
 
