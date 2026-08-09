@@ -664,7 +664,7 @@ async function saveQuestion(){
                 getValue("choice3"),
 
                 getValue("choice4"),
-                getValue("choice5"),
+                getValue("choice5")
 
             ],
 
@@ -813,15 +813,6 @@ async function saveQuestion(){
     return;
 
 }
-
-            alert(
-                "보기 4개를 입력해주세요."
-            );
-
-            return;
-
-        }
-
 
         // ----------------------------
         // 중복 문제 검사
