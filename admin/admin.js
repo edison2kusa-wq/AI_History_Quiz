@@ -1698,20 +1698,15 @@ function drawCategoryChart(data){
 
 
 // ========================================
-// CSV 업로드 - 5선지형
+// CSV 업로드 - 5선지형 FINAL
 // ========================================
 
 async function uploadCSV(){
-    console.log(
-        "===== 새 CSV 업로드 함수 실행 ====="
-    );
 
-    console.log(
-        "admin.js 5선지 버전"
-    );
+    console.log("===== CSV 업로드 시작 =====");
+
     const file =
         document.getElementById("csvFile")?.files[0];
-
 
     if(!file){
 
@@ -1734,22 +1729,134 @@ async function uploadCSV(){
 
             encoding: "UTF-8",
 
+            transformHeader: function(header){
+
+                // BOM 제거 + 공백 제거
+                return String(header)
+                    .replace(/^\uFEFF/, "")
+                    .trim();
+
+            },
+
+
             complete: async function(result){
 
                 try{
 
-                    const rows =
-                        result.data;
+                    console.log(
+                        "CSV 전체 결과:",
+                        result
+                    );
 
+
+                    const rows =
+                        result.data || [];
+
+
+                    if(rows.length === 0){
+
+                        alert(
+                            "CSV 파일에 데이터가 없습니다."
+                        );
+
+                        return;
+
+                    }
+
+
+                    // --------------------------------
+                    // CSV 헤더 확인
+                    // --------------------------------
+
+                    console.log(
+                        "CSV 첫 번째 행:",
+                        rows[0]
+                    );
+
+
+                    const headers =
+                        Object.keys(rows[0] || {});
+
+
+                    console.log(
+                        "CSV 헤더:",
+                        headers
+                    );
+
+
+                    // --------------------------------
+                    // 필수 헤더 검사
+                    // --------------------------------
+
+                    const requiredHeaders = [
+
+                        "question",
+                        "choice1",
+                        "choice2",
+                        "choice3",
+                        "choice4",
+                        "choice5",
+                        "answer"
+
+                    ];
+
+
+                    const missingHeaders =
+                        requiredHeaders.filter(
+                            function(header){
+
+                                return !headers.includes(
+                                    header
+                                );
+
+                            }
+                        );
+
+
+                    if(
+                        missingHeaders.length > 0
+                    ){
+
+                        alert(
+
+                            "CSV 열 이름이 올바르지 않습니다.\n\n" +
+
+                            "없는 열 :\n" +
+
+                            missingHeaders.join(", ") +
+
+                            "\n\n" +
+
+                            "필수 열 :\n" +
+
+                            requiredHeaders.join(", ")
+
+                        );
+
+                        console.error(
+                            "누락된 CSV 헤더:",
+                            missingHeaders
+                        );
+
+                        return;
+
+                    }
+
+
+                    // --------------------------------
+                    // 카운터
+                    // --------------------------------
 
                     let success = 0;
+
                     let duplicate = 0;
+
                     let errorCount = 0;
 
 
-                    // ----------------------------
+                    // --------------------------------
                     // 기존 문제 가져오기
-                    // ----------------------------
+                    // --------------------------------
 
                     const snapshot =
                         await db
@@ -1761,40 +1868,44 @@ async function uploadCSV(){
                         new Set();
 
 
-                    snapshot.forEach(function(doc){
+                    snapshot.forEach(
+                        function(doc){
 
-                        const q =
-                            doc.data();
+                            const q =
+                                doc.data();
 
 
-                        if(q.question){
+                            if(q.question){
 
-                            existing.add(
-                                q.question.trim()
-                            );
+                                existing.add(
+                                    q.question
+                                        .trim()
+                                );
+
+                            }
 
                         }
+                    );
 
-                    });
 
-
-                    // ----------------------------
+                    // --------------------------------
                     // CSV 행 처리
-                    // ----------------------------
+                    // --------------------------------
 
                     for(
-                        const row
-                        of rows
+                        const row of rows
                     ){
 
                         try{
 
-                            // ----------------------------
+                            // ============================
                             // 문제
-                            // ----------------------------
+                            // ============================
 
                             const question =
-                                (row.question || "")
+                                String(
+                                    row.question || ""
+                                )
                                 .trim();
 
 
@@ -1802,45 +1913,75 @@ async function uploadCSV(){
 
                                 errorCount++;
 
+                                console.warn(
+                                    "문제 없음:",
+                                    row
+                                );
+
                                 continue;
 
                             }
 
 
-                            // ----------------------------
+                            // ============================
                             // 5개 보기
-                            // ----------------------------
+                            // ============================
 
                             const choices = [
 
-                                (row.choice1 || "").trim(),
+                                String(
+                                    row.choice1 || ""
+                                ).trim(),
 
-                                (row.choice2 || "").trim(),
+                                String(
+                                    row.choice2 || ""
+                                ).trim(),
 
-                                (row.choice3 || "").trim(),
+                                String(
+                                    row.choice3 || ""
+                                ).trim(),
 
-                                (row.choice4 || "").trim(),
+                                String(
+                                    row.choice4 || ""
+                                ).trim(),
 
-                                (row.choice5 || "").trim()
+                                String(
+                                    row.choice5 || ""
+                                ).trim()
 
                             ];
 
 
-                            // ----------------------------
+                            console.log(
+                                "문제:",
+                                question
+                            );
+
+                            console.log(
+                                "보기:",
+                                choices
+                            );
+
+
+                            // ============================
                             // 5선지 검사
-                            // ----------------------------
+                            // ============================
 
                             if(
-                                choices.some(function(choice){
+                                choices.length !== 5 ||
+                                choices.some(
+                                    function(choice){
 
-                                    return choice === "";
+                                        return choice === "";
 
-                                })
+                                    }
+                                )
                             ){
 
                                 console.warn(
                                     "보기 부족:",
-                                    question
+                                    question,
+                                    choices
                                 );
 
                                 errorCount++;
@@ -1850,18 +1991,24 @@ async function uploadCSV(){
                             }
 
 
-                            // ----------------------------
+                            // ============================
                             // 정답 검사
-                            // CSV에서는 1~5
-                            // Firestore에서는 0~4
-                            // ----------------------------
+                            // CSV = 1~5
+                            // Firestore = 0~4
+                            // ============================
 
                             const csvAnswer =
-                                Number(row.answer);
+                                Number(
+                                    String(
+                                        row.answer || ""
+                                    ).trim()
+                                );
 
 
                             if(
-                                isNaN(csvAnswer) ||
+                                !Number.isInteger(
+                                    csvAnswer
+                                ) ||
                                 csvAnswer < 1 ||
                                 csvAnswer > 5
                             ){
@@ -1883,12 +2030,14 @@ async function uploadCSV(){
                                 csvAnswer - 1;
 
 
-                            // ----------------------------
+                            // ============================
                             // 중복 검사
-                            // ----------------------------
+                            // ============================
 
                             if(
-                                existing.has(question)
+                                existing.has(
+                                    question
+                                )
                             ){
 
                                 duplicate++;
@@ -1898,9 +2047,9 @@ async function uploadCSV(){
                             }
 
 
-                            // ----------------------------
+                            // ============================
                             // 키워드
-                            // ----------------------------
+                            // ============================
 
                             const keywords =
 
@@ -1908,152 +2057,178 @@ async function uploadCSV(){
 
                                 ?
 
-                                row.keywords
-                                    .split(",")
-                                    .map(function(item){
+                                String(
+                                    row.keywords
+                                )
+                                .split(",")
+                                .map(
+                                    function(item){
 
                                         return item.trim();
 
-                                    })
-                                    .filter(function(item){
+                                    }
+                                )
+                                .filter(
+                                    function(item){
 
                                         return item !== "";
 
-                                    })
+                                    }
+                                )
 
                                 :
 
                                 [];
 
 
-                            // ----------------------------
+                            // ============================
+                            // 승인 여부
+                            // ============================
+
+                            const approvedValue =
+                                String(
+                                    row.approved || ""
+                                )
+                                .trim()
+                                .toLowerCase();
+
+
+                            const approved =
+                                approvedValue === "true" ||
+                                approvedValue === "1" ||
+                                approvedValue === "yes";
+
+
+                            // ============================
                             // Firestore 데이터
-                            // ----------------------------
+                            // ============================
 
                             const data = {
 
                                 question:
-
                                     question,
 
 
                                 choices:
-
                                     choices,
 
 
                                 answer:
-
                                     answer,
 
 
                                 period:
-
-                                    row.period || "기타",
+                                    String(
+                                        row.period || "기타"
+                                    ).trim(),
 
 
                                 category:
-
-                                    row.category || "기타",
+                                    String(
+                                        row.category || "기타"
+                                    ).trim(),
 
 
                                 level:
-
-                                    row.level || "중",
+                                    String(
+                                        row.level || "중"
+                                    ).trim(),
 
 
                                 type:
-
-                                    row.type || "기출",
+                                    String(
+                                        row.type || "기출"
+                                    ).trim(),
 
 
                                 source:
-
-                                    row.source || "",
+                                    String(
+                                        row.source || ""
+                                    ).trim(),
 
 
                                 sourceType:
-
-                                    row.sourceType ||
-                                    "한국사능력검정 기출",
+                                    String(
+                                        row.sourceType ||
+                                        "한국사능력검정 기출"
+                                    ).trim(),
 
 
                                 sourceYear:
-
-                                    row.sourceYear || "",
+                                    String(
+                                        row.sourceYear || ""
+                                    ).trim(),
 
 
                                 reference:
-
-                                    row.reference || "",
+                                    String(
+                                        row.reference || ""
+                                    ).trim(),
 
 
                                 keywords:
-
                                     keywords,
 
 
-                                concept:
+                                explanation:
+                                    String(
+                                        row.explanation || ""
+                                    ).trim(),
 
-                                    row.concept || "",
+
+                                concept:
+                                    String(
+                                        row.concept || ""
+                                    ).trim(),
 
 
                                 wrongPoint:
-
-                                    row.wrongPoint || "",
+                                    String(
+                                        row.wrongPoint || ""
+                                    ).trim(),
 
 
                                 memory:
-
-                                    row.memory || "",
-
-
-                                explanation:
-
-                                    row.explanation || "",
+                                    String(
+                                        row.memory || ""
+                                    ).trim(),
 
 
                                 image:
-
-                                    row.image || "",
+                                    String(
+                                        row.image || ""
+                                    ).trim(),
 
 
                                 approved:
-
-                                    row.approved === "true",
+                                    approved,
 
 
                                 qualityScore:
-
                                     Number(
-                                        row.qualityScore
-                                    ) || 0,
+                                        row.qualityScore || 0
+                                    ),
 
 
                                 solveCount:
-
                                     0,
 
 
                                 correctCount:
-
                                     0,
 
 
                                 wrongCount:
-
                                     0,
 
 
                                 created:
-
                                     firebase.firestore
                                         .FieldValue
                                         .serverTimestamp(),
 
 
                                 updated:
-
                                     firebase.firestore
                                         .FieldValue
                                         .serverTimestamp()
@@ -2061,16 +2236,18 @@ async function uploadCSV(){
                             };
 
 
-                            // ----------------------------
+                            // ============================
                             // Firestore 저장
-                            // ----------------------------
+                            // ============================
 
                             await db
                                 .collection("questions")
                                 .add(data);
 
 
-                            existing.add(question);
+                            existing.add(
+                                question
+                            );
 
 
                             success++;
@@ -2093,9 +2270,24 @@ async function uploadCSV(){
                     }
 
 
-                    // ----------------------------
-                    // 결과
-                    // ----------------------------
+                    // ============================
+                    // 완료
+                    // ============================
+
+                    console.log(
+                        "CSV 업로드 완료",
+                        {
+                            success:
+                                success,
+
+                            duplicate:
+                                duplicate,
+
+                            errorCount:
+                                errorCount
+                        }
+                    );
+
 
                     alert(
 
@@ -2116,9 +2308,9 @@ async function uploadCSV(){
                     );
 
 
-                    // ----------------------------
+                    // ============================
                     // 목록 새로고침
-                    // ----------------------------
+                    // ============================
 
                     await loadQuestions();
 
@@ -2140,6 +2332,21 @@ async function uploadCSV(){
 
                 }
 
+            },
+
+            error: function(error){
+
+                console.error(
+                    "PapaParse 오류:",
+                    error
+                );
+
+
+                alert(
+                    "CSV 파일을 읽을 수 없습니다.\n\n" +
+                    error.message
+                );
+
             }
 
         }
@@ -2147,7 +2354,6 @@ async function uploadCSV(){
     );
 
 }
-
 
 // ========================================
 // CSV 다운로드
@@ -3129,7 +3335,8 @@ choices:[
 
 "오답 보기 2",
 
-"오답 보기 3"
+"오답 보기 3",
+"오답 보기 4"
 
 ],
 
@@ -3198,6 +3405,9 @@ ${result.question}
 ④ ${result.choices[3]}
 </p>
 
+<p>
+④ ${result.choices[4]}
+</p>
 
 <button onclick='saveAIQuestion(${JSON.stringify(result)})'>
 
