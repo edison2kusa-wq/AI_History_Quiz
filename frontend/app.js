@@ -39,37 +39,17 @@ function initButtons(){
     // -----------------------
 
     const startBtn =
+document.getElementById("startBtn");
 
-    document.getElementById(
-        "startBtn"
-    );
+if(startBtn){
 
+    startBtn.onclick = function(){
 
-    if(startBtn){
+        openExamSetting();
 
+    };
 
-        startBtn.onclick=function(){
-
-
-            const menu =
-
-            document.getElementById(
-                "settingMenu"
-            );
-
-
-            if(menu){
-
-                menu.style.display="block";
-
-            }
-
-
-        };
-
-
-    }
-
+}
 
 
 
@@ -642,9 +622,9 @@ async function startNormalQuiz(){
 
     // 화면 이동
 
-    showAppScreen("quizScreen");
+    appScreen("quizScreen");
 
-showQuestion();
+    showQuestion();
 
 
 }
@@ -694,4 +674,243 @@ function showMainMenu() {
     }
 
     window.scrollTo(0, 0);
+}
+// =====================================
+// 모바일 앱 화면 관리
+// =====================================
+
+// =====================================
+// 모바일 앱 화면 전환 V2
+// =====================================
+
+function appScreen(screenId) {
+
+    const screens = [
+
+        "mainMenu",
+        "settingMenu",
+        "categoryMenu",
+        "quizScreen",
+        "reportBox",
+        "weakAnalysis",
+        "myHistory",
+        "bookmarkList",
+        "wrongNote",
+        "aiResultBox"
+
+    ];
+
+
+    // 모든 화면 숨김
+
+    screens.forEach(function(id){
+
+        const el =
+            document.getElementById(id);
+
+        if(el){
+
+            el.style.display = "none";
+
+        }
+
+    });
+
+
+    // 선택 화면 표시
+
+    const target =
+        document.getElementById(screenId);
+
+
+    if(target){
+
+        target.style.display = "block";
+
+    }
+
+
+    // =================================
+    // 하단 네비게이션 처리
+    // =================================
+
+    const bottomNav =
+        document.getElementById("bottomNav");
+
+
+    if(bottomNav){
+
+        if(screenId === "quizScreen"){
+
+            // 문제 풀이 중에는 숨김
+
+            bottomNav.style.display = "none";
+
+        }
+        else{
+
+            // 일반 화면에서는 표시
+
+            bottomNav.style.display = "flex";
+
+        }
+
+    }
+
+
+    // =================================
+    // 화면에 따라 활성 메뉴
+    // =================================
+
+    if(screenId === "mainMenu"){
+
+        setActiveNav(0);
+
+    }
+
+    else if(
+        screenId === "settingMenu" ||
+        screenId === "categoryMenu"
+    ){
+
+        setActiveNav(1);
+
+    }
+
+    else if(
+        screenId === "myHistory" ||
+        screenId === "reportBox" ||
+        screenId === "weakAnalysis"
+    ){
+
+        setActiveNav(2);
+
+    }
+
+
+    // 화면 최상단
+
+    window.scrollTo({
+
+        top:0,
+
+        behavior:"smooth"
+
+    });
+
+}
+
+// =====================================
+// 홈으로 이동
+// =====================================
+
+function goHome() {
+
+    appScreen("mainMenu");
+
+}
+
+
+// =====================================
+// 시험 설정 화면
+// =====================================
+
+function openExamSetting() {
+
+    appScreen("settingMenu");
+
+}
+
+
+// =====================================
+// 분야 선택 화면
+// =====================================
+
+function openCategoryMenu() {
+
+    appScreen("categoryMenu");
+
+}
+// =====================================
+// 하단 네비게이션
+// =====================================
+
+function setActiveNav(index) {
+
+    const items =
+        document.querySelectorAll(".nav-item");
+
+    items.forEach(function(item, i) {
+
+        item.classList.toggle(
+            "active",
+            i === index
+        );
+
+    });
+
+}
+
+
+// =====================================
+// 홈
+// =====================================
+
+function goHome() {
+
+    appScreen("mainMenu");
+
+    setActiveNav(0);
+
+}
+
+
+// =====================================
+// 학습
+// =====================================
+
+function openExamSetting() {
+
+    appScreen("settingMenu");
+
+    setActiveNav(1);
+
+}
+
+
+// =====================================
+// 기록
+// =====================================
+
+function openHistoryScreen() {
+
+    appScreen("myHistory");
+
+    setActiveNav(2);
+
+}
+
+
+// =====================================
+// 설정
+// =====================================
+
+function openSettingsScreen() {
+
+    goHome();
+
+    const loginBox =
+        document.getElementById("loginBox");
+
+    if(loginBox){
+
+        loginBox.scrollIntoView({
+            behavior:"smooth",
+            block:"start"
+        });
+
+    }
+
+    setActiveNav(3);
+
 }

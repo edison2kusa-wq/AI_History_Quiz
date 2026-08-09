@@ -187,25 +187,7 @@ startTimer();
 buildQuestionNav();
 
 
-        document
-
-        .getElementById(
-            "mainMenu"
-        )
-
-        .style.display="none";
-
-
-
-        document
-
-        .getElementById(
-            "quizScreen"
-        )
-
-        .style.display="block";
-
-
+       appScreen("quizScreen");
 
         showQuestion();
 

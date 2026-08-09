@@ -4452,3 +4452,264 @@ body{
     }
 
 }
+/* =====================================
+   모바일 앱 화면
+===================================== */
+
+#mainMenu,
+#settingMenu,
+#categoryMenu,
+#quizScreen,
+#reportBox,
+#weakAnalysis,
+#myHistory,
+#bookmarkList,
+#wrongNote,
+#aiResultBox {
+
+    animation: appFade .2s ease;
+
+}
+
+
+@keyframes appFade {
+
+    from {
+
+        opacity:0;
+        transform:translateX(12px);
+
+    }
+
+    to {
+
+        opacity:1;
+        transform:translateX(0);
+
+    }
+
+}
+
+
+/* 홈 버튼 */
+
+.home-btn {
+
+    width:100%;
+
+    background:#f1f5f9;
+
+    color:#334155;
+
+    border:1px solid #e2e8f0;
+
+    margin-bottom:12px;
+
+}
+
+
+/* 모바일 화면 */
+
+@media(max-width:480px){
+
+    body {
+
+        background:#f4f7fb;
+
+    }
+
+
+    .container {
+
+        width:100%;
+
+        max-width:480px;
+
+        min-height:100vh;
+
+        margin:0 auto;
+
+        padding:10px;
+
+    }
+
+
+    #mainMenu {
+
+        min-height:calc(100vh - 20px);
+
+    }
+
+
+    #quizScreen {
+
+        min-height:calc(100vh - 20px);
+
+    }
+
+}
+/* =====================================
+   하단 앱 네비게이션
+===================================== */
+
+.bottom-nav {
+
+    position:fixed;
+
+    left:50%;
+
+    bottom:0;
+
+    transform:translateX(-50%);
+
+    width:100%;
+
+    max-width:480px;
+
+    height:70px;
+
+    background:rgba(255,255,255,.96);
+
+    backdrop-filter:blur(12px);
+
+    border-top:1px solid #e5e7eb;
+
+    display:flex;
+
+    justify-content:space-around;
+
+    align-items:center;
+
+    z-index:5000;
+
+    box-shadow:
+        0 -4px 15px rgba(0,0,0,.08);
+
+}
+
+
+.nav-item {
+
+    flex:1;
+
+    height:100%;
+
+    border:0;
+
+    border-radius:0;
+
+    background:transparent;
+
+    color:#64748b;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:4px;
+
+    font-size:12px;
+
+    padding:5px;
+
+}
+
+
+.nav-icon {
+
+    font-size:22px;
+
+    line-height:1;
+
+}
+
+
+.nav-item.active {
+
+    color:#2563eb;
+
+    font-weight:bold;
+
+}
+
+
+.nav-item.active .nav-icon {
+
+    transform:scale(1.08);
+
+}
+
+
+.nav-item:hover {
+
+    background:#f8fafc;
+
+    opacity:1;
+
+}
+
+
+/* =====================================
+   하단 메뉴 공간 확보
+===================================== */
+
+body {
+
+    padding-bottom:80px;
+
+}
+
+
+.container {
+
+    padding-bottom:90px;
+
+}
+
+
+/* =====================================
+   PC에서도 앱 형태 유지
+===================================== */
+
+@media(min-width:481px){
+
+    .bottom-nav {
+
+        border-radius:18px 18px 0 0;
+
+    }
+
+}
+
+
+/* =====================================
+   작은 휴대폰
+===================================== */
+
+@media(max-width:360px){
+
+    .bottom-nav {
+
+        height:64px;
+
+    }
+
+
+    .nav-icon {
+
+        font-size:19px;
+
+    }
+
+
+    .nav-item {
+
+        font-size:11px;
+
+    }
+
+}
