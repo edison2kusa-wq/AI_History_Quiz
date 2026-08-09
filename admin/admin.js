@@ -1952,15 +1952,15 @@ async function uploadCSV(){
                             ];
 
 
-                            console.log(
-                                "문제:",
-                                question
-                            );
-
-                            console.log(
-                                "보기:",
-                                choices
-                            );
+                            console.log("===== CSV 실제 행 확인 =====");
+console.log("문제:", question);
+console.log("전체 row:", row);
+console.log("choice1:", row.choice1);
+console.log("choice2:", row.choice2);
+console.log("choice3:", row.choice3);
+console.log("choice4:", row.choice4);
+console.log("choice5:", row.choice5);
+console.log("choices 배열:", choices);
 
 
                             // ============================
