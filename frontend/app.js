@@ -943,3 +943,12 @@ function openSettingsScreen() {
     setActiveNav(3);
 
 }
+function switchMobileView(view){
+
+    document.querySelectorAll(".mobile-view")
+        .forEach(function(el){
+            el.style.display = "none";
+        });
+
+    document.getElementById(view).style.display = "block";
+}
